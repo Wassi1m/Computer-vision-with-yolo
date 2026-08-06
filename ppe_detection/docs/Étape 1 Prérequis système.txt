@@ -1,0 +1,30 @@
+Étape 1 — Prérequis système
+sudo apt update && sudo apt install -y \
+    python3 python3-pip python3-venv \
+    libgl1-mesa-glx libglib2.0-0 \
+    libsm6 libxext6 libxrender-dev \
+    v4l-utils ffmpeg \
+    fonts-dejavu
+Étape 2 — Créer l'environnement Python
+mkdir -p ~/ppe_system && cd ~/ppe_system
+python3 -m venv ppe_env
+source ppe_env/bin/activate
+Étape 3 — Installer les dépendances
+pip install ultralytics opencv-python huggingface_hub
+Étape 4 — Télécharger les modèles
+cd ~/ppe_system
+# Modèle 1 : casque, masque, gilet (52 MB)
+curl -4 -k -L -o best.pt \
+  "https://huggingface.co/Hexmon/vyra-yolo-ppe-detection/resolve/main/best.pt"
+# Modèle 2 : lunettes, gants (5.4 MB)
+curl -4 -k -L -o best_gloves.pt \
+  "https://huggingface.co/Tanishjain9/yolov8n-ppe-detection-6classes/resolve/main/best.pt"
+# Vérifier les fichiers
+ls -lh *.pt
+resumer : # Tout faire d'un coup (copier-coller en entier)
+mkdir -p ~/ppe_system && cd ~/ppe_system
+python3 -m venv ppe_env && source ppe_env/bin/activate
+pip install ultralytics opencv-python
+curl -4 -k -L -o best.pt "https://huggingface.co/Hexmon/vyra-yolo-ppe-detection/resolve/main/best.pt"
+curl -4 -k -L -o best_gloves.pt "https://huggingface.co/Tanishjain9/yolov8n-ppe-detection-6classes/resolve/main/best.pt"
+python3 ppe_dual_model.py 2>/dev/null

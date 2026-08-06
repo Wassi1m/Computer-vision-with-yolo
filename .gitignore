@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+
+ppe_detection/data/
+surveillance_suite/data/

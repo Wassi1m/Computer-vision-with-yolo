@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classification IA Surveillance</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --border: #1e2230;
+    --easy: #00e5a0;
+    --easy-bg: rgba(0,229,160,0.08);
+    --medium: #f0b429;
+    --medium-bg: rgba(240,180,41,0.08);
+    --hard: #ff6b35;
+    --hard-bg: rgba(255,107,53,0.08);
+    --nf: #e040fb;
+    --nf-bg: rgba(224,64,251,0.08);
+    --text: #e8ecf4;
+    --muted: #6b7490;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #00e5a0, #00b4d8, #e040fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 40px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+  }
+
+  .stat-pill.easy { background: var(--easy-bg); border-color: var(--easy); color: var(--easy); }
+  .stat-pill.medium { background: var(--medium-bg); border-color: var(--medium); color: var(--medium); }
+  .stat-pill.hard { background: var(--hard-bg); border-color: var(--hard); color: var(--hard); }
+  .stat-pill.nf { background: var(--nf-bg); border-color: var(--nf); color: var(--nf); }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .section {
+    margin-bottom: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .section-header .count {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: default;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .card.easy { border-color: rgba(0,229,160,0.2); }
+  .card.easy:hover { border-color: var(--easy); }
+  .card.easy::before { background: var(--easy); }
+
+  .card.medium { border-color: rgba(240,180,41,0.2); }
+  .card.medium:hover { border-color: var(--medium); }
+  .card.medium::before { background: var(--medium); }
+
+  .card.hard { border-color: rgba(255,107,53,0.2); }
+  .card.hard:hover { border-color: var(--hard); }
+  .card.hard::before { background: var(--hard); }
+
+  .card.nf { border-color: rgba(224,64,251,0.2); }
+  .card.nf:hover { border-color: var(--nf); }
+  .card.nf::before { background: var(--nf); }
+
+  .card-num {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.08em;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .card-note {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-top: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .badge.easy { background: var(--easy-bg); color: var(--easy); border: 1px solid rgba(0,229,160,0.3); }
+  .badge.medium { background: var(--medium-bg); color: var(--medium); border: 1px solid rgba(240,180,41,0.3); }
+  .badge.hard { background: var(--hard-bg); color: var(--hard); border: 1px solid rgba(255,107,53,0.3); }
+  .badge.nf { background: var(--nf-bg); color: var(--nf); border: 1px solid rgba(224,64,251,0.3); }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 16px;
+    border-radius: 30px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .filter-btn:hover, .filter-btn.active { color: var(--text); border-color: #444; background: #1e2230; }
+  .filter-btn.active.easy { border-color: var(--easy); color: var(--easy); background: var(--easy-bg); }
+  .filter-btn.active.medium { border-color: var(--medium); color: var(--medium); background: var(--medium-bg); }
+  .filter-btn.active.hard { border-color: var(--hard); color: var(--hard); background: var(--hard-bg); }
+  .filter-btn.active.nf { border-color: var(--nf); color: var(--nf); background: var(--nf-bg); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Classification IA Vidéosurveillance</h1>
+  <p>47 cas d'usage · Analyse de faisabilité</p>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-pill easy"><span class="dot"></span> Facile · <strong id="count-easy">0</strong></div>
+  <div class="stat-pill medium"><span class="dot"></span> Moyenne · <strong id="count-medium">0</strong></div>
+  <div class="stat-pill hard"><span class="dot"></span> Difficile · <strong id="count-hard">0</strong></div>
+  <div class="stat-pill nf"><span class="dot"></span> Non faisable · <strong id="count-nf">0</strong></div>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filter('all', this)">Tous</button>
+  <button class="filter-btn easy" onclick="filter('easy', this)">● Facile</button>
+  <button class="filter-btn medium" onclick="filter('medium', this)">● Moyenne</button>
+  <button class="filter-btn hard" onclick="filter('hard', this)">● Difficile</button>
+  <button class="filter-btn nf" onclick="filter('nf', this)">● Non faisable</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const items = [
+  { num: 1, title: "Détection automatique de matricules (OCR/LPR)", level: "easy", note: "Technologie LPR mature, déployée à grande échelle." },
+  { num: 2, title: "Véhicule en sens interdit ou stationnement non autorisé", level: "easy", note: "Combinaison LPR + zone virtuelle, solutions commerciales disponibles." },
+  { num: 3, title: "Reconnaissance d'objets mis en voiture ou dans sacs/poches", level: "hard", note: "Occlusion, petits objets, angles variés. Très difficile en temps réel." },
+  { num: 4, title: "Entrées/sorties des ouvriers hors temps de travail", level: "easy", note: "Croisement caméra + planning RH, faisable avec détection de personnes." },
+  { num: 5, title: "Fraude de pointage (double badge)", level: "easy", note: "Déjà couvert par la biométrie faciale, redondance utile." },
+  { num: 6, title: "Détection porte ouverte/fermée", level: "easy", note: "Très simple : capteurs IoT ou vision à faible coût." },
+  { num: 7, title: "Agent de sécurité à son poste ou non", level: "easy", note: "Détection de présence dans une zone définie, cas d'usage classique." },
+  { num: "7b", title: "Agent a effectué la fouille / ouvert les sacs", level: "hard", note: "Inférence comportementale fine, nécessite des angles précis et labellisation." },
+  { num: 8, title: "Agent call center : présent, devant PC, téléphone prolongé", level: "medium", note: "Détection de posture et objets faisable, mais vie privée à encadrer." },
+  { num: 9, title: "Contrôle activité PC (écran actif ou non)", level: "medium", note: "Possible via HDMI capture ou endpoint agent, caméra seule = difficile." },
+  { num: 10, title: "Détection de pollution (jetés de déchets)", level: "medium", note: "Détectable si caméra HD fixe, durée d'abandon mesurable." },
+  { num: 11, title: "Chute d'objet en dépôt", level: "medium", note: "Détection de mouvement rapide et impact, faisable mais calibrage nécessaire." },
+  { num: 12, title: "Aide à l'inventaire et détection de fraude stock", level: "hard", note: "Comptage en temps réel + comparaison référentiel = complexe mais en cours de maturité." },
+  { num: 13, title: "Tentative de casser ou désinstaller une caméra", level: "medium", note: "Détection de vibration + obscurcissement image, solutions antivandalisme existent." },
+  { num: 14, title: "Ouverture / consommation de produits en supermarché", level: "medium", note: "Faisable avec caméras rayon dédiées, mais nombreux faux positifs." },
+  { num: 15, title: "Étude comportement anti-fraude opérateurs/managers + zones non autorisées", level: "medium", note: "Combinaison de géofencing et analyse de patterns comportementaux." },
+  { num: 16, title: "Fumer hors zone fumeurs", level: "medium", note: "Détection de fumée localisée + zone virtuelle, faisable." },
+  { num: 17, title: "Bagarre, braquage, vandalisme, attaque", level: "medium", note: "Détection d'agression par posture/mouvement rapide, modèles disponibles." },
+  { num: 18, title: "Personne évanouie / tombée", level: "easy", note: "Détection de chute humaine, modèles matures et déployés." },
+  { num: 19, title: "Enfant sorti sans parents / sortie non autorisée", level: "medium", note: "Combinaison détection de mineurs + règle de sortie, faisable." },
+  { num: 20, title: "Bloquer la vision caméra (objet ou rotation)", level: "easy", note: "Analyse de dégradation de l'image, détection de manipulation caméra = classique." },
+  { num: 21, title: "Cercle de personnes bloquant la vision", level: "hard", note: "Difficile à distinguer d'un simple attroupement. Peu de solutions robustes." },
+  { num: 22, title: "Non-port des EPI (casque, gants, gilet, lunettes)", level: "easy", note: "Cas d'usage très mature, nombreuses solutions industrielles disponibles." },
+  { num: 23, title: "Détection UAC / Near-Miss", level: "hard", note: "Nécessite compréhension sémantique fine de la scène. Recherche active." },
+  { num: 24, title: "Détection d'animaux (avec option ignorer)", level: "easy", note: "Classification d'objets standard, modèles pré-entraînés disponibles." },
+  { num: 25, title: "Objet abandonné (sac, valise laissé longtemps)", level: "easy", note: "Use case classique sécurité aéroportuaire, très bien couvert." },
+  { num: 26, title: "Objet disparu de son emplacement habituel", level: "medium", note: "Comparaison scène de référence + soustraction d'arrière-plan, faisable." },
+  { num: 27, title: "Échange main à main / objet mis dans sac ou poche", level: "hard", note: "Occlusion des mains, mouvements rapides. Très difficile à fiabiliser." },
+  { num: 28, title: "Mouvement dans local censé être vide la nuit", level: "easy", note: "Détection de mouvement standard, existe dans toute caméra moderne." },
+  { num: 29, title: "Franchissement de ligne virtuelle", level: "easy", note: "Fonctionnalité native dans la quasi-totalité des VMS/NVR du marché." },
+  { num: 30, title: "Escalade / franchissement de clôture physique", level: "medium", note: "Détection de posture spécifique (escalade), faisable avec bons angles." },
+  { num: 31, title: "Détection de fumée, incendie, vapeur anormale", level: "easy", note: "Modèles IA très performants, complémentaires aux détecteurs traditionnels." },
+  { num: 32, title: "Détection de fuite liquide (eau, huile, produit chimique)", level: "medium", note: "Segmentation de surface au sol, faisable avec caméras zénithales." },
+  { num: 33, title: "Analyse posture / estimation du poids porté (TMS)", level: "hard", note: "Estimation de charge = complexe. Analyse de posture (skeleton) = faisable." },
+  { num: 34, title: "Bonne utilisation d'un équipement/machine", level: "hard", note: "Nécessite référentiel précis des gestes corrects. Projet sur mesure." },
+  { num: 35, title: "Entrée en espace confiné non autorisé / sans EPI", level: "medium", note: "Combinaison zone virtuelle + détection EPI, faisable." },
+  { num: 36, title: "Heatmap flux clients (zones fréquentées)", level: "easy", note: "Fonctionnalité standard de tout système analytique retail." },
+  { num: 37, title: "Comportement client devant un rayon (temps d'attention)", level: "easy", note: "People analytics retail, solutions commerciales matures." },
+  { num: 38, title: "File d'attente anormalement longue", level: "easy", note: "Comptage de personnes dans une zone, cas d'usage très répandu." },
+  { num: 39, title: "Passage en caisse sans paiement (self-checkout)", level: "medium", note: "Retail AI spécialisé (ex: Veesion, Aifi), faisable mais coûteux." },
+  { num: 40, title: "État d'emballage défectueux / mal étiqueté sur ligne", level: "medium", note: "Vision industrielle, faisable en contexte contrôlé (éclairage fixe)." },
+  { num: 41, title: "Niveau de stock bas sur étagère", level: "medium", note: "Détection par analyse visuelle du rayon, solutions retail disponibles." },
+  { num: 42, title: "Estimation densité de foule / risque bousculade", level: "easy", note: "Comptage et densité, modèles matures pour espaces publics." },
+  { num: 43, title: "Personne allongée par terre (détresse)", level: "easy", note: "Variante de la détection de chute, modèles disponibles." },
+  { num: 44, title: "Reconnaissance d'émotions (RSE)", level: "nf", note: "Interdite dans l'UE (AI Act), résultats scientifiquement contestés, biais importants." },
+  { num: 45, title: "Objet manquant sur un bureau (en absence de la personne)", level: "medium", note: "Comparaison scène avant/après, faisable avec caméra fixe dédiée." },
+  { num: 46, title: "Protection archive : qui a ouvert / accédé", level: "easy", note: "Combinaison caméra + contrôle d'accès, traçabilité standard." },
+  { num: 47, title: "Comptage de produits sur chaîne de préparation", level: "medium", note: "Vision industrielle en contexte contrôlé, solutions spécialisées disponibles." },
+];
+
+const labels = { easy: "Facile", medium: "Moyenne", hard: "Difficile", nf: "Non faisable" };
+const icons = { easy: "✓", medium: "◎", hard: "△", nf: "✕" };
+
+function renderCards(filterLevel) {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const visible = filterLevel === 'all' ? items : items.filter(i => i.level === filterLevel);
+  visible.forEach(item => {
+    const card = document.createElement('div');
+    card.className = `card ${item.level}`;
+    card.innerHTML = `
+      <div class="card-num">— N° ${item.num} —</div>
+      <div class="card-title">${item.title}</div>
+      <div class="card-note">${item.note}</div>
+      <span class="badge ${item.level}">${icons[item.level]} ${labels[item.level]}</span>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filter(level, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(level);
+}
+
+// Count stats
+const counts = { easy: 0, medium: 0, hard: 0, nf: 0 };
+items.forEach(i => counts[i.level]++);
+document.getElementById('count-easy').textContent = counts.easy;
+document.getElementById('count-medium').textContent = counts.medium;
+document.getElementById('count-hard').textContent = counts.hard;
+document.getElementById('count-nf').textContent = counts.nf;
+
+renderCards('all');
+</script>
+</body>
+</html>

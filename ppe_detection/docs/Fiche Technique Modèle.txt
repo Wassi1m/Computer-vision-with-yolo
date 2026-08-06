@@ -1,0 +1,83 @@
+Fiche Technique — Modèle PPE Detection
+Hexmon/vyra-yolo-ppe-detection
+Source : huggingface.co/Hexmon/vyra-yolo-ppe-detection
+
+1. Identité du modèle
+Attribut	Valeur
+Nom	vyra-yolo-ppe-detection
+Architecture	YOLOv8m (You Only Look Once v8 — Medium)
+Tâche	Détection d'objets (Object Detection)
+Format fichier	.pt (PyTorch)
+Taille fichier	52.1 MB
+Licence dataset	CC BY 4.0 (utilisation commerciale autorisée)
+2. Architecture technique — YOLOv8m
+Paramètre	Valeur
+Paramètres totaux	25.9 millions
+FLOPs	~79 GFLOPs
+Taille d'entrée	640 × 640 pixels
+Profondeur (depth multiplier)	0.67
+Largeur (width multiplier)	0.75
+Backbone	CSPDarknet53 + C2f modules
+Tête de détection	Anchor-free, découplée (Decoupled Head)
+mAP COCO (base)	50.2% mAP50-95
+Pourquoi YOLOv8m et pas nano/small/large ?
+
+C'est le bon compromis : plus précis que nano/small pour détecter les petits EPI (gants, lunettes), sans être aussi lent que large/xlarge — idéal pour la vidéo temps réel.
+
+3. Classes détectées (14 classes)
+ID	Classe	Type	Signification
+0	Fall-Detected	Danger	Chute de personne détectée
+1	Gloves	✅ PPE présent	Gants portés
+2	Goggles	✅ PPE présent	Lunettes de protection portées
+3	Hardhat	✅ PPE présent	Casque porté
+4	Ladder	Objet	Échelle/escabeau
+5	Mask	✅ PPE présent	Masque porté
+6	NO-Gloves	❌ PPE absent	Gants non portés
+7	NO-Goggles	❌ PPE absent	Lunettes non portées
+8	NO-Hardhat	❌ PPE absent	Casque non porté
+9	NO-Mask	❌ PPE absent	Masque non porté
+10	NO-Safety Vest	❌ PPE absent	Gilet non porté
+11	Person	Personne	Personne détectée
+12	Safety Cone	Objet	Cône de signalisation
+13	Safety Vest	✅ PPE présent	Gilet de sécurité porté
+4. Entraînement
+Paramètre	Valeur
+Modèle de base	YOLOv8m pré-entraîné sur COCO
+Dataset	PPE Combined Model v4 (Roboflow Universe)
+Images d'entraînement	~44 000 images
+Épochs	100
+Batch size	32
+Image size	640 px
+Optimiseur	SGD / Adam (Ultralytics défaut)
+Augmentation	Mosaic, Flip, Rotation, HSV, Scale
+5. Performances en temps réel
+Matériel	FPS estimé
+GPU NVIDIA RTX 3060	~120 FPS
+GPU NVIDIA GTX 1650	~60 FPS
+CPU Intel i7 (sans GPU)	~8–15 FPS
+Raspberry Pi 4	~2–4 FPS
+Jetson Nano	~20–30 FPS
+Pour un usage webcam fluide sur CPU, utilise imgsz=320 à la place de 640 pour doubler les FPS.
+
+6. Formats d'export supportés
+Le modèle .pt peut être exporté vers d'autres formats selon ton déploiement :
+
+model = YOLO("best.pt")
+model.export(format="onnx")      # → interopérabilité
+model.export(format="tflite")    # → mobile/embarqué
+model.export(format="engine")    # → TensorRT (GPU NVIDIA max perf)
+model.export(format="openvino")  # → Intel CPU optimisé
+model.export(format="coreml")    # → Apple (macOS/iOS)
+7. Ce que le modèle PEUT faire
+Détecter simultanément plusieurs personnes dans le même cadre
+Fonctionner sur image, vidéo, webcam, flux RTSP (caméra IP)
+Détecter la présence ET l'absence de chaque EPI
+Détecter une chute de personne (Fall-Detected)
+Détecter des objets de chantier (échelle, cône)
+Fonctionner à temps réel sur GPU standard
+8. Ce que le modèle NE PEUT PAS faire
+Identifier une personne spécifique (pas de reconnaissance faciale)
+Détecter les chaussures de sécurité (classe non incluse)
+Détecter les harnais de sécurité
+Fonctionner en conditions de très faible luminosité sans caméra IR
+Garantir 100% de précision sur les très petits objets ou personnes lointaines

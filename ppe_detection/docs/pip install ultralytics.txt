@@ -1,0 +1,8 @@
+pip install ultralytics opencv-python huggingface_hub
+pip install ultralytics opencv-python
+
+python3 ppe_dual_model_backup.py
+
+curl -4 -k -L -o best.pt "https://huggingface.co/Hexmon/vyra-yolo-ppe-detection/resolve/main/best.pt"
+cd "/home/user/Bureau/model ia ppe"
+curl -4 -k -L -o best_gloves.pt "https://huggingface.co/Tanishjain9/yolov8n-ppe-detection-6classes/resolve/main/best.pt"

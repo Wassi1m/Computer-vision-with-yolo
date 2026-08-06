@@ -67,10 +67,16 @@ def detect_falls(pose_result, aspect_ratio_thresh, angle_thresh_deg):
             kpts = keypoints_all.xy[i].cpu().numpy()
             angle = compute_trunk_angle(kpts)
 
-        fallen = False
-        if aspect_ratio > aspect_ratio_thresh:
-            if angle is None or angle > angle_thresh_deg:
-                fallen = True
+        # Les deux critères doivent être confirmés pour réduire les faux
+        # positifs (voir docstring) : si l'angle est indisponible (occlusion,
+        # personne accroupie/penchée...), on ne peut pas le confirmer, donc on
+        # ne déclare PAS de chute plutôt que de se rabattre uniquement sur le
+        # ratio largeur/hauteur (qui seul est trop bruité).
+        fallen = (
+            aspect_ratio > aspect_ratio_thresh
+            and angle is not None
+            and angle > angle_thresh_deg
+        )
 
         detections.append(
             {

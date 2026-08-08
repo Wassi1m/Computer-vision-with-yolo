@@ -1,0 +1,87 @@
+{
+  "casque": {
+    "images": 600,
+    "classes": {
+      "Hardhat": {
+        "AP50_perimetre_coherent": 0.9504,
+        "AP50_publiee_val_complet": 0.8551,
+        "precision": 0.9254,
+        "recall": 0.9132
+      },
+      "NO-Hardhat": {
+        "AP50_perimetre_coherent": 0.9362,
+        "AP50_publiee_val_complet": 0.7179,
+        "precision": 0.9466,
+        "recall": 0.9158
+      }
+    }
+  },
+  "gants": {
+    "images": 600,
+    "classes": {
+      "Gloves": {
+        "AP50_perimetre_coherent": 0.9506,
+        "AP50_publiee_val_complet": 0.9148,
+        "precision": 0.864,
+        "recall": 0.9247
+      },
+      "NO-Gloves": {
+        "AP50_perimetre_coherent": 0.9153,
+        "AP50_publiee_val_complet": 0.8097,
+        "precision": 0.8589,
+        "recall": 0.8861
+      }
+    }
+  },
+  "lunettes": {
+    "images": 600,
+    "classes": {
+      "Goggles": {
+        "AP50_perimetre_coherent": 0.9808,
+        "AP50_publiee_val_complet": 0.9433,
+        "precision": 0.8808,
+        "recall": 0.9869
+      },
+      "NO-Goggles": {
+        "AP50_perimetre_coherent": 0.9575,
+        "AP50_publiee_val_complet": 0.8988,
+        "precision": 0.8841,
+        "recall": 0.9181
+      }
+    }
+  },
+  "masque": {
+    "images": 582,
+    "classes": {
+      "Mask": {
+        "AP50_perimetre_coherent": 0.9618,
+        "AP50_publiee_val_complet": 0.529,
+        "precision": 0.9736,
+        "recall": 0.9323
+      },
+      "NO-Mask": {
+        "AP50_perimetre_coherent": 0.9239,
+        "AP50_publiee_val_complet": 0.6637,
+        "precision": 0.9286,
+        "recall": 0.8653
+      }
+    }
+  },
+  "gilet": {
+    "images": 600,
+    "classes": {
+      "NO-Safety Vest": {
+        "AP50_perimetre_coherent": 0.6655,
+        "AP50_publiee_val_complet": 0.0482,
+        "precision": 0.8119,
+        "recall": 0.4987
+      },
+      "Safety Vest": {
+        "AP50_perimetre_coherent": 0.8907,
+        "AP50_publiee_val_complet": 0.4938,
+        "precision": 0.8609,
+        "recall": 0.8454
+      }
+    }
+  }
+}

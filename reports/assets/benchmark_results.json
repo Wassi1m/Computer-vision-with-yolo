@@ -1,0 +1,72 @@
+[
+  {
+    "name": "ppe_detection/best.pt (YOLOv8m, 14 classes)",
+    "file_size_mb": 49.64,
+    "mean_ms": 206.8,
+    "median_ms": 207.6,
+    "fps": 4.84,
+    "rss_after_load_mb": 546.0,
+    "rss_delta_mb": 232.5,
+    "imgsz": 480
+  },
+  {
+    "name": "ppe_detection/best_gloves.pt (YOLOv8n, 6 classes)",
+    "file_size_mb": 5.36,
+    "mean_ms": 36.6,
+    "median_ms": 36.5,
+    "fps": 27.31,
+    "rss_after_load_mb": 555.7,
+    "rss_delta_mb": 9.1,
+    "imgsz": 480
+  },
+  {
+    "name": "ppe_detection/yolov8n.pt (COCO, person only)",
+    "file_size_mb": 6.25,
+    "mean_ms": 40.6,
+    "median_ms": 40.8,
+    "fps": 24.65,
+    "rss_after_load_mb": 556.8,
+    "rss_delta_mb": 1.2,
+    "imgsz": 480
+  },
+  {
+    "name": "surveillance_suite/fire_smoke.pt",
+    "file_size_mb": 5.1,
+    "mean_ms": 36.7,
+    "median_ms": 34.8,
+    "fps": 27.24,
+    "rss_after_load_mb": 572.6,
+    "rss_delta_mb": 13.1,
+    "imgsz": 480
+  },
+  {
+    "name": "surveillance_suite/license_plate.pt",
+    "file_size_mb": 5.14,
+    "mean_ms": 33.1,
+    "median_ms": 33.3,
+    "fps": 30.25,
+    "rss_after_load_mb": 557.4,
+    "rss_delta_mb": -15.2,
+    "imgsz": 480
+  },
+  {
+    "name": "surveillance_suite/yolo26n.pt (general/tracking)",
+    "file_size_mb": 5.29,
+    "mean_ms": 36.0,
+    "median_ms": 36.6,
+    "fps": 27.8,
+    "rss_after_load_mb": 564.6,
+    "rss_delta_mb": 7.2,
+    "imgsz": 480
+  },
+  {
+    "name": "surveillance_suite/yolo26n-pose.pt",
+    "file_size_mb": 7.51,
+    "mean_ms": 42.1,
+    "median_ms": 41.7,
+    "fps": 23.77,
+    "rss_after_load_mb": 557.4,
+    "rss_delta_mb": -7.2,
+    "imgsz": 480
+  }
+]

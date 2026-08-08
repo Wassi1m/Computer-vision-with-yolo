@@ -1,0 +1,36 @@
+{
+  "tag": "baseline_best_sur_sousensemble_propre",
+  "weights": "/home/user/Bureau/model ia ppe/ppe_detection/models/best.pt",
+  "data": "/home/user/Bureau/model ia ppe/ppe_detection/data/extracted/ppe_vest_clean_14c/data.yaml",
+  "split": "val",
+  "mAP50_global": 0.7596,
+  "mAP50_95_global": 0.4712,
+  "per_class": {
+    "NO-Safety Vest": {
+      "AP50": 0.6278,
+      "AP50_95": 0.2976,
+      "precision": 0.7747,
+      "recall": 0.5145
+    },
+    "Safety Vest": {
+      "AP50": 0.8913,
+      "AP50_95": 0.6448,
+      "precision": 0.8703,
+      "recall": 0.843
+    }
+  },
+  "classes_suivies": {
+    "Safety Vest": {
+      "AP50": 0.8913,
+      "AP50_95": 0.6448,
+      "precision": 0.8703,
+      "recall": 0.843
+    },
+    "NO-Safety Vest": {
+      "AP50": 0.6278,
+      "AP50_95": 0.2976,
+      "precision": 0.7747,
+      "recall": 0.5145
+    }
+  }
+}

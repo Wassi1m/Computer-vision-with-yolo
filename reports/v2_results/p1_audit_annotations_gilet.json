@@ -1,0 +1,176 @@
+[
+  {
+    "split": "train",
+    "instances": {
+      "Safety Vest": 4499,
+      "NO-Safety Vest": 1435,
+      "Person": 1034,
+      "Hardhat": 28996,
+      "NO-Hardhat": 9705
+    },
+    "images_contenant": {
+      "Safety Vest": 2135,
+      "NO-Safety Vest": 678,
+      "Person": 679,
+      "Hardhat": 10660,
+      "NO-Hardhat": 3647
+    },
+    "boites_gilet_sans_personne": {
+      "Safety Vest": 4499,
+      "NO-Safety Vest": 1435
+    },
+    "contradictions_vest_vs_novest": 2,
+    "exemples_contradictions": [
+      "ppe_0781_jpg.rf.a692f629b68c0d0cd992aa8fa18b6ba9",
+      "ppe_0781_jpg.rf.a692f629b68c0d0cd992aa8fa18b6ba9"
+    ],
+    "images_avec_personne": 679,
+    "images_personne_sans_aucune_etiquette_gilet": 679,
+    "personnes_total": 1034,
+    "personnes_sans_etiquette_gilet": 1034,
+    "aire_relative_boites": {
+      "Safety Vest": {
+        "n": 4499,
+        "median": 0.04533,
+        "p10": 0.01009,
+        "p90": 0.23976
+      },
+      "NO-Safety Vest": {
+        "n": 1435,
+        "median": 0.04802,
+        "p10": 0.00983,
+        "p90": 0.21533
+      },
+      "Hardhat": {
+        "n": 28996,
+        "median": 0.00751,
+        "p10": 0.00175,
+        "p90": 0.04258
+      },
+      "NO-Hardhat": {
+        "n": 9705,
+        "median": 0.00846,
+        "p10": 0.0024,
+        "p90": 0.13971
+      }
+    },
+    "position_verticale_dans_personne": {
+      "Safety Vest": null,
+      "NO-Safety Vest": null
+    }
+  },
+  {
+    "split": "val",
+    "instances": {
+      "Safety Vest": 1287,
+      "NO-Safety Vest": 361,
+      "Person": 277,
+      "Hardhat": 8952,
+      "NO-Hardhat": 2222
+    },
+    "images_contenant": {
+      "Safety Vest": 609,
+      "NO-Safety Vest": 189,
+      "Person": 193,
+      "Hardhat": 3191,
+      "NO-Hardhat": 865
+    },
+    "boites_gilet_sans_personne": {
+      "Safety Vest": 1287,
+      "NO-Safety Vest": 361
+    },
+    "contradictions_vest_vs_novest": 0,
+    "exemples_contradictions": [],
+    "images_avec_personne": 193,
+    "images_personne_sans_aucune_etiquette_gilet": 193,
+    "personnes_total": 277,
+    "personnes_sans_etiquette_gilet": 277,
+    "aire_relative_boites": {
+      "Safety Vest": {
+        "n": 1287,
+        "median": 0.04313,
+        "p10": 0.01114,
+        "p90": 0.23136
+      },
+      "NO-Safety Vest": {
+        "n": 361,
+        "median": 0.05975,
+        "p10": 0.01395,
+        "p90": 0.20319
+      },
+      "Hardhat": {
+        "n": 8952,
+        "median": 0.00632,
+        "p10": 0.00142,
+        "p90": 0.03384
+      },
+      "NO-Hardhat": {
+        "n": 2222,
+        "median": 0.00855,
+        "p10": 0.00202,
+        "p90": 0.17373
+      }
+    },
+    "position_verticale_dans_personne": {
+      "Safety Vest": null,
+      "NO-Safety Vest": null
+    }
+  },
+  {
+    "split": "test",
+    "instances": {
+      "Safety Vest": 662,
+      "NO-Safety Vest": 226,
+      "Person": 138,
+      "Hardhat": 4480,
+      "NO-Hardhat": 1038
+    },
+    "images_contenant": {
+      "Safety Vest": 300,
+      "NO-Safety Vest": 108,
+      "Person": 95,
+      "Hardhat": 1626,
+      "NO-Hardhat": 413
+    },
+    "boites_gilet_sans_personne": {
+      "Safety Vest": 662,
+      "NO-Safety Vest": 226
+    },
+    "contradictions_vest_vs_novest": 0,
+    "exemples_contradictions": [],
+    "images_avec_personne": 95,
+    "images_personne_sans_aucune_etiquette_gilet": 95,
+    "personnes_total": 138,
+    "personnes_sans_etiquette_gilet": 138,
+    "aire_relative_boites": {
+      "Safety Vest": {
+        "n": 662,
+        "median": 0.04061,
+        "p10": 0.0104,
+        "p90": 0.21974
+      },
+      "NO-Safety Vest": {
+        "n": 226,
+        "median": 0.04435,
+        "p10": 0.00867,
+        "p90": 0.21875
+      },
+      "Hardhat": {
+        "n": 4480,
+        "median": 0.0065,
+        "p10": 0.00146,
+        "p90": 0.03573
+      },
+      "NO-Hardhat": {
+        "n": 1038,
+        "median": 0.00922,
+        "p10": 0.00278,
+        "p90": 0.18317
+      }
+    },
+    "position_verticale_dans_personne": {
+      "Safety Vest": null,
+      "NO-Safety Vest": null
+    }
+  }
+]

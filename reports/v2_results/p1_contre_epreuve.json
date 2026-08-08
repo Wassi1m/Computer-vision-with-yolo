@@ -1,0 +1,9 @@
+{
+  "images_testees": 150,
+  "images_avec_detection_gilet_non_annotee": 18,
+  "taux": 0.12,
+  "detections_gilet_total": 55,
+  "conf_moyenne": 0.4088,
+  "conf_max": 0.7581,
+  "seuil": 0.25
+}

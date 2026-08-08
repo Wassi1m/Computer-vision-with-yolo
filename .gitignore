@@ -1,6 +1,26 @@
 venv/
+.venv/
 __pycache__/
 *.pyc
 
 ppe_detection/data/
 surveillance_suite/data/
+
+# Cache Hugging Face (téléchargements de datasets, régénérable)
+.cache_hf/
+
+# Paquets Colab (zips de dataset + résultats d'entraînement bruts, régénérables
+# depuis improvements/p*_merge_*.py -- les modèles finaux déployés sont dans
+# ppe_detection/models/ et surveillance_suite/models/, eux versionnés)
+reports/colab_package/
+reports/result_colab/
+reports/v2_results/runs/
+
+# Exports ONNX (régénérables via improvements/p3_benchmark_pipeline.py)
+ppe_detection/models/*.onnx
+
+# Sauvegardes locales de poids pré-fine-tuning (l'historique git remplit déjà
+# ce rôle une fois le nouveau poids commité -- pas besoin de les versionner)
+ppe_detection/models/*_pre_*.pt
+surveillance_suite/models/*_pre_*.pt
+surveillance_suite/models/*_backup.pt

@@ -43,7 +43,7 @@ class DoorClassifier:
         # On ne prend en compte la prédiction que si elle est assez confiante,
         # sinon on la traite comme "incertain" et on garde l'historique tel quel
         if top_conf >= self.min_confidence:
-            self.history.append(top_label == "open")
+            self.history.append(top_label.lower() == "open")
 
         self.last_confidence = top_conf
 
@@ -64,7 +64,7 @@ class DoorClassifier:
 
 
 def load_trained_door_classifier(model_path="models/door_classifier.pt",
-                                  roi_path="dataset/roi.json",
+                                  roi_path="data/dataset/roi.json",
                                   smoothing_window=7, min_confidence=0.6):
     """
     Charge le classifieur entraîné + son ROI associé, si disponibles.

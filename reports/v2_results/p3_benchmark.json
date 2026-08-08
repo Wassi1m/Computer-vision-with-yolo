@@ -1,0 +1,132 @@
+{
+  "threads": 12,
+  "n_images": 15,
+  "pytorch": {
+    "640": {
+      "personnes_yolov8n": {
+        "ms_median": 67.77,
+        "ms_p90": 74.37,
+        "fps": 14.76,
+        "n": 15
+      },
+      "epi_best": {
+        "ms_median": 374.79,
+        "ms_p90": 390.68,
+        "fps": 2.67,
+        "n": 15
+      },
+      "epi_gloves": {
+        "ms_median": 59.73,
+        "ms_p90": 62.97,
+        "fps": 16.74,
+        "n": 15
+      },
+      "cascade_3_modeles": {
+        "ms_median": 502.29,
+        "fps": 1.99
+      },
+      "cascade_2_modeles_sans_gloves": {
+        "ms_median": 442.56,
+        "fps": 2.26
+      }
+    },
+    "480": {
+      "personnes_yolov8n": {
+        "ms_median": 42.48,
+        "ms_p90": 44.72,
+        "fps": 23.54,
+        "n": 15
+      },
+      "epi_best": {
+        "ms_median": 222.18,
+        "ms_p90": 227.18,
+        "fps": 4.5,
+        "n": 15
+      },
+      "epi_gloves": {
+        "ms_median": 39.77,
+        "ms_p90": 41.63,
+        "fps": 25.14,
+        "n": 15
+      },
+      "cascade_3_modeles": {
+        "ms_median": 304.43,
+        "fps": 3.28
+      },
+      "cascade_2_modeles_sans_gloves": {
+        "ms_median": 264.66,
+        "fps": 3.78
+      }
+    }
+  },
+  "onnx": {
+    "640": {
+      "personnes_yolov8n": {
+        "ms_median": 83.09,
+        "ms_p90": 130.77,
+        "fps": 12.04,
+        "n": 15
+      },
+      "epi_best": {
+        "ms_median": 310.86,
+        "ms_p90": 358.08,
+        "fps": 3.22,
+        "n": 15
+      },
+      "epi_gloves": {
+        "ms_median": 104.76,
+        "ms_p90": 131.09,
+        "fps": 9.55,
+        "n": 15
+      },
+      "cascade_3_modeles": {
+        "ms_median": 498.71,
+        "fps": 2.01
+      },
+      "cascade_2_modeles_sans_gloves": {
+        "ms_median": 393.95,
+        "fps": 2.54
+      }
+    },
+    "480": {
+      "personnes_yolov8n": {
+        "ms_median": 132.56,
+        "ms_p90": 141.77,
+        "fps": 7.54,
+        "n": 15
+      },
+      "epi_best": {
+        "ms_median": 279.4,
+        "ms_p90": 302.22,
+        "fps": 3.58,
+        "n": 15
+      },
+      "epi_gloves": {
+        "ms_median": 74.38,
+        "ms_p90": 87.47,
+        "fps": 13.45,
+        "n": 15
+      },
+      "cascade_3_modeles": {
+        "ms_median": 486.34,
+        "fps": 2.06
+      },
+      "cascade_2_modeles_sans_gloves": {
+        "ms_median": 411.96,
+        "fps": 2.43
+      }
+    }
+  },
+  "precision_vs_resolution": {
+    "640": {
+      "mAP50": 0.8833,
+      "Safety Vest": 0.9249,
+      "NO-Safety Vest": 0.8417
+    },
+    "480": {
+      "mAP50": 0.8869,
+      "Safety Vest": 0.9249,
+      "NO-Safety Vest": 0.849
+    }
+  }
+}

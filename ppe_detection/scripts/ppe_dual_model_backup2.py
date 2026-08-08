@@ -16,6 +16,22 @@ print("Modeles prets !\n")
 # M2 (best_gloves.pt) : Gloves, Vest, goggles, helmet, mask, safety_shoe
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ── P2 : table de correspondance M2 -> M1 ─────────────────────────────────────
+# Les deux modèles couvrent en grande partie les mêmes EPI sous des noms
+# différents (`Hardhat`/`helmet`, `Safety Vest`/`Vest`...). Sans cette table,
+# le même gilet physique produit 2 boîtes superposées (une par modèle) à
+# l'affichage, et 2x le calcul pour rien. On ne peut PAS ré-entraîner un
+# modèle unique (aucun dataset local pour les classes propres à M2, en
+# particulier `safety_shoe` -- cf. `improvements/p2_table_correspondance_epi.py`
+# pour le diagnostic complet) : cette table est le correctif retenu, sans
+# ré-entraînement. `safety_shoe` reste le seul apport net de M2, jamais
+# dédoublonnée (aucun équivalent dans M1).
+CORRESPONDANCE_M2_VERS_M1 = {
+    "gloves": "Gloves", "vest": "Safety Vest", "goggles": "Goggles",
+    "helmet": "Hardhat", "mask": "Mask",
+}
+IOU_DEDUP_SEUIL = 0.4
+
 DEBUG = False   # Touche D en direct pour activer le mode diagnostic
 
 # ── Traductions vers le français (clés = noms de classes exacts des modèles) ──
@@ -200,6 +216,7 @@ while True:
     # 2) Collecte des EPI avec les 2 modèles spécialisés
     conf_globale = 0.01 if DEBUG else 0.03
     brutes_debug = []
+    detections_m1 = []  # (cls, sc, x1, y1, x2, y2) -- pour dédup IoU de M2 (P2)
 
     for model, lm in [(model1, "M1"), (model2, "M2")]:
         for box in model.predict(frame, conf=conf_globale, verbose=False)[0].boxes:
@@ -216,8 +233,26 @@ while True:
                     personnes.append((x1, y1, x2, y2))
                 continue
 
-            if sc >= 0.03:
-                ppe_detections.append((cls, sc, x1, y1, x2, y2))
+            if sc < 0.03:
+                continue
+
+            # P2 : une détection M2 qui correspond à un concept déjà couvert par
+            # M1 est ignorée si elle chevauche (IoU) une détection M1 du même
+            # concept -- M1 sert de référence (mieux mesuré, cf. P1). Seule
+            # `safety_shoe` (sans équivalent dans M1) est toujours conservée.
+            if lm == "M2":
+                equiv = CORRESPONDANCE_M2_VERS_M1.get(cls_low)
+                if equiv is not None:
+                    doublon = any(
+                        d_cls == equiv and iou((x1, y1, x2, y2), (dx1, dy1, dx2, dy2)) >= IOU_DEDUP_SEUIL
+                        for d_cls, _, dx1, dy1, dx2, dy2 in detections_m1
+                    )
+                    if doublon:
+                        continue
+
+            ppe_detections.append((cls, sc, x1, y1, x2, y2))
+            if lm == "M1":
+                detections_m1.append((cls, sc, x1, y1, x2, y2))
 
     # Fallback : personne virtuelle si aucune détectée mais EPI visibles
     if not personnes and ppe_detections:

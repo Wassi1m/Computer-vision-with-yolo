@@ -1,17 +1,53 @@
 """
 Module 2 : Détection de personne tombée / évanouie.
 
-Principe :
-- YOLO26-pose donne 17 points clés (COCO keypoints) par personne.
-- On calcule l'angle du "tronc" (ligne épaules -> hanches) par rapport
-  à la verticale, + le ratio largeur/hauteur de la boîte englobante.
-- Une personne debout : tronc quasi vertical, boîte haute et étroite.
-- Une personne tombée : tronc proche de l'horizontale, boîte large et basse.
-- On combine les 2 critères pour réduire les faux positifs.
+Deux implémentations, sélectionnées automatiquement par `main.py` (même
+logique que le module porte : modèle entraîné en priorité, heuristique en
+secours si absent) :
+
+1. `FallDetectorYOLO` (préféré) : modèle dédié `fall_detector.pt` (2 classes
+   `falling`/`stand`), entraîné P5 sur 945 images (511 Roboflow locales +
+   434 DeZan/Hugging Face). AP50 mesuré : falling 97.6%, stand 93.2% -- voir
+   `reports/v2_results/p5_final_val.log`. Détection directe, pas de
+   dépendance à la qualité des keypoints de pose.
+
+2. Heuristique par pose (`compute_trunk_angle` + `detect_falls`, ci-dessous) :
+   YOLO26-pose donne 17 points clés (COCO keypoints) par personne. On calcule
+   l'angle du "tronc" (ligne épaules -> hanches) par rapport à la verticale,
+   + le ratio largeur/hauteur de la boîte englobante. Une personne debout :
+   tronc quasi vertical, boîte haute et étroite. Une personne tombée : tronc
+   proche de l'horizontale, boîte large et basse. Les 2 critères doivent
+   concorder pour réduire les faux positifs. Sert de secours quand
+   `fall_detector.pt` est absent.
 """
 
 import math
 import numpy as np
+from ultralytics import YOLO
+
+
+class FallDetectorYOLO:
+    """Détecteur de chute dédié (modèle entraîné P5), même interface que
+    `FireSmokeDetector` : `.detect(frame)` -> liste de dicts {box, fallen, conf}."""
+
+    def __init__(self, model_path, conf=0.4):
+        self.model = YOLO(model_path)
+        self.conf = conf
+
+    def detect(self, frame):
+        results = self.model.predict(frame, conf=self.conf, verbose=False)
+        detections = []
+        if results and results[0].boxes is not None:
+            boxes = results[0].boxes
+            for i in range(len(boxes)):
+                xyxy = boxes.xyxy[i].cpu().numpy().astype(int)
+                label = self.model.names[int(boxes.cls[i])]  # "falling" ou "stand"
+                detections.append({
+                    "box": xyxy,
+                    "fallen": label == "falling",
+                    "conf": float(boxes.conf[i]),
+                })
+        return detections
 
 # Indices COCO keypoints (format Ultralytics)
 L_SHOULDER, R_SHOULDER = 5, 6

@@ -22,7 +22,7 @@ import cv2
 from ultralytics import YOLO
 
 import config
-from module_fall import detect_falls
+from module_fall import detect_falls, FallDetectorYOLO
 from module_line_crossing import LineCrossingCounter
 from module_door import DoorStateDetector, select_roi_interactively, compute_occlusion_ratio
 from module_door_classifier import load_trained_door_classifier
@@ -65,8 +65,17 @@ def main():
     print("Chargement du modèle général YOLO26...")
     model_general = YOLO(config.MODEL_GENERAL)
 
-    print("Chargement du modèle pose YOLO26 (détection de chute)...")
-    model_pose = YOLO(config.MODEL_POSE)
+    # Chute : modèle dédié en priorité (fall_detector.pt, P5), heuristique
+    # pose en secours si absent -- même schéma que le module porte.
+    fall_detector = None
+    model_pose = None
+    if getattr(config, "MODEL_FALL", None) and os.path.exists(config.MODEL_FALL):
+        print("Modèle de chute dédié trouvé (fall_detector.pt) -> utilisation (recommandé).")
+        fall_detector = FallDetectorYOLO(config.MODEL_FALL, conf=config.CONF_THRESHOLD)
+    else:
+        print("Aucun modèle de chute dédié trouvé -> heuristique pose (moins fiable).")
+        print("Chargement du modèle pose YOLO26 (détection de chute)...")
+        model_pose = YOLO(config.MODEL_POSE)
 
     fire_detector = None
     if not args.no_fire and FireSmokeDetector and os.path.exists(config.MODEL_FIRE_SMOKE or ""):
@@ -172,7 +181,10 @@ def main():
 
         run_pose_this_frame = frame_idx % POSE_EVERY_N == 0
         if run_pose_this_frame:
-            pose_future = executor.submit(model_pose, frame, imgsz=INFER_IMGSZ, verbose=False)
+            if fall_detector is not None:
+                fall_future = executor.submit(fall_detector.detect, frame)
+            else:
+                pose_future = executor.submit(model_pose, frame, imgsz=INFER_IMGSZ, verbose=False)
 
         track_results = general_future.result()
         tracked_objects = []
@@ -199,12 +211,16 @@ def main():
         cv2.putText(frame, f"IN: {line_counter.count_in}  OUT: {line_counter.count_out}",
                     (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
-        # Module 2 : détection de chute (pose) - 1 frame sur POSE_EVERY_N,
-        # on reaffiche le dernier resultat connu les autres frames
+        # Module 2 : détection de chute - 1 frame sur POSE_EVERY_N, on reaffiche
+        # le dernier resultat connu les autres frames. Modèle dédié si présent
+        # (fall_detector.pt), sinon heuristique pose.
         if run_pose_this_frame:
-            pose_results = pose_future.result()
-            last_falls = detect_falls(pose_results[0], config.FALL_ASPECT_RATIO_THRESHOLD,
-                                       config.FALL_ANGLE_THRESHOLD_DEG)
+            if fall_detector is not None:
+                last_falls = fall_future.result()
+            else:
+                pose_results = pose_future.result()
+                last_falls = detect_falls(pose_results[0], config.FALL_ASPECT_RATIO_THRESHOLD,
+                                           config.FALL_ANGLE_THRESHOLD_DEG)
         for f in last_falls:
             x1, y1, x2, y2 = f["box"]
             if f["fallen"]:

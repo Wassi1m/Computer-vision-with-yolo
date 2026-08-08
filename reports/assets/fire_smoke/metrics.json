@@ -1,0 +1,31 @@
+{
+  "model": "surveillance_suite/models/fire_smoke.pt",
+  "data": "surveillance_suite/data/dataset/Fire -smoke Detection.v1i.yolo26/data_abs.yaml",
+  "elapsed_sec": 200.4219686985016,
+  "map50": 0.46398979475142554,
+  "map50_95": 0.15585780017696013,
+  "mean_precision": 0.5756754225533256,
+  "mean_recall": 0.5400217841617792,
+  "precision_per_class": [
+    0.7829794181020672,
+    0.3683714270045841
+  ],
+  "recall_per_class": [
+    0.6591576885406464,
+    0.42088587978291186
+  ],
+  "ap50_per_class": [
+    0.6523698057984653,
+    0.2756097837043858
+  ],
+  "class_names": [
+    "fire",
+    "smoke"
+  ],
+  "speed_ms": {
+    "preprocess": 3.1102414582035114,
+    "inference": 178.26330325663878,
+    "loss": 8.948770739873477e-05,
+    "postprocess": 0.6525885506372601
+  }
+}

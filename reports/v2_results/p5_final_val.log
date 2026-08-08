@@ -1,0 +1,13 @@
+Ultralytics 8.4.115 🚀 Python-3.12.3 torch-2.13.0+cpu CPU (13th Gen Intel Core i7-1355U)
+YOLO26n summary (fused): 122 layers, 2,375,226 parameters, 0 gradients, 5.3 GFLOPs
+[34m[1mval: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 154.0±65.6 MB/s, size: 48.5 KB)
+[K[34m[1mval: [0mScanning /home/user/Bureau/model ia ppe/ppe_detection/data/extracted/fall_detection_enriched/test/labels... 51 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 51/51 1.5Kit/s 0.0s
+[34m[1mval: [0mNew cache created: /home/user/Bureau/model ia ppe/ppe_detection/data/extracted/fall_detection_enriched/test/labels.cache
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 7% ╸─────────── 1/13 1.2s/it 0.4s<15.0s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 15% ━╸────────── 2/13 1.4it/s 0.7s<7.7s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 23% ━━╸───────── 3/13 1.7it/s 1.2s<5.9s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 30% ━━━╸──────── 4/13 1.8it/s 1.6s<4.9s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 38% ━━━━╸─────── 5/13 2.2it/s 2.0s<3.7s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 46% ━━━━━╸────── 6/13 2.4it/s 2.3s<2.9s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 53% ━━━━━━────── 7/13 2.6it/s 2.6s<2.3s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 61% ━━━━━━━───── 8/13 2.8it/s 2.9s<1.8s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 69% ━━━━━━━━──── 9/13 3.0it/s 3.2s<1.3s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 76% ━━━━━━━━━─── 10/13 3.0it/s 3.5s<1.0s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 84% ━━━━━━━━━━── 11/13 3.0it/s 3.9s<0.7s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 92% ━━━━━━━━━━━─ 12/13 3.2it/s 4.1s<0.3s[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 13/13 3.0it/s 4.4s
+                   all         51         51      0.855      0.934      0.954      0.845
+               falling         36         36      0.879      0.889      0.976      0.865
+                 stand         15         15       0.83       0.98      0.932      0.826
+Speed: 1.8ms preprocess, 76.7ms inference, 0.0ms loss, 0.4ms postprocess per image
+falling AP50= 0.9761
+stand AP50= 0.9321
+mAP50 global: 0.9541

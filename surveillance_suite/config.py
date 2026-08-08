@@ -7,7 +7,12 @@ Modifie ces valeurs selon ta caméra / scène.
 # Modèles
 # --------------------------------------------------------------------------
 MODEL_GENERAL = "yolo26n.pt"        # détection générale (personnes, voitures...) COCO
-MODEL_POSE = "yolo26n-pose.pt"      # squelette -> détection de chute
+MODEL_POSE = "yolo26n-pose.pt"      # squelette -> détection de chute (secours si MODEL_FALL absent)
+
+# Détecteur de chute dédié (P5, entraîné sur Colab -- voir module_fall.py).
+# Utilisé en priorité si présent ; sinon repli automatique sur l'heuristique
+# pose (angle du tronc + ratio largeur/hauteur, moins fiable).
+MODEL_FALL = "models/fall_detector.pt"      # ou None pour forcer l'heuristique
 
 # Modèle spécialisé fumée/feu : PAS inclus dans YOLO26 de base.
 # Télécharge un modèle entraîné (ex: Roboflow "fire-smoke-yolov8") et mets le

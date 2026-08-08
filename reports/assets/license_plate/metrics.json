@@ -1,0 +1,29 @@
+{
+  "model": "surveillance_suite/models/license_plate.pt",
+  "data": "surveillance_suite/data/dataset/License Plate Detector.v5i.yolo26/data_abs.yaml",
+  "elapsed_sec": 16.337031364440918,
+  "map50": 0.535,
+  "map50_95": 0.2910952380952381,
+  "mean_precision": 0.875,
+  "mean_recall": 0.5384615384615384,
+  "precision_per_class": [
+    0.875
+  ],
+  "recall_per_class": [
+    0.5384615384615384
+  ],
+  "ap50_per_class": [
+    0.535
+  ],
+  "class_names": [
+    "licence",
+    "num_plate",
+    "number_plate"
+  ],
+  "speed_ms": {
+    "preprocess": 6.665951400009362,
+    "inference": 604.9672625999847,
+    "loss": 0.00017050006135832518,
+    "postprocess": 2.0855243999903905
+  }
+}

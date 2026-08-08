@@ -1,0 +1,362 @@
+{
+  "split": "train",
+  "cooccurrence": {
+    "Fall-Detected": {
+      "Fall-Detected": 3148
+    },
+    "Gloves": {
+      "Gloves": 1519,
+      "NO-Gloves": 1217
+    },
+    "Goggles": {
+      "Goggles": 2681,
+      "NO-Goggles": 524
+    },
+    "Hardhat": {
+      "Hardhat": 10660,
+      "NO-Hardhat": 746
+    },
+    "Ladder": {
+      "Ladder": 680,
+      "Person": 677
+    },
+    "Mask": {
+      "Mask": 961,
+      "NO-Mask": 89
+    },
+    "NO-Gloves": {
+      "Gloves": 1217,
+      "NO-Gloves": 1954
+    },
+    "NO-Goggles": {
+      "Goggles": 524,
+      "NO-Goggles": 2243
+    },
+    "NO-Hardhat": {
+      "Hardhat": 746,
+      "NO-Hardhat": 3647
+    },
+    "NO-Mask": {
+      "Mask": 89,
+      "NO-Mask": 1098
+    },
+    "NO-Safety Vest": {
+      "NO-Safety Vest": 678,
+      "Safety Vest": 85
+    },
+    "Person": {
+      "Ladder": 677,
+      "Person": 679
+    },
+    "Safety Cone": {
+      "Safety Cone": 1172
+    },
+    "Safety Vest": {
+      "NO-Safety Vest": 85,
+      "Safety Vest": 2135
+    }
+  },
+  "lots": {
+    "#": {
+      "images": 6887,
+      "classes": {
+        "Hardhat": 5630,
+        "NO-Hardhat": 1127,
+        "Safety Vest": 70,
+        "Mask": 15,
+        "NO-Safety Vest": 193,
+        "Safety Cone": 433,
+        "NO-Mask": 11,
+        "Person": 5,
+        "Ladder": 5
+      }
+    },
+    "people-#-": {
+      "images": 3148,
+      "classes": {
+        "Fall-Detected": 3148
+      }
+    },
+    "-#-_png": {
+      "images": 2211,
+      "classes": {
+        "Hardhat": 2211
+      }
+    },
+    "kp#": {
+      "images": 1880,
+      "classes": {
+        "Goggles": 1322,
+        "NO-Goggles": 730,
+        "Gloves": 4
+      }
+    },
+    "packing#": {
+      "images": 1660,
+      "classes": {
+        "Goggles": 987,
+        "NO-Goggles": 1020
+      }
+    },
+    "ppe_#": {
+      "images": 1605,
+      "classes": {
+        "NO-Safety Vest": 326,
+        "Safety Vest": 440,
+        "Hardhat": 878,
+        "NO-Hardhat": 57
+      }
+    },
+    "PP#img#": {
+      "images": 1059,
+      "classes": {
+        "Gloves": 757,
+        "NO-Gloves": 953
+      }
+    },
+    "pos_#": {
+      "images": 948,
+      "classes": {
+        "Safety Vest": 904,
+        "NO-Hardhat": 44
+      }
+    },
+    "image_#": {
+      "images": 892,
+      "classes": {
+        "Hardhat": 458,
+        "Safety Vest": 434
+      }
+    },
+    "IMG_#_mp#-#": {
+      "images": 875,
+      "classes": {
+        "Mask": 180,
+        "NO-Mask": 294,
+        "NO-Hardhat": 260
+      }
+    },
+    "frame#": {
+      "images": 717,
+      "classes": {
+        "Goggles": 241,
+        "NO-Goggles": 351,
+        "NO-Gloves": 123,
+        "NO-Safety Vest": 1,
+        "NO-Hardhat": 1
+      }
+    },
+    "RPReplay_Final#_MP#-#": {
+      "images": 658,
+      "classes": {
+        "Mask": 240,
+        "NO-Hardhat": 326,
+        "NO-Mask": 92
+      }
+    },
+    "class#_#": {
+      "images": 546,
+      "classes": {
+        "Person": 544,
+        "Ladder": 544
+      }
+    },
+    "helmet#": {
+      "images": 540,
+      "classes": {
+        "NO-Hardhat": 229,
+        "Hardhat": 340
+      }
+    },
+    "front_crawling_#": {
+      "images": 428,
+      "classes": {
+        "Hardhat": 426,
+        "Safety Vest": 2
+      }
+    },
+    "img#": {
+      "images": 396,
+      "classes": {
+        "NO-Hardhat": 8,
+        "NO-Safety Vest": 10,
+        "Gloves": 358,
+        "NO-Gloves": 267,
+        "Hardhat": 5,
+        "Safety Vest": 2
+      }
+    },
+    "p#": {
+      "images": 358,
+      "classes": {
+        "NO-Hardhat": 249,
+        "Hardhat": 108
+      }
+    },
+    "autox#_mp#-#": {
+      "images": 351,
+      "classes": {
+        "Safety Cone": 351
+      }
+    },
+    "Image#": {
+      "images": 252,
+      "classes": {
+        "Hardhat": 122,
+        "Safety Vest": 130
+      }
+    },
+    "img_#": {
+      "images": 241,
+      "classes": {
+        "Hardhat": 88,
+        "Safety Vest": 89,
+        "NO-Hardhat": 30,
+        "NO-Safety Vest": 31
+      }
+    },
+    "IMG_#-#-_mp#-#": {
+      "images": 227,
+      "classes": {
+        "Mask": 52,
+        "NO-Hardhat": 112,
+        "NO-Mask": 63
+      }
+    },
+    "PPE_Data_#": {
+      "images": 219,
+      "classes": {
+        "Goggles": 78,
+        "Gloves": 15,
+        "NO-Goggles": 83,
+        "NO-Gloves": 43
+      }
+    },
+    "nglovpp#": {
+      "images": 212,
+      "classes": {
+        "NO-Gloves": 212,
+        "Gloves": 36
+      }
+    },
+    "N#h_img_#": {
+      "images": 211,
+      "classes": {
+        "NO-Hardhat": 68,
+        "Hardhat": 203,
+        "Gloves": 1,
+        "Goggles": 1,
+        "NO-Goggles": 1
+      }
+    },
+    "mask-wearing-#_png": {
+      "images": 194,
+      "classes": {
+        "NO-Hardhat": 95,
+        "NO-Mask": 72,
+        "Mask": 28
+      }
+    },
+    "IMG_#-#_mp#-#": {
+      "images": 175,
+      "classes": {
+        "NO-Hardhat": 84,
+        "NO-Mask": 91
+      }
+    },
+    "youtube-#": {
+      "images": 155,
+      "classes": {}
+    },
+    "MX_img_#": {
+      "images": 154,
+      "classes": {
+        "NO-Hardhat": 154
+      }
+    },
+    "nglov#": {
+      "images": 145,
+      "classes": {
+        "Gloves": 108,
+        "NO-Gloves": 135
+      }
+    },
+    "mask-wearing-tests_mohamed_mp#-#": {
+      "images": 143,
+      "classes": {
+        "NO-Mask": 66,
+        "NO-Hardhat": 72
+      }
+    },
+    "fglov#": {
+      "images": 142,
+      "classes": {
+        "Gloves": 132,
+        "NO-Gloves": 104
+      }
+    },
+    "IMG_#_MOV-#": {
+      "images": 138,
+      "classes": {
+        "NO-Hardhat": 66,
+        "Mask": 35,
+        "NO-Mask": 29
+      }
+    },
+    "goggle#": {
+      "images": 123,
+      "classes": {
+        "NO-Gloves": 99,
+        "Gloves": 108
+      }
+    },
+    "frame#-#-": {
+      "images": 100,
+      "classes": {
+        "NO-Goggles": 47,
+        "Goggles": 52,
+        "NO-Gloves": 1
+      }
+    },
+    "Mask#_mov-#": {
+      "images": 99,
+      "classes": {
+        "Mask": 30,
+        "NO-Hardhat": 51,
+        "NO-Mask": 18
+      }
+    },
+    "YouTube_FreeStockFootage_People-wearing-": {
+      "images": 97,
+      "classes": {
+        "Mask": 25,
+        "NO-Hardhat": 34,
+        "NO-Mask": 9
+      }
+    },
+    "YouTube-FREE-AerialStockFootage_CityUrba": {
+      "images": 96,
+      "classes": {}
+    },
+    "Mask-detector#_mov-#": {
+      "images": 85,
+      "classes": {
+        "NO-Mask": 41,
+        "NO-Hardhat": 44
+      }
+    },
+    "autox_mp#-#": {
+      "images": 79,
+      "classes": {
+        "Safety Cone": 79
+      }
+    },
+    "Nhh_img_#": {
+      "images": 71,
+      "classes": {
+        "Hardhat": 71,
+        "NO-Hardhat": 13
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "fall_detector": {
+    "reference": 0.9551,
+    "faible_luminosite": 0.4919,
+    "contre_jour": 0.9524,
+    "brouillard_pluie": 0.9142,
+    "flou_mouvement": 0.8795,
+    "basse_resolution": 0.925
+  },
+  "fire_smoke": {
+    "reference": 0.6846,
+    "faible_luminosite": 0.3413,
+    "contre_jour": 0.5265,
+    "brouillard_pluie": 0.6248,
+    "flou_mouvement": 0.6174,
+    "basse_resolution": 0.6466
+  },
+  "license_plate": {
+    "reference": 0.8649,
+    "faible_luminosite": 0.4176,
+    "contre_jour": 0.7989,
+    "brouillard_pluie": 0.6109,
+    "flou_mouvement": 0.2151,
+    "basse_resolution": 0.3312
+  },
+  "ppe_best": {
+    "reference": 0.9213,
+    "faible_luminosite": 0.1538,
+    "contre_jour": 0.792,
+    "brouillard_pluie": 0.8471,
+    "flou_mouvement": 0.7264,
+    "basse_resolution": 0.9064
+  }
+}

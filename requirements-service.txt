@@ -1,0 +1,22 @@
+# Dépendances du moteur de détection, versions figées.
+#
+# Les deux fichiers historiques (ppe_detection/requirements.txt et
+# surveillance_suite/requirements.txt) divergeaient sur torch et numpy et
+# n'épinglaient que des minima : deux installations à deux dates pouvaient donc
+# produire deux comportements différents. Ce fichier est la référence unique du
+# service ; les versions sont celles effectivement validées le 2026-08-08.
+#
+# Variante CPU de torch : le moteur cible un déploiement sans GPU (cf. plan v3,
+# priorité 8). Pour une machine équipée, retirer l'index ci-dessous et installer
+# la variante CUDA correspondante.
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+ultralytics==8.4.115
+torch==2.13.0+cpu
+torchvision==0.28.0+cpu
+opencv-python-headless==5.0.0.93
+numpy==2.4.4
+easyocr==1.7.2
+scikit-image==0.26.0
+lap==0.5.13

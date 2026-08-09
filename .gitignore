@@ -19,8 +19,14 @@ reports/v2_results/runs/
 # Exports ONNX (régénérables via improvements/p3_benchmark_pipeline.py)
 ppe_detection/models/*.onnx
 
-# Sauvegardes locales de poids pré-fine-tuning (l'historique git remplit déjà
-# ce rôle une fois le nouveau poids commité -- pas besoin de les versionner)
+# Sauvegardes locales de poids pré-fine-tuning
 ppe_detection/models/*_pre_*.pt
 surveillance_suite/models/*_pre_*.pt
 surveillance_suite/models/*_backup.pt
+
+# Modèles (.pt) : gardés en local uniquement, pas dans le dépôt (142 Mo à eux
+# seuls, ralentissaient le push). Le suivi de version passe par
+# tests/reference_modeles.json (métriques + provenance, committé) plutôt que
+# par git sur les binaires -- voir docs/registre_modeles.md.
+ppe_detection/models/*.pt
+surveillance_suite/models/*.pt

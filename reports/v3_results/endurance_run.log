@@ -1,0 +1,99 @@
+Source de test generee : /tmp/endurance_source.avi (40 images)
+Lancement : /home/user/Bureau/model ia ppe/.venv/bin/python unified_surveillance.py --source /tmp/endurance_source.avi --boucler --health-port 8891 --log-level WARNING
+       20s  memoire  1094.9 Mo  fps  5.80  frames     39  ev 34
+       40s  memoire  1077.5 Mo  fps  5.44  frames    112  ev 78
+       60s  memoire  1093.6 Mo  fps  5.87  frames    188  ev 116
+       80s  memoire  1092.8 Mo  fps  5.74  frames    260  ev 148
+      100s  memoire  1102.2 Mo  fps  6.25  frames    338  ev 183
+      120s  memoire  1095.6 Mo  fps  5.96  frames    416  ev 222
+      140s  memoire  1065.7 Mo  fps  5.83  frames    493  ev 251
+      160s  memoire  1098.4 Mo  fps  5.05  frames    561  ev 282
+      180s  memoire  1098.5 Mo  fps  5.52  frames    635  ev 316
+      200s  memoire  1098.5 Mo  fps  5.70  frames    704  ev 349
+      220s  memoire  1097.3 Mo  fps  4.46  frames    761  ev 376
+      240s  memoire  1098.5 Mo  fps  4.85  frames    823  ev 410
+      260s  memoire  1097.3 Mo  fps  4.04  frames    878  ev 437
+      280s  memoire  1099.7 Mo  fps  4.99  frames    932  ev 470
+      300s  memoire  1078.0 Mo  fps  4.63  frames    993  ev 500
+      320s  memoire  1098.6 Mo  fps  3.77  frames   1046  ev 529
+      340s  memoire  1097.4 Mo  fps  4.26  frames   1100  ev 560
+      360s  memoire  1097.4 Mo  fps  4.94  frames   1162  ev 592
+      380s  memoire  1098.6 Mo  fps  4.20  frames   1221  ev 626
+      400s  memoire  1078.1 Mo  fps  4.27  frames   1277  ev 654
+      420s  memoire  1126.7 Mo  fps  3.76  frames   1328  ev 677
+      440s  memoire  1117.3 Mo  fps  4.24  frames   1388  ev 715
+      460s  memoire  1117.3 Mo  fps  3.73  frames   1444  ev 740
+      480s  memoire  1135.3 Mo  fps  3.82  frames   1497  ev 773
+      500s  memoire  1130.3 Mo  fps  5.93  frames   1559  ev 805
+      520s  memoire  1133.9 Mo  fps  5.07  frames   1625  ev 841
+      540s  memoire  1136.5 Mo  fps  4.42  frames   1683  ev 865
+      560s  memoire  1111.9 Mo  fps  4.69  frames   1742  ev 899
+      580s  memoire  1109.9 Mo  fps  5.20  frames   1803  ev 928
+      600s  memoire  1133.9 Mo  fps  4.30  frames   1860  ev 962
+      620s  memoire  1132.7 Mo  fps  5.18  frames   1919  ev 993
+      640s  memoire  1135.4 Mo  fps  5.15  frames   1985  ev 1030
+      660s  memoire  1143.3 Mo  fps  4.38  frames   2042  ev 1055
+      680s  memoire  1133.9 Mo  fps  5.17  frames   2102  ev 1088
+      700s  memoire  1136.5 Mo  fps  5.49  frames   2168  ev 1115
+      720s  memoire  1135.4 Mo  fps  4.25  frames   2229  ev 1154
+      740s  memoire  1135.0 Mo  fps  5.30  frames   2288  ev 1178
+      760s  memoire  1132.7 Mo  fps  4.18  frames   2348  ev 1214
+      780s  memoire  1136.5 Mo  fps  4.17  frames   2405  ev 1237
+      800s  memoire  1116.0 Mo  fps  4.92  frames   2469  ev 1273
+      820s  memoire  1111.8 Mo  fps  5.04  frames   2534  ev 1300
+      840s  memoire  1114.3 Mo  fps  4.49  frames   2597  ev 1332
+      860s  memoire  1136.4 Mo  fps  3.47  frames   2649  ev 1353
+      880s  memoire  1101.1 Mo  fps  5.38  frames   2713  ev 1390
+      900s  memoire  1135.2 Mo  fps  5.01  frames   2787  ev 1421
+      920s  memoire  1143.1 Mo  fps  5.22  frames   2855  ev 1454
+      940s  memoire  1139.0 Mo  fps  5.84  frames   2926  ev 1484
+      960s  memoire  1137.9 Mo  fps  6.50  frames   3003  ev 1516
+      980s  memoire  1135.2 Mo  fps  4.31  frames   3069  ev 1553
+     1000s  memoire  1136.7 Mo  fps  5.01  frames   3135  ev 1583
+     1020s  memoire  1135.2 Mo  fps  6.33  frames   3209  ev 1609
+     1040s  memoire  1135.2 Mo  fps  6.00  frames   3284  ev 1645
+     1060s  memoire  1132.6 Mo  fps  5.24  frames   3350  ev 1679
+     1080s  memoire  1136.4 Mo  fps  5.83  frames   3419  ev 1710
+     1100s  memoire  1103.7 Mo  fps  5.11  frames   3491  ev 1735
+     1120s  memoire  1115.9 Mo  fps  5.03  frames   3557  ev 1770
+     1140s  memoire  1135.2 Mo  fps  5.93  frames   3624  ev 1799
+     1160s  memoire  1116.5 Mo  fps  6.65  frames   3698  ev 1832
+     1180s  memoire  1137.0 Mo  fps  5.89  frames   3769  ev 1863
+     1200s  memoire  1116.5 Mo  fps  5.14  frames   3836  ev 1896
+     1220s  memoire  1139.7 Mo  fps  5.85  frames   3909  ev 1929
+     1240s  memoire  1134.4 Mo  fps  6.46  frames   3983  ev 1960
+     1260s  memoire  1135.9 Mo  fps  4.57  frames   4048  ev 1988
+     1280s  memoire  1130.6 Mo  fps  6.04  frames   4112  ev 2020
+     1300s  memoire  1136.6 Mo  fps  5.92  frames   4181  ev 2054
+     1320s  memoire  1131.0 Mo  fps  5.49  frames   4254  ev 2091
+     1340s  memoire  1129.5 Mo  fps  5.79  frames   4322  ev 2116
+     1360s  memoire  1104.4 Mo  fps  5.37  frames   4391  ev 2153
+     1380s  memoire  1130.6 Mo  fps  6.73  frames   4472  ev 2186
+     1400s  memoire  1135.9 Mo  fps  5.77  frames   4544  ev 2221
+     1420s  memoire  1113.9 Mo  fps  5.60  frames   4613  ev 2253
+     1440s  memoire  1131.8 Mo  fps  6.62  frames   4688  ev 2281
+     1460s  memoire  1137.0 Mo  fps  5.88  frames   4766  ev 2316
+     1480s  memoire  1143.8 Mo  fps  5.20  frames   4835  ev 2350
+     1500s  memoire  1135.9 Mo  fps  5.83  frames   4904  ev 2383
+     1520s  memoire  1113.9 Mo  fps  5.67  frames   4977  ev 2417
+     1540s  memoire  1138.5 Mo  fps  6.58  frames   5054  ev 2446
+     1560s  memoire  1133.2 Mo  fps  5.54  frames   5124  ev 2477
+     1580s  memoire  1135.9 Mo  fps  5.35  frames   5195  ev 2511
+     1600s  memoire  1134.4 Mo  fps  7.21  frames   5269  ev 2546
+     1620s  memoire  1147.6 Mo  fps  5.28  frames   5345  ev 2583
+     1640s  memoire  1147.9 Mo  fps  5.66  frames   5414  ev 2610
+     1660s  memoire  1137.0 Mo  fps  5.56  frames   5484  ev 2641
+     1680s  memoire  1138.5 Mo  fps  6.89  frames   5558  ev 2676
+     1700s  memoire  1134.4 Mo  fps  5.58  frames   5636  ev 2708
+     1720s  memoire  1137.0 Mo  fps  5.37  frames   5707  ev 2744
+     1740s  memoire  1138.5 Mo  fps  5.50  frames   5776  ev 2773
+     1760s  memoire  1101.7 Mo  fps  6.87  frames   5849  ev 2799
+     1780s  memoire  1138.2 Mo  fps  5.99  frames   5924  ev 2835
+     1800s  memoire  1131.8 Mo  fps  5.46  frames   5994  ev 2869
+
+============================================================
+Duree            : 1801s, 5994 images analysees
+Memoire          : 1102.2 -> 1131.8 Mo (+29.6 Mo)
+Debit            : 4.77 -> 5.88 FPS (+23.2 %)
+
+Aucune derive detectee sur la duree du test.

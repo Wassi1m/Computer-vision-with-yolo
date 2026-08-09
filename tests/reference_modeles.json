@@ -25,10 +25,10 @@
       "split": "test",
       "origine": "P4 — fine-tuning Colab T4, dataset d'origine + complément pyro-sdis",
       "classes": {
-        "fire": 0.9155,
-        "smoke": 0.3913
+        "fire": 0.9037,
+        "smoke": 0.4071
       },
-      "mAP50": 0.6534
+      "mAP50": 0.6554
     },
     "license_plate": {
       "poids": "surveillance_suite/models/license_plate.pt",

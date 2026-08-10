@@ -1,0 +1,41 @@
+{
+  "nom": "epi_robuste",
+  "donnees": "/home/karimmay078/ppe/donnees/ppe_vest_clean_14c_robuste/data.yaml",
+  "poids_depart": "modeles/best.pt",
+  "avant": {
+    "conditions_normales": {
+      "mAP50": 0.8833,
+      "mAP50_95": 0.5462,
+      "classes": {
+        "NO-Safety Vest": 0.8417,
+        "Safety Vest": 0.9249
+      }
+    },
+    "jeu_enrichi": {
+      "mAP50": 0.8833,
+      "mAP50_95": 0.5462,
+      "classes": {
+        "NO-Safety Vest": 0.8417,
+        "Safety Vest": 0.9249
+      }
+    }
+  },
+  "apres": {
+    "jeu_enrichi": {
+      "mAP50": 0.8854,
+      "mAP50_95": 0.5518,
+      "classes": {
+        "NO-Safety Vest": 0.8535,
+        "Safety Vest": 0.9173
+      }
+    },
+    "conditions_normales": {
+      "mAP50": 0.8854,
+      "mAP50_95": 0.5518,
+      "classes": {
+        "NO-Safety Vest": 0.8535,
+        "Safety Vest": 0.9173
+      }
+    }
+  }
+}

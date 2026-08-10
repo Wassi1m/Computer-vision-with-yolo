@@ -24,9 +24,20 @@ ppe_detection/models/*_pre_*.pt
 surveillance_suite/models/*_pre_*.pt
 surveillance_suite/models/*_backup.pt
 
+# Configuration d'accès aux machines d'entraînement : adresse, utilisateur,
+# chemin de clé. Propre à chaque poste, et à ne jamais publier.
+# Le modèle .env.gcp.exemple, lui, est versionné.
+.env.gcp
+.env
+
 # Modèles (.pt) : gardés en local uniquement, pas dans le dépôt (142 Mo à eux
 # seuls, ralentissaient le push). Le suivi de version passe par
 # tests/reference_modeles.json (métriques + provenance, committé) plutôt que
 # par git sur les binaires -- voir docs/registre_modeles.md.
 ppe_detection/models/*.pt
 surveillance_suite/models/*.pt
+
+# Poids issus des runs d'entrainement sur la VM (reports/v3_results/<jeu>_robuste/)
+# et sauvegardes des anciens poids avant installation : memes raisons que ci-dessus.
+reports/v3_results/*_robuste/*.pt
+reports/v3_results/poids_remplaces/

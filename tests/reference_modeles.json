@@ -12,12 +12,13 @@
       "poids": "surveillance_suite/models/fall_detector.pt",
       "data": "ppe_detection/data/extracted/fall_detection_enriched/data.yaml",
       "split": "test",
-      "origine": "P5 — entraînement Colab T4, dataset fusionné Roboflow local + DeZan/HF",
+      "origine": "P8 — fine-tuning Colab T4 du 2026-08-10, robustesse conditions dégradées (nuit/contre-jour/flou/intempérie), reprend le poids P5",
+      "mesure_le": "2026-08-10",
       "classes": {
-        "falling": 0.9761,
-        "stand": 0.9321
+        "falling": 0.9923,
+        "stand": 0.9879
       },
-      "mAP50": 0.9541
+      "mAP50": 0.9901
     },
     "fire_smoke": {
       "poids": "surveillance_suite/models/fire_smoke.pt",
@@ -34,11 +35,12 @@
       "poids": "surveillance_suite/models/license_plate.pt",
       "data": "surveillance_suite/data/dataset/license_plate_unified/data.yaml",
       "split": "test",
-      "origine": "P7 — ré-entraînement local CPU, taxonomie unifiée 3 classes -> 1",
+      "origine": "P8 — fine-tuning Colab T4 du 2026-08-10, robustesse conditions dégradées (nuit/contre-jour/flou/intempérie), reprend le poids P7",
+      "mesure_le": "2026-08-10",
       "classes": {
-        "plate": 0.8526
+        "plate": 0.8619
       },
-      "mAP50": 0.8526
+      "mAP50": 0.8619
     },
     "ppe_best": {
       "poids": "ppe_detection/models/best.pt",
@@ -47,10 +49,10 @@
       "origine": "P1 — fine-tuning Colab T4 sur le sous-ensemble d'annotations gilet propres",
       "commentaire": "Mesuré sur `val` faute de split `test` dédié pour ce sous-ensemble. Seules les deux classes gilet sont suivies : ce sont elles que le fine-tuning P1 visait, et les seules dont le périmètre de mesure est cohérent sur ce jeu.",
       "classes": {
-        "Safety Vest": 0.9249,
-        "NO-Safety Vest": 0.8417
+        "Safety Vest": 0.9173,
+        "NO-Safety Vest": 0.8534
       },
-      "mAP50": 0.8833
+      "mAP50": 0.8854
     }
   }
 }

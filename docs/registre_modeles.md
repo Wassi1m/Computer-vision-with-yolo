@@ -55,16 +55,24 @@ est explicitée dans `improvements/ppe_taxonomy.py`.
 |---|---|
 | **Rôle** | 2 classes : `falling`, `stand` |
 | **Architecture** | YOLO26n |
-| **Version** | P5 — création du 2026-08-08 (n'existait pas auparavant) |
-| **Origine** | Entraînement neuf depuis `yolo26n.pt` (COCO) |
-| **Données** | 945 images : 511 Roboflow (`fall detection 2.v2i`, présentes dans le dépôt mais jamais utilisées) + 434 `DeZan/fall-detection` (Hugging Face, MIT) |
-| **Entraînement** | Colab T4, 10 époques — `reports/colab_package/p5_fall/p5_train_fall_colab.ipynb` |
-| **Métriques** | `falling` 97.6% · `stand` 93.2% · mAP@50 95.4% (split `test`) |
+| **Version** | P8 — fine-tuning du 2026-08-10 (reprend le poids P5) |
+| **Origine** | Fine-tuning P5 sur `fall_detection_enriched_robuste` |
+| **Données** | Jeu P5 (945 images) + 60 % de copies dégradées (nuit/contre-jour/flou/intempérie) — `improvements/p8_dataset_nuit.py` |
+| **Entraînement** | Colab T4, 60 époques — `reports/colab_package/p8_chute/p8_train_chute_colab.ipynb` |
+| **Métriques** | `falling` 99.2% · `stand` 98.8% · mAP@50 99.0% (split `test`) — contre 95.4 % avant P8 |
 
 **À savoir** : la fusion des deux jeux a demandé un remappage de classes. Les
 labels DeZan utilisent trois identifiants (0/1/2) sans documentation ; l'analyse
 des noms de fichiers a établi que 0 = chute et {1,2} = deux activités sans
 chute, remappées en `stand` (voir `improvements/p5_merge_fall_dataset.py`).
+
+**P8** : fine-tuning de robustesse aux conditions dégradées (motivé par
+`reports/v3_results/robustesse_conditions_reelles.json`, qui montrait un
+effondrement à 49.2 % de mAP@50 en faible luminosité). Le gain observé ici sur
+`test` (conditions normales) est probablement en partie dû au fait que ce split
+est plus petit (51 images) — à confirmer par une nouvelle mesure de robustesse
+en conditions dégradées avant de considérer le point clos. Ancien poids
+conservé en `fall_detector_pre_p8.pt` (hors dépôt, voir `.gitignore`).
 
 ### `surveillance_suite/models/fire_smoke.pt` — feu et fumée
 
@@ -89,16 +97,25 @@ mesure d'origine (27.6 %) reste valable.
 |---|---|
 | **Rôle** | 1 classe : `plate` |
 | **Architecture** | YOLO26n |
-| **Version** | P7 — ré-entraînement du 2026-08-07 |
-| **Données** | `license_plate_unified` — taxonomie unifiée (voir ci-dessous) |
-| **Entraînement** | Local CPU, 37 époques sur 80 (interrompu par manque de mémoire, checkpoint conservé) |
-| **Métriques** | mAP@50 85.3% (`test`) · 90.9% (`val`) — contre 72.6 % avant |
+| **Version** | P8 — fine-tuning du 2026-08-10 (reprend le poids P7) |
+| **Origine** | Fine-tuning P7 sur `license_plate_unified_robuste` |
+| **Données** | Jeu P7 (504 images train) + 60 % de copies dégradées (nuit/contre-jour/flou/intempérie) — `improvements/p8_dataset_nuit.py` |
+| **Entraînement** | Colab T4, 60 époques — `reports/colab_package/p8_plaque/p8_train_plaque_colab.ipynb` |
+| **Métriques** | mAP@50 86.2% (`test`) — contre 85.3 % avant P8 |
 
 **À savoir** : le modèle d'origine avait trois classes redondantes du même
 concept (`licence`, `num_plate`, `number_plate`), qui se disputaient les mêmes
 boîtes et diluaient la mAP. Leur fusion en une seule classe explique l'essentiel
-du gain. Le module consommateur (`module_lpr.py`) ne lit pas les identifiants de
-classe : le remplacement lui a été transparent.
+du gain P7. Le module consommateur (`module_lpr.py`) ne lit pas les identifiants
+de classe : le remplacement lui a été transparent.
+
+**P8** : fine-tuning de robustesse aux conditions dégradées (motivé par
+`reports/v3_results/robustesse_conditions_reelles.json`, qui montrait un
+effondrement à 41.8 % de mAP@50 en faible luminosité — le pire cas mesuré,
+aggravé par le flou de mouvement, −75 %). Le gain en conditions normales est
+faible mais positif ; l'apport réel se mesure en conditions dégradées, à
+vérifier par une nouvelle passe de `tests/mesure_robustesse.py`. Ancien poids
+conservé en `license_plate_pre_p8.pt` (hors dépôt, voir `.gitignore`).
 
 ### `surveillance_suite/models/door_classifier.pt` — état de porte
 

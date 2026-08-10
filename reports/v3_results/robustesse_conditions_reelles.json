@@ -24,11 +24,11 @@
     "basse_resolution": 0.3312
   },
   "ppe_best": {
-    "reference": 0.9213,
-    "faible_luminosite": 0.1538,
-    "contre_jour": 0.792,
-    "brouillard_pluie": 0.8471,
-    "flou_mouvement": 0.7264,
-    "basse_resolution": 0.9064
+    "reference": 0.906,
+    "faible_luminosite": 0.8318,
+    "contre_jour": 0.8568,
+    "brouillard_pluie": 0.877,
+    "flou_mouvement": 0.8238,
+    "basse_resolution": 0.8789
   }
 }

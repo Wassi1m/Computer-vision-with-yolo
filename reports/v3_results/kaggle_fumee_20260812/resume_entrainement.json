@@ -1,0 +1,7 @@
+{
+  "poids": "/kaggle/working/sorties/fumee_robuste/weights/best.pt",
+  "taille_octets": 5437125,
+  "epoques": 26,
+  "meilleure_epoque": "24",
+  "meilleur_mAP50": 0.8785
+}

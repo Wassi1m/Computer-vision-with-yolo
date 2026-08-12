@@ -1,0 +1,60 @@
+{
+  "modele": "/tmp/claude-1000/-home-user-Bureau-model-ia-ppe/742dbb11-0d3b-4e87-8362-65e0b472f413/scratchpad/best.pt",
+  "split": "test",
+  "classes_fumee": [
+    1,
+    2
+  ],
+  "seuils": {
+    "0.01": {
+      "detection": 0.9911,
+      "fausse_alarme": 0.0891,
+      "manques": 6
+    },
+    "0.02": {
+      "detection": 0.9732,
+      "fausse_alarme": 0.0769,
+      "manques": 18
+    },
+    "0.03": {
+      "detection": 0.9702,
+      "fausse_alarme": 0.0688,
+      "manques": 20
+    },
+    "0.05": {
+      "detection": 0.9598,
+      "fausse_alarme": 0.0628,
+      "manques": 27
+    },
+    "0.07": {
+      "detection": 0.9449,
+      "fausse_alarme": 0.0547,
+      "manques": 37
+    },
+    "0.10": {
+      "detection": 0.9165,
+      "fausse_alarme": 0.0526,
+      "manques": 56
+    },
+    "0.15": {
+      "detection": 0.8644,
+      "fausse_alarme": 0.0486,
+      "manques": 91
+    },
+    "0.20": {
+      "detection": 0.8063,
+      "fausse_alarme": 0.0324,
+      "manques": 130
+    },
+    "0.30": {
+      "detection": 0.693,
+      "fausse_alarme": 0.0263,
+      "manques": 206
+    },
+    "0.50": {
+      "detection": 0.4367,
+      "fausse_alarme": 0.0263,
+      "manques": 378
+    }
+  }
+}

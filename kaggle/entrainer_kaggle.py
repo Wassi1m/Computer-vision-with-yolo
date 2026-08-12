@@ -117,7 +117,7 @@ def preparer_reprise(dossier_run: Path) -> bool:
 
 def entrainer(epochs: int = 60, imgsz: int = 896, batch: int = 16,
               proportion: float = 0.35, patience: int = 25,
-              workers: int = 2) -> int:
+              workers: int = 2, lr0: float = 0.001) -> int:
     from ultralytics import YOLO
     import torch
 
@@ -172,6 +172,16 @@ def entrainer(epochs: int = 60, imgsz: int = 896, batch: int = 16,
         data=str(data_yaml),
         epochs=epochs, imgsz=imgsz, batch=batch, workers=workers,
         device=0, patience=patience,
+        # Taux d'apprentissage de FINE-TUNING, dix fois plus bas que le defaut
+        # d'Ultralytics (0.01), prevu lui pour un entrainement depuis zero.
+        # Le run du 2026-08-12 a paye cette confusion : parti de fire_smoke.pt,
+        # il a effondre sa fitness de 0.61 (epoque 1) a 0.43 (epoque 4) en
+        # ecrasant les poids acquis, puis a passe 22 epoques a remonter sans
+        # jamais retrouver son point de depart -- 2 h 54 de GPU pour rien, et un
+        # arret par patience declenche precisement parce que l'epoque 1 n'a
+        # jamais ete battue.
+        lr0=lr0,
+
         project=str(sorties), name=NOM_RUN, exist_ok=True, seed=0, plots=True,
         # Augmentation photometrique renforcee, comme sur les runs precedents :
         # c'est `hsv_v` qui porte l'essentiel de l'effet recherche pour la nuit.

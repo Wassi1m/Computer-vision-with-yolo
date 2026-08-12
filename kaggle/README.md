@@ -124,20 +124,40 @@ du 12 août (« Best results observed at epoch 1 » contre « meilleure_epoque :
 Le champ `mAP50_max_toutes_epoques` conserve l'information de la meilleure mAP50
 brute, à titre indicatif.
 
-### Résultat du run du 2026-08-12
+### Résultat du run du 2026-08-12 — candidat ❌ REJETÉ
 
 26 époques en 2 h 54 sur T4, arrêt par `EarlyStopping` (voir l'encadré du §4).
+Mesuré à l'étape 4 ci-dessous, le candidat est **moins bon sur les deux axes à
+la fois** — le cas de rejet le plus net possible :
 
-| Classe | mAP@50 |
+| Seuil 0.10 | Modèle en place | Candidat Kaggle |
+|---|---|---|
+| Détection de scène | **96.7 %** | 91.6 % |
+| Fausse alarme | **2.0 %** | 5.3 % |
+
+L'écart se creuse avec le seuil : −5.1 points de détection à 0.10, −21.5 à 0.50.
+
+**Cause : `lr0` laissé au défaut d'Ultralytics (0.01).** C'est le taux d'un
+entraînement *depuis zéro*, dix fois trop élevé pour un fine-tuning. La courbe
+de `results.csv` le montre sans ambiguïté :
+
+| Époque | fitness (`0.1×mAP50 + 0.9×mAP50-95`) |
 |---|---|
-| `fire` | 0.965 |
-| `smoke` | 0.836 |
-| `smoke_distant` | 0.747 |
+| 1 | **0.6105** ← jamais dépassée |
+| 4 | 0.4316 ← les poids acquis sont écrasés |
+| 26 | 0.6081 ← tout juste revenu au point de départ |
 
-Ces chiffres ne sont **pas** comparables à ceux du registre (mesurés sur
-`fire_smoke_enriched`, 2 classes) : jeu différent, taxonomie différente. Seule
-l'étape 4 ci-dessous tranche. L'intérêt réel du candidat se joue sur
-`smoke_distant`, une classe que le modèle en place ne connaît pas du tout.
+Le modèle a détruit ce qu'il savait, puis a passé 22 époques à le réapprendre
+sans y parvenir. `best.pt` est donc le modèle de l'époque 1 : `fire_smoke.pt`
+déjà entamé, avec une tête réinitialisée pour trois classes. Et l'arrêt par
+patience s'explique de lui-même — aucune époque n'a battu la première.
+
+`entrainer_kaggle.py` fixe désormais `lr0=0.001` par défaut. **La courbe montait
+encore à l'arrêt** (0.5880 → 0.6081 sur les cinq dernières époques) : un
+nouveau run avec le bon taux d'apprentissage a de réelles chances d'aboutir.
+Les chiffres de mAP par classe du run rejeté (`fire` 0.965, `smoke` 0.836,
+`smoke_distant` 0.747) ne doivent **pas** être comparés à ceux du registre :
+jeu et taxonomie différents, voir l'encadré de l'étape 3.
 
 ---
 

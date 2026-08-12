@@ -1,0 +1,7 @@
+path: /kaggle/working/donnees/fire_smoke_v9_robuste
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 3
+names: ['fire', 'smoke', 'smoke_distant']

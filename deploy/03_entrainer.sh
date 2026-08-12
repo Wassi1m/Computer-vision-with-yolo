@@ -16,16 +16,22 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 arreter_en_sortant
 
 CIBLE_JEU="${1:-}"
-[[ -n "$CIBLE_JEU" ]] || echec "usage : $0 <epi|chute|feu|plaque> [options]"
+[[ -n "$CIBLE_JEU" ]] || echec "usage : $0 <epi|chute|feu|fumee|plaque> [options]"
 shift
 
 EPOCHS=60
 PROPORTION=0.6
+# 640 par defaut, comme les modeles deja en place. A augmenter pour les objets
+# petits : la fumee lointaine mesure 19x16 px a 640, contre 27x22 px a 896 --
+# c'est la difference entre un objet a la limite du detectable et un objet
+# confortablement couvert par la tete P3.
+IMGSZ=640
 REPRENDRE=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --epochs)     EPOCHS="$2"; shift 2 ;;
         --proportion) PROPORTION="$2"; shift 2 ;;
+        --imgsz)      IMGSZ="$2"; shift 2 ;;
         --reprendre)  REPRENDRE="--reprendre"; shift ;;
         *) echec "option inconnue : $1" ;;
     esac
@@ -35,6 +41,7 @@ case "$CIBLE_JEU" in
     epi)    JEU=ppe_vest_clean_14c;      POIDS=best.pt ;;
     chute)  JEU=fall_detection_enriched; POIDS=fall_detector.pt ;;
     feu)    JEU=fire_smoke_enriched;     POIDS=fire_smoke.pt ;;
+    fumee)  JEU=fire_smoke_v9;           POIDS=fire_smoke.pt ;;
     plaque) JEU=license_plate_unified;   POIDS=license_plate.pt ;;
     *) echec "jeu inconnu : $CIBLE_JEU" ;;
 esac
@@ -75,6 +82,7 @@ vm "cd '$GCP_WORKDIR' && tmux new-session -d -s '$SESSION' \
         --poids 'modeles/$POIDS' \
         --nom '$NOM_RUN' \
         --epochs $EPOCHS \
+        --imgsz $IMGSZ \
         --batch ${GCP_BATCH:-32} \
         --workers ${GCP_WORKERS:-4} \
         --reference '$GCP_WORKDIR/donnees/$JEU/data.yaml' \

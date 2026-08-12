@@ -1,0 +1,50 @@
+{
+  "modele": "surveillance_suite/models/fire_smoke.pt",
+  "split": "test",
+  "classes_fumee": [
+    1,
+    2
+  ],
+  "seuils": {
+    "0.10": {
+      "detection": 0.9672,
+      "fausse_alarme": 0.0202,
+      "manques": 22
+    },
+    "0.15": {
+      "detection": 0.9508,
+      "fausse_alarme": 0.0162,
+      "manques": 33
+    },
+    "0.20": {
+      "detection": 0.9255,
+      "fausse_alarme": 0.0162,
+      "manques": 50
+    },
+    "0.25": {
+      "detection": 0.8987,
+      "fausse_alarme": 0.0162,
+      "manques": 68
+    },
+    "0.30": {
+      "detection": 0.8525,
+      "fausse_alarme": 0.0162,
+      "manques": 99
+    },
+    "0.40": {
+      "detection": 0.7422,
+      "fausse_alarme": 0.0162,
+      "manques": 173
+    },
+    "0.50": {
+      "detection": 0.6513,
+      "fausse_alarme": 0.0142,
+      "manques": 234
+    },
+    "0.60": {
+      "detection": 0.5007,
+      "fausse_alarme": 0.0121,
+      "manques": 335
+    }
+  }
+}

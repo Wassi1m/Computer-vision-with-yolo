@@ -67,6 +67,10 @@ fi
 info "Environnement Python"
 vm "
     set -e
+    # Necessaire sur une VM neuve : le cache apt est vide au premier demarrage,
+    # 'install' echoue sans candidat trouve (ex : libgl1) tant qu'il n'a pas
+    # ete rafraichi une fois.
+    sudo apt-get update -qq >/dev/null 2>&1
     sudo apt-get install -y -qq python3-venv python3-pip libgl1 libglib2.0-0 ffmpeg tmux >/dev/null 2>&1
     mkdir -p '$GCP_WORKDIR'
     if [[ ! -d '$GCP_WORKDIR/.venv' ]]; then

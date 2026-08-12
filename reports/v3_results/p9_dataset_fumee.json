@@ -1,0 +1,50 @@
+{
+  "seuil_distant": 0.02,
+  "classes": [
+    "fire",
+    "smoke",
+    "smoke_distant"
+  ],
+  "images_sources": 9702,
+  "splits": {
+    "train": {
+      "fichiers": 13244,
+      "instances": {
+        "fire": 8918,
+        "smoke": 1836,
+        "smoke_distant": 4198
+      },
+      "images_par_classe": {
+        "fire": 8461,
+        "smoke": 1748,
+        "smoke_distant": 3648
+      }
+    },
+    "valid": {
+      "fichiers": 969,
+      "instances": {
+        "fire": 478,
+        "smoke": 96,
+        "smoke_distant": 526
+      },
+      "images_par_classe": {
+        "fire": 438,
+        "smoke": 95,
+        "smoke_distant": 467
+      }
+    },
+    "test": {
+      "fichiers": 1165,
+      "instances": {
+        "fire": 552,
+        "smoke": 119,
+        "smoke_distant": 626
+      },
+      "images_par_classe": {
+        "fire": 527,
+        "smoke": 115,
+        "smoke_distant": 561
+      }
+    }
+  }
+}

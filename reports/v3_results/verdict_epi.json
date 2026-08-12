@@ -1,0 +1,35 @@
+{
+  "images": 272,
+  "conf": 0.25,
+  "conf_personne": 0.4,
+  "seuil_confinement": 0.5,
+  "logiques": {
+    "ancien": {
+      "detection": 0.9747,
+      "fausse_alarme": 0.3472,
+      "exactitude": 0.7463,
+      "vp": 77,
+      "fp": 67,
+      "fn": 2,
+      "vn": 126
+    },
+    "confinement": {
+      "detection": 0.9747,
+      "fausse_alarme": 0.3782,
+      "exactitude": 0.7243,
+      "vp": 77,
+      "fp": 73,
+      "fn": 2,
+      "vn": 120
+    },
+    "mixte": {
+      "detection": 0.9747,
+      "fausse_alarme": 0.3679,
+      "exactitude": 0.7316,
+      "vp": 77,
+      "fp": 71,
+      "fn": 2,
+      "vn": 122
+    }
+  }
+}

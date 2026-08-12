@@ -234,5 +234,94 @@ def test_flux_sain_ne_produit_aucun_evenement_technique():
     assert s.recus == []
 
 
+# ── Couche de qualification (plan v5) ────────────────────────────────────────
+
+import qualification as q  # noqa: E402
+
+PERSONNE = (100, 0, 200, 300)   # x1, y1, x2, y2 -- hauteur 300
+
+
+def test_confinement_distingue_porte_de_flottant():
+    """L'IoU ne sait pas juger un rapport « partie de » : un casque occupe ~3 %
+    d'une personne, son IoU vaut donc ~0.03 qu'il soit porté ou non."""
+    assert q.confinement((130, 10, 170, 40), PERSONNE) == pytest.approx(1.0)
+    assert q.confinement((500, 500, 540, 530), PERSONNE) == 0.0
+
+
+def test_epi_flottant_n_est_attribue_a_personne():
+    """Le cas qui motive tout le module : sans rejet, un faux casque détecté
+    n'importe où est attribué à la personne la moins éloignée et compte comme
+    équipement porté — masquant une vraie infraction."""
+    assert q.associer_a_personne((500, 500, 540, 530), [PERSONNE], epi="casque") is None
+
+
+def test_casque_au_niveau_des_pieds_est_rejete():
+    """Confinement parfait mais position aberrante : la géométrie seule ne suffit pas."""
+    aux_pieds = (130, 260, 170, 290)
+    assert q.confinement(aux_pieds, PERSONNE) == pytest.approx(1.0)
+    assert q.associer_a_personne(aux_pieds, [PERSONNE], epi="casque") is None
+    # le meme emplacement convient a des chaussures
+    assert q.associer_a_personne(aux_pieds, [PERSONNE], epi="chaussures") == 0
+
+
+def test_casque_sur_la_tete_est_accepte():
+    assert q.associer_a_personne((130, 10, 170, 40), [PERSONNE], epi="casque") == 0
+
+
+def test_epi_inconnu_n_est_jamais_rejete_par_l_anatomie():
+    """Une règle ne doit pas rejeter ce qu'elle ne sait pas juger."""
+    assert q.plausible_anatomiquement("brassard", (130, 260, 170, 290), PERSONNE)
+
+
+def test_profil_ne_bascule_pas_sur_une_image_isolee():
+    """Sans hystérésis, un phare ou un nuage reconfigurerait les seuils du moteur
+    à chaque image, faisant apparaître et disparaître des évènements."""
+    d = q.DetecteurProfil(stabilite=5)
+    nuit = np.full((8, 8, 3), 30, dtype=np.uint8)
+    for _ in range(4):
+        assert d.mettre_a_jour(nuit).nom == "jour"
+    assert d.mettre_a_jour(nuit).nom == "nuit"
+
+
+def test_seuil_nocturne_est_plus_bas_et_confirmation_plus_stricte():
+    """Le couple est indissociable : baisser le seuil sans durcir la
+    confirmation noierait l'aval sous les fausses alertes."""
+    jour, nuit = q.PROFILS["jour"], q.PROFILS["nuit"]
+    assert nuit.seuil_detection < jour.seuil_detection
+    assert nuit.minimum_confirmation > jour.minimum_confirmation
+
+
+# ── Repli des labels feu/fumée ───────────────────────────────────────────────
+
+def test_smoke_distant_est_replie_sur_l_evenement_smoke():
+    """Un modèle à 3 classes émet `smoke_distant` ; sans ce repli, la fumée
+    lointaine — celle qui permet la détection la plus précoce — ne déclencherait
+    rien en aval. Le label d'origine reste exposé pour la couche v5."""
+    import torch
+    from module_fire_smoke import FireSmokeDetector
+
+    class FauxBoites:
+        cls = torch.tensor([0, 1, 2])
+        xyxy = torch.tensor([[1, 2, 3, 4]] * 3)
+        conf = torch.tensor([0.9, 0.9, 0.9])
+
+        def __len__(self):
+            return 3
+
+    class FauxResultat:
+        boxes = FauxBoites()
+
+    detecteur = FireSmokeDetector.__new__(FireSmokeDetector)
+    detecteur.conf = 0.4
+    detecteur.model = type("M", (), {
+        "names": {0: "fire", 1: "smoke", 2: "smoke_distant"},
+        "predict": lambda self, *a, **k: [FauxResultat()],
+    })()
+
+    dets = detecteur.detect(None)
+    assert [d["label"] for d in dets] == ["fire", "smoke", "smoke"]
+    assert dets[2]["label_modele"] == "smoke_distant"
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

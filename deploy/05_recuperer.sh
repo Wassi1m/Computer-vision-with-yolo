@@ -15,12 +15,13 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 arreter_en_sortant
 
 CIBLE_JEU="${1:-}"
-[[ -n "$CIBLE_JEU" ]] || echec "usage : $0 <epi|chute|feu|plaque>"
+[[ -n "$CIBLE_JEU" ]] || echec "usage : $0 <epi|chute|feu|fumee|plaque>"
 
 case "$CIBLE_JEU" in
     epi)    DESTINATION="ppe_detection/models/best.pt";                 REF_MODELE=ppe_best ;;
     chute)  DESTINATION="surveillance_suite/models/fall_detector.pt";   REF_MODELE=fall_detector ;;
     feu)    DESTINATION="surveillance_suite/models/fire_smoke.pt";      REF_MODELE=fire_smoke ;;
+    fumee)  DESTINATION="surveillance_suite/models/fire_smoke.pt";      REF_MODELE=fire_smoke ;;
     plaque) DESTINATION="surveillance_suite/models/license_plate.pt";   REF_MODELE=license_plate ;;
     *) echec "jeu inconnu : $CIBLE_JEU" ;;
 esac

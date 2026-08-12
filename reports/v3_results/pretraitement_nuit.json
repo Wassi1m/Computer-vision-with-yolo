@@ -1,0 +1,32 @@
+{
+  "modele": "surveillance_suite/models/fire_smoke.pt",
+  "seuil": 0.15,
+  "images": 400,
+  "positifs": 230,
+  "traitements": {
+    "aucun (nuit brute)": {
+      "detection": 0.3609,
+      "fausse_alarme": 0.0118,
+      "manques": 147,
+      "cout_pretraitement_ms": 0.0
+    },
+    "gamma 0.45": {
+      "detection": 0.2826,
+      "fausse_alarme": 0.0118,
+      "manques": 165,
+      "cout_pretraitement_ms": 0.53
+    },
+    "CLAHE": {
+      "detection": 0.2522,
+      "fausse_alarme": 0.0059,
+      "manques": 172,
+      "cout_pretraitement_ms": 8.76
+    },
+    "CLAHE + debruitage": {
+      "detection": 0.2174,
+      "fausse_alarme": 0.0176,
+      "manques": 180,
+      "cout_pretraitement_ms": 801.77
+    }
+  }
+}

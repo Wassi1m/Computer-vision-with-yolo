@@ -18,11 +18,13 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 EPOCHS=60
 PROPORTION=0.6
+IMGSZ=640
 JEUX=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --epochs)     EPOCHS="$2"; shift 2 ;;
         --proportion) PROPORTION="$2"; shift 2 ;;
+        --imgsz)      IMGSZ="$2"; shift 2 ;;
         --garder-vm)  export GARDER_VM=1; shift ;;
         -*) echec "option inconnue : $1" ;;
         *)  JEUX+=("$1"); shift ;;
@@ -33,7 +35,38 @@ done
 DEBUT=$(date +%s)
 arreter_en_sortant          # garantit l'arret de la VM en sortie
 
-info "Modeles a entrainer : ${JEUX[*]}  ($EPOCHS epoques, proportion $PROPORTION)"
+info "Modeles a entrainer : ${JEUX[*]}  ($EPOCHS epoques, proportion $PROPORTION, imgsz $IMGSZ)"
+
+# ── Phase 0 : deposer les jeux dans le bucket, VM ETEINTE ────────────────────
+#
+# L'envoi depuis une liaison domestique est long (des dizaines de minutes par
+# jeu). Le faire pendant que le GPU tourne revient a payer une L4 a ne rien
+# faire : c'est exactement ce qui a coute 98 min de facturation pour un
+# transfert qui a fini par casser. On depose donc tout avant d'allumer quoi que
+# ce soit -- et comme `televerser_bucket` ignore ce qui est deja en place, cette
+# phase est quasi instantanee dans les runs suivants.
+if bucket_actif; then
+    info "=== Depot des jeux dans le bucket (VM eteinte, aucune facturation) ==="
+    for jeu in "${JEUX[@]}"; do
+        case "$jeu" in
+            epi)    CHEMIN="$RACINE/ppe_detection/data/extracted/ppe_vest_clean_14c" ;;
+            chute)  CHEMIN="$RACINE/ppe_detection/data/extracted/fall_detection_enriched" ;;
+            feu)    CHEMIN="$RACINE/surveillance_suite/data/dataset/fire_smoke_enriched" ;;
+            fumee)  CHEMIN="$RACINE/surveillance_suite/data/dataset/fire_smoke_v9" ;;
+            plaque) CHEMIN="$RACINE/surveillance_suite/data/dataset/license_plate_unified" ;;
+            *) alerte "jeu inconnu : $jeu"; continue ;;
+        esac
+        [[ -d "$CHEMIN" ]] || { alerte "$jeu : jeu absent ($CHEMIN)"; continue; }
+        NOM="$(basename "$CHEMIN")"
+        ARCHIVE="/tmp/${NOM}.tar.gz"
+        [[ -f "$ARCHIVE" ]] || { info "Archivage de $NOM"; tar -czhf "$ARCHIVE" -C "$(dirname "$CHEMIN")" "$NOM"; }
+        televerser_bucket "$ARCHIVE" "${NOM}.tar.gz"
+    done
+else
+    alerte "GCP_BUCKET non defini dans .env.gcp : les jeux partiront en scp,"
+    alerte "sans reprise sur coupure et avec la VM allumee (donc facturee)."
+fi
+
 demarrer_vm
 
 info "=== Preparation de la VM ==="
@@ -54,7 +87,7 @@ for jeu in "${JEUX[@]}"; do
     fi
 
     if ! GARDER_VM=1 "$RACINE/deploy/03_entrainer.sh" "$jeu" \
-            --epochs "$EPOCHS" --proportion "$PROPORTION"; then
+            --epochs "$EPOCHS" --proportion "$PROPORTION" --imgsz "$IMGSZ"; then
         alerte "$jeu : lancement echoue, modele ignore"
         ECHOUES+=("$jeu (lancement)")
         continue

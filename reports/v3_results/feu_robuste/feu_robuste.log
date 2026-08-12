@@ -1,0 +1,221 @@
+WARNING ⚠️ user config directory '/home/karimmay078/.config/Ultralytics' is not writable, using '/tmp/Ultralytics'. Set YOLO_CONFIG_DIR to override.
+Creating new Ultralytics Settings v0.0.7 file ✅ 
+View Ultralytics Settings with 'yolo settings' or at '/tmp/Ultralytics/settings.json'
+Update Settings with 'yolo settings key=value', i.e. 'yolo settings runs_dir=path/to/dir'. For help see https://docs.ultralytics.com/quickstart/#ultralytics-settings.
+GPU : NVIDIA L4 (23.7 Go)
+
+== Avant fine-tuning ==
+Ultralytics 8.4.117 🚀 Python-3.10.12 torch-2.6.0+cu124 CUDA:0 (NVIDIA L4, 22563MiB)
+YOLO26n summary (fused): 122 layers, 2,375,226 parameters, 0 gradients, 5.3 GFLOPs
+[KDownloading https://ultralytics.com/assets/Arial.ttf to '/tmp/Ultralytics/Arial.ttf': 100% ━━━━━━━━━━━━ 755.1KB 6.7MB/s 0.1s
+[34m[1mval: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 1500.6±832.9 MB/s, size: 57.8 KB)
+[K[34m[1mval: [0mScanning /home/karimmay078/ppe/donnees/fire_smoke_enriched/valid/labels... 1817 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 1817/1817 1.5Kit/s 1.2s
+[34m[1mval: [0mNew cache created: /home/karimmay078/ppe/donnees/fire_smoke_enriched/valid/labels.cache
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 114/114 13.6it/s 8.4s
+                   all       1817       2063      0.784      0.751      0.759      0.402
+Speed: 0.6ms preprocess, 1.6ms inference, 0.0ms loss, 0.2ms postprocess per image
+  [normales] mAP@50 = 0.7586  {'fire': 0.8802, 'smoke': 0.6369}
+Ultralytics 8.4.117 🚀 Python-3.10.12 torch-2.6.0+cu124 CUDA:0 (NVIDIA L4, 22563MiB)
+[34m[1mval: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 1986.5±620.7 MB/s, size: 68.3 KB)
+[K[34m[1mval: [0mScanning /home/karimmay078/ppe/donnees/fire_smoke_enriched_robuste/valid/labels... 1817 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 1817/1817 1.5Kit/s 1.2s
+[34m[1mval: [0mNew cache created: /home/karimmay078/ppe/donnees/fire_smoke_enriched_robuste/valid/labels.cache
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 114/114 15.6it/s 7.3s
+                   all       1817       2063      0.784      0.751      0.759      0.402
+Speed: 0.7ms preprocess, 1.4ms inference, 0.0ms loss, 0.1ms postprocess per image
+  [enrichi] mAP@50 = 0.7586  {'fire': 0.8802, 'smoke': 0.6369}
+
+== Fine-tuning ==
+Ultralytics 8.4.117 🚀 Python-3.10.12 torch-2.6.0+cu124 CUDA:0 (NVIDIA L4, 22563MiB)
+[34m[1mengine/trainer: [0magnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=32, bgr=0.0, box=7.5, cache=False, cfg=None, channels_last=False, classes=None, close_mosaic=10, cls=0.5, cls_pw=0.0, cls_remap=True, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=False, cutmix=0.0, data=/home/karimmay078/ppe/donnees/fire_smoke_enriched_robuste/data.yaml, degrees=0.0, deterministic=True, device=0, dfl=1.5, dgrad=0.5, dis=6.0, distill_model=None, dlam=1.0, dlog=1.0, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=60, erasing=0.4, exist_ok=True, fliplr=0.5, flipud=0.0, format=torchscript, fraction=1.0, freeze=None, hsv_h=0.015, hsv_s=0.8, hsv_v=0.9, imgsz=640, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.001, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=modeles/fire_smoke.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=feu_robuste, nbs=64, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=20, perspective=0.0, plots=True, pose=12.0, pretrained=True, profile=False, project=/home/karimmay078/ppe/sorties, quantize=None, rect=False, resume=False, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=/home/karimmay078/ppe/sorties/feu_robuste, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=0, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=tracktrack.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.1, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.0005, workers=4, workspace=None
+
+                   from  n    params  module                                       arguments                     
+  0                  -1  1       464  ultralytics.nn.modules.conv.Conv             [3, 16, 3, 2]                 
+  1                  -1  1      4672  ultralytics.nn.modules.conv.Conv             [16, 32, 3, 2]                
+  2                  -1  1      6640  ultralytics.nn.modules.block.C3k2            [32, 64, 1, False, 0.25]      
+  3                  -1  1     36992  ultralytics.nn.modules.conv.Conv             [64, 64, 3, 2]                
+  4                  -1  1     26080  ultralytics.nn.modules.block.C3k2            [64, 128, 1, False, 0.25]     
+  5                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]              
+  6                  -1  1     87040  ultralytics.nn.modules.block.C3k2            [128, 128, 1, True]           
+  7                  -1  1    295424  ultralytics.nn.modules.conv.Conv             [128, 256, 3, 2]              
+  8                  -1  1    346112  ultralytics.nn.modules.block.C3k2            [256, 256, 1, True]           
+  9                  -1  1    164608  ultralytics.nn.modules.block.SPPF            [256, 256, 5, 3, True]        
+ 10                  -1  1    249728  ultralytics.nn.modules.block.C2PSA           [256, 256, 1]                 
+ 11                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']          
+ 12             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 13                  -1  1    119808  ultralytics.nn.modules.block.C3k2            [384, 128, 1, True]           
+ 14                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']          
+ 15             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 16                  -1  1     34304  ultralytics.nn.modules.block.C3k2            [256, 64, 1, True]            
+ 17                  -1  1     36992  ultralytics.nn.modules.conv.Conv             [64, 64, 3, 2]                
+ 18            [-1, 13]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 19                  -1  1     95232  ultralytics.nn.modules.block.C3k2            [192, 128, 1, True]           
+ 20                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]              
+ 21            [-1, 10]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 22                  -1  1    463104  ultralytics.nn.modules.block.C3k2            [384, 256, 1, True, 0.5, True]
+ 23        [16, 19, 22]  1    241956  ultralytics.nn.modules.head.Detect           [2, 1, True, [64, 128, 256]]  
+YOLO26n summary: 260 layers, 2,504,580 parameters, 2,504,580 gradients, 5.9 GFLOPs
+
+Transferred 708/708 items from pretrained weights
+[34m[1mAMP: [0mrunning Automatic Mixed Precision (AMP) checks...
+[KDownloading https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n.pt to 'yolo26n.pt': 100% ━━━━━━━━━━━━ 5.3MB 13.7MB/s 0.4s
+[34m[1mAMP: [0mchecks passed ✅
+[34m[1mtrain: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 1643.8±863.8 MB/s, size: 59.6 KB)
+[K[34m[1mtrain: [0mScanning /home/karimmay078/ppe/donnees/fire_smoke_enriched_robuste/train/labels... 23342 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 23342/23342 1.5Kit/s 15.3s
+[34m[1mtrain: [0mNew cache created: /home/karimmay078/ppe/donnees/fire_smoke_enriched_robuste/train/labels.cache
+[34m[1mval: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 1173.1±769.4 MB/s, size: 78.6 KB)
+[K[34m[1mval: [0mScanning /home/karimmay078/ppe/donnees/fire_smoke_enriched_robuste/valid/labels.cache... 1817 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 1817/1817 61.5Mit/s 0.0s
+[34m[1moptimizer:[0m 'optimizer=auto' found, ignoring 'lr0=0.001' and 'momentum=0.937' and determining best 'optimizer', 'lr0' and 'momentum' automatically... 
+[34m[1moptimizer:[0m MuSGD(lr=0.01, momentum=0.9) with parameter groups 114 weight(decay=0.0), 126 weight(decay=0.0005), 126 bias(decay=0.0)
+Plotting labels to /home/karimmay078/ppe/sorties/feu_robuste/labels.jpg... 
+Image sizes 640 train, 640 val
+Using 4 dataloader workers
+Logging results to [1m/home/karimmay078/ppe/sorties/feu_robuste[0m
+Starting training for 60 epochs...
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       1/60      4.94G      1.243     0.9389    0.01362         39        640: 100% ━━━━━━━━━━━━ 730/730 3.2it/s 3:45
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 3.8it/s 7.6s
+                   all       1817       2063      0.767      0.736      0.749      0.383
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       2/60      5.84G      1.259     0.8844    0.01385         24        640: 100% ━━━━━━━━━━━━ 730/730 3.4it/s 3:32
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.7s
+                   all       1817       2063      0.766      0.719      0.754      0.388
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       3/60      5.84G       1.37      1.002    0.01564         35        640: 100% ━━━━━━━━━━━━ 730/730 3.6it/s 3:21
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.7s
+                   all       1817       2063      0.704      0.657      0.669       0.31
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       4/60      5.84G      1.517       1.18    0.01808         31        640: 100% ━━━━━━━━━━━━ 730/730 3.6it/s 3:21
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.4it/s 6.6s
+                   all       1817       2063      0.693      0.652      0.655      0.315
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       5/60      5.84G      1.514      1.166    0.01802         38        640: 100% ━━━━━━━━━━━━ 730/730 3.6it/s 3:21
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.8s
+                   all       1817       2063      0.701      0.672      0.684      0.328
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       6/60      5.84G        1.5      1.159    0.01768         29        640: 100% ━━━━━━━━━━━━ 730/730 3.6it/s 3:20
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.7s
+                   all       1817       2063      0.697      0.688      0.682      0.342
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       7/60      5.84G      1.488      1.134    0.01746         27        640: 100% ━━━━━━━━━━━━ 730/730 3.6it/s 3:21
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.8s
+                   all       1817       2063      0.723      0.716      0.713      0.358
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       8/60      5.84G      1.477      1.117    0.01739         28        640: 100% ━━━━━━━━━━━━ 730/730 3.6it/s 3:25
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.1it/s 7.0s
+                   all       1817       2063      0.715      0.721      0.715      0.361
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K       9/60      5.84G      1.473       1.09      0.017         28        640: 100% ━━━━━━━━━━━━ 730/730 3.5it/s 3:27
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.2it/s 6.9s
+                   all       1817       2063      0.745      0.707      0.718      0.367
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      10/60      5.84G      1.452      1.078    0.01677         28        640: 100% ━━━━━━━━━━━━ 730/730 3.5it/s 3:28
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.2it/s 6.8s
+                   all       1817       2063      0.731      0.692      0.705      0.353
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      11/60      5.84G      1.451      1.039    0.01676         32        640: 100% ━━━━━━━━━━━━ 730/730 3.6it/s 3:25
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.2it/s 6.9s
+                   all       1817       2063       0.73      0.703      0.702      0.352
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      12/60      5.84G      1.433      1.033    0.01639         34        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:19
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.4it/s 6.6s
+                   all       1817       2063      0.738      0.702      0.714      0.358
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      13/60      5.84G      1.427      1.021    0.01618         32        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:20
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.7s
+                   all       1817       2063      0.726      0.729      0.723      0.368
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      14/60      5.84G      1.411     0.9966    0.01606         23        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:19
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.7s
+                   all       1817       2063      0.742      0.719      0.723      0.362
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      15/60      5.84G      1.401      1.002    0.01586         33        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:19
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.4it/s 6.6s
+                   all       1817       2063      0.734      0.715      0.711      0.365
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      16/60      5.84G      1.392     0.9842    0.01565         31        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:20
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.7s
+                   all       1817       2063      0.748      0.725      0.719      0.371
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      17/60      5.84G      1.378     0.9493    0.01547         29        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:19
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.4it/s 6.6s
+                   all       1817       2063      0.741      0.743      0.736      0.381
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      18/60      5.84G      1.377     0.9399    0.01535         20        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:20
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.7s
+                   all       1817       2063      0.738      0.715      0.711      0.375
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      19/60      5.84G      1.373     0.9322    0.01525         37        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:20
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.4it/s 6.6s
+                   all       1817       2063      0.743      0.725      0.726      0.376
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      20/60      5.84G      1.345     0.9275    0.01503         28        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:19
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.2it/s 6.8s
+                   all       1817       2063      0.767      0.736      0.742      0.384
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      21/60      5.84G      1.345     0.9242     0.0151         30        640: 100% ━━━━━━━━━━━━ 730/730 3.6it/s 3:20
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.4it/s 6.6s
+                   all       1817       2063      0.753      0.717      0.724      0.381
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+[K      22/60      5.84G      1.337      0.911    0.01471         30        640: 100% ━━━━━━━━━━━━ 730/730 3.7it/s 3:20
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 4.3it/s 6.8s
+                   all       1817       2063      0.753       0.73      0.729      0.382
+[34m[1mEarlyStopping: [0mTraining stopped early as no improvement observed in last 20 epochs. Best results observed at epoch 2, best model saved as best.pt.
+To update EarlyStopping(patience=20) pass a new patience value, i.e. `patience=300` or use `patience=0` to disable EarlyStopping.
+
+22 epochs completed in 1.284 hours.
+Optimizer stripped from /home/karimmay078/ppe/sorties/feu_robuste/weights/last.pt, 5.4MB
+Optimizer stripped from /home/karimmay078/ppe/sorties/feu_robuste/weights/best.pt, 5.4MB
+
+Validating /home/karimmay078/ppe/sorties/feu_robuste/weights/best.pt...
+Ultralytics 8.4.117 🚀 Python-3.10.12 torch-2.6.0+cu124 CUDA:0 (NVIDIA L4, 22563MiB)
+YOLO26n summary (fused): 122 layers, 2,375,226 parameters, 0 gradients, 5.3 GFLOPs
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 29/29 3.5it/s 8.2s
+                   all       1817       2063      0.769      0.721      0.754      0.388
+                  fire        943       1021      0.882      0.871      0.892      0.458
+                 smoke        894       1042      0.656      0.572      0.617      0.319
+Speed: 0.1ms preprocess, 0.9ms inference, 0.0ms loss, 0.3ms postprocess per image
+Results saved to [1m/home/karimmay078/ppe/sorties/feu_robuste[0m
+
+== Apres fine-tuning ==
+Ultralytics 8.4.117 🚀 Python-3.10.12 torch-2.6.0+cu124 CUDA:0 (NVIDIA L4, 22563MiB)
+YOLO26n summary (fused): 122 layers, 2,375,226 parameters, 0 gradients, 5.3 GFLOPs
+[34m[1mval: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 1995.9±965.3 MB/s, size: 62.7 KB)
+[K[34m[1mval: [0mScanning /home/karimmay078/ppe/donnees/fire_smoke_enriched_robuste/valid/labels.cache... 1817 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 1817/1817 293.1Mit/s 0.0s
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 114/114 15.6it/s 7.3s
+                   all       1817       2063      0.767       0.72      0.754      0.388
+Speed: 0.7ms preprocess, 1.5ms inference, 0.0ms loss, 0.1ms postprocess per image
+  [enrichi] mAP@50 = 0.7537  {'fire': 0.8917, 'smoke': 0.6157}
+Ultralytics 8.4.117 🚀 Python-3.10.12 torch-2.6.0+cu124 CUDA:0 (NVIDIA L4, 22563MiB)
+[34m[1mval: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 1367.1±627.4 MB/s, size: 53.2 KB)
+[K[34m[1mval: [0mScanning /home/karimmay078/ppe/donnees/fire_smoke_enriched/valid/labels.cache... 1817 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 1817/1817 317.5Mit/s 0.0s
+[K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 114/114 15.5it/s 7.4s
+                   all       1817       2063      0.767       0.72      0.754      0.388
+Speed: 0.7ms preprocess, 1.5ms inference, 0.0ms loss, 0.2ms postprocess per image
+  [normales] mAP@50 = 0.7537  {'fire': 0.8917, 'smoke': 0.6157}
+
+Conditions normales : 0.7586 -> 0.7537 (-0.0049)
+
+Poids  : /home/karimmay078/ppe/sorties/feu_robuste/weights/best.pt
+Mesures: /home/karimmay078/ppe/sorties/feu_robuste/resultats_p8.json

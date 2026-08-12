@@ -97,11 +97,21 @@ def main() -> int:
         # corrigeant le cas degrade.
         if args.reference:
             print("\n== Avant fine-tuning ==", flush=True)
-            modele = YOLO(args.poids)
-            resultats["avant"] = {
-                "conditions_normales": evaluer(modele, args.reference, "val", "normales", args.device),
-                "jeu_enrichi": evaluer(modele, data_yaml, "val", "enrichi", args.device),
-            }
+            # Cette mesure est informative : elle sert a comparer apres coup.
+            # Elle ne doit en aucun cas interrompre un entrainement de plusieurs
+            # heures -- ce qui arriverait par exemple si les poids de depart et
+            # le jeu n'ont pas le meme nombre de classes, cas normal quand on
+            # scinde une classe (P9 : `smoke` -> `smoke` + `smoke_distant`).
+            try:
+                modele = YOLO(args.poids)
+                resultats["avant"] = {
+                    "conditions_normales": evaluer(modele, args.reference, "val", "normales", args.device),
+                    "jeu_enrichi": evaluer(modele, data_yaml, "val", "enrichi", args.device),
+                }
+            except Exception as e:
+                print(f"  mesure 'avant' impossible ({type(e).__name__}: {e}) -- "
+                      f"on poursuit l'entrainement", file=sys.stderr, flush=True)
+                resultats["avant"] = {"erreur": f"{type(e).__name__}: {e}"}
 
         print("\n== Fine-tuning ==", flush=True)
         modele = YOLO(args.poids)

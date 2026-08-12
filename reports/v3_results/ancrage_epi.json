@@ -1,0 +1,14 @@
+{
+  "modele": "ppe_detection/models/best.pt",
+  "images": 200,
+  "conf": 0.25,
+  "seuil_confinement": 0.5,
+  "stats": {
+    "epi_detectes": 496,
+    "rejetes_par_confinement": 122,
+    "attribues_a_tort": 122,
+    "attribues_a_la_mauvaise_personne": 4
+  },
+  "iou_median": 0.2982,
+  "confinement_median": 1.0
+}

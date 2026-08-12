@@ -17,7 +17,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 arreter_en_sortant
 
 CIBLE_JEU="${1:-}"
-[[ -n "$CIBLE_JEU" ]] || echec "usage : $0 <epi|chute|feu|plaque>"
+[[ -n "$CIBLE_JEU" ]] || echec "usage : $0 <epi|chute|feu|fumee|plaque>"
 
 case "$CIBLE_JEU" in
     epi)
@@ -29,10 +29,16 @@ case "$CIBLE_JEU" in
     feu)
         DATASET="$RACINE/surveillance_suite/data/dataset/fire_smoke_enriched"
         POIDS="$RACINE/surveillance_suite/models/fire_smoke.pt" ;;
+    fumee)
+        # P9 : meme domaine que `feu`, mais sur le jeu reconstruit a 3 classes
+        # (fire / smoke / smoke_distant). Voir improvements/p9_dataset_fumee.py
+        # pour la raison de la separation.
+        DATASET="$RACINE/surveillance_suite/data/dataset/fire_smoke_v9"
+        POIDS="$RACINE/surveillance_suite/models/fire_smoke.pt" ;;
     plaque)
         DATASET="$RACINE/surveillance_suite/data/dataset/license_plate_unified"
         POIDS="$RACINE/surveillance_suite/models/license_plate.pt" ;;
-    *)  echec "jeu inconnu : $CIBLE_JEU (attendus : epi, chute, feu, plaque)" ;;
+    *)  echec "jeu inconnu : $CIBLE_JEU (attendus : epi, chute, feu, fumee, plaque)" ;;
 esac
 
 [[ -d "$DATASET" ]] || echec "jeu de donnees absent : $DATASET"
@@ -47,15 +53,30 @@ if vm "[[ -d '$GCP_WORKDIR/donnees/$NOM_JEU' ]]"; then
     alerte "$NOM_JEU deja present sur la VM, transfert des images ignore"
     alerte "(supprimer '$GCP_WORKDIR/donnees/$NOM_JEU' sur la VM pour forcer)"
 else
-    info "Archivage de $NOM_JEU"
     ARCHIVE="/tmp/${NOM_JEU}.tar.gz"
-    # -h : suit les liens symboliques. Les jeux fusionnes (fire_smoke_enriched,
-    # fall_detection_enriched) sont construits par symlink pour ne pas dupliquer
-    # les images sur le disque local ; sans -h, l'archive ne contiendrait que
-    # des liens brises.
-    tar -czhf "$ARCHIVE" -C "$(dirname "$DATASET")" "$NOM_JEU"
-    info "Envoi ($(du -h "$ARCHIVE" | cut -f1)) -- cela peut prendre plusieurs minutes"
-    vers_vm "$ARCHIVE" "$CIBLE:$GCP_WORKDIR/donnees/"
+    if [[ ! -f "$ARCHIVE" ]]; then
+        info "Archivage de $NOM_JEU"
+        # -h : suit les liens symboliques. Les jeux fusionnes (fire_smoke_enriched,
+        # fall_detection_enriched) sont construits par symlink pour ne pas dupliquer
+        # les images sur le disque local ; sans -h, l'archive ne contiendrait que
+        # des liens brises.
+        tar -czhf "$ARCHIVE" -C "$(dirname "$DATASET")" "$NOM_JEU"
+    else
+        info "Archive $ARCHIVE deja presente, reutilisee"
+    fi
+
+    if bucket_actif; then
+        # Chemin recommande : l'archive transite par le bucket, ce qui rend le
+        # transfert reprenable et permet de l'envoyer VM eteinte (voir lib.sh).
+        televerser_bucket "$ARCHIVE" "${NOM_JEU}.tar.gz"
+        vm_recuperer_bucket "${NOM_JEU}.tar.gz" "$GCP_WORKDIR/donnees"
+    else
+        alerte "GCP_BUCKET non defini : envoi direct en scp, sans reprise possible"
+        alerte "(une coupure reseau fait tout recommencer -- voir lib.sh)"
+        info "Envoi ($(du -h "$ARCHIVE" | cut -f1)) -- cela peut prendre plusieurs minutes"
+        vers_vm "$ARCHIVE" "$CIBLE:$GCP_WORKDIR/donnees/"
+    fi
+
     vm "cd '$GCP_WORKDIR/donnees' && tar -xzf '${NOM_JEU}.tar.gz' && rm '${NOM_JEU}.tar.gz'"
     rm -f "$ARCHIVE"
 

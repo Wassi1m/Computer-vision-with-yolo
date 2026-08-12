@@ -171,3 +171,66 @@ verifier_connexion() {
     # change. Les deux cas se resolvent par demarrer_vm.
     demarrer_vm
 }
+
+# ── Transfert des jeux de donnees via Cloud Storage ──────────────────────────
+#
+# Envoyer un jeu directement en scp depuis le poste local a montre ses limites :
+# une archive de 774 Mo sur une liaison domestique a 76 Ko/s demande plus de
+# deux heures en une seule session TCP, sans reprise possible. Un envoi a
+# effectivement casse a 35 % sur un « Connection reset by peer », perdant 98 min
+# de travail et autant de facturation GPU -- car la VM tournait pendant ce
+# temps, sans rien faire d'autre qu'attendre des octets.
+#
+# Passer par un bucket corrige les deux problemes a la fois :
+#   - `gcloud storage` fragmente et reprend automatiquement : une coupure ne
+#     fait plus repartir de zero ;
+#   - l'envoi se fait **VM eteinte**, donc sans facturation ; la VM ne s'allume
+#     que pour tirer le fichier depuis le bucket, sur le reseau interne Google,
+#     en quelques minutes.
+#
+# Le bucket doit etre dans la meme region que la VM : le transfert interne est
+# alors gratuit et rapide. Sans `GCP_BUCKET` dans .env.gcp, les scripts
+# retombent sur le scp direct.
+
+bucket_actif() { [[ -n "${GCP_BUCKET:-}" ]]; }
+
+# Envoie un fichier local vers le bucket, en ignorant l'envoi si l'objet y est
+# deja avec la meme taille -- un jeu de donnees ne change pas entre deux runs,
+# le re-televerser serait du temps perdu.
+televerser_bucket() {
+    local fichier="$1" objet="${2:-$(basename "$1")}"
+    local taille_locale taille_distante
+    taille_locale=$(stat -c '%s' "$fichier")
+    taille_distante=$("$GCLOUD" storage ls -l "$GCP_BUCKET/$objet" \
+        --project "$GCP_PROJET" 2>/dev/null | awk 'NR==1{print $1}')
+    if [[ "$taille_distante" == "$taille_locale" ]]; then
+        succes "$objet deja dans le bucket ($(numfmt --to=iec "$taille_locale")), envoi ignore"
+        return 0
+    fi
+    info "Envoi vers $GCP_BUCKET/$objet ($(numfmt --to=iec "$taille_locale")) -- reprenable"
+    "$GCLOUD" storage cp "$fichier" "$GCP_BUCKET/$objet" \
+        --project "$GCP_PROJET" || echec "envoi vers le bucket echoue"
+    succes "$objet depose dans le bucket"
+}
+
+# Fait tirer l'objet par la VM. On privilegie `gcloud storage` s'il est present
+# (fragmentation, reprise), sinon on retombe sur l'API JSON avec le jeton du
+# serveur de metadonnees -- disponible sur toute instance GCE, sans dependance.
+vm_recuperer_bucket() {
+    local objet="$1" destination="$2"
+    info "La VM recupere $objet depuis le bucket (reseau interne Google)"
+    vm "
+        set -e
+        cd '$destination'
+        if command -v gcloud >/dev/null 2>&1; then
+            gcloud storage cp '$GCP_BUCKET/$objet' . --project '$GCP_PROJET'
+        else
+            jeton=\$(curl -s -H 'Metadata-Flavor: Google' \
+                'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token' \
+                | python3 -c 'import sys,json; print(json.load(sys.stdin)[\"access_token\"])')
+            curl -s -f -C - -H \"Authorization: Bearer \$jeton\" -o '$objet' \
+                'https://storage.googleapis.com/storage/v1/b/${GCP_BUCKET#gs://}/o/$objet?alt=media'
+        fi
+    " || echec "recuperation depuis le bucket echouee"
+    succes "$objet recupere sur la VM"
+}

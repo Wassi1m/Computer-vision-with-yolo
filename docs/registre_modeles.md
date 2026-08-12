@@ -80,16 +80,25 @@ conservé en `fall_detector_pre_p8.pt` (hors dépôt, voir `.gitignore`).
 |---|---|
 | **Rôle** | 2 classes : `fire`, `smoke` |
 | **Architecture** | YOLO26n |
-| **Version** | P4 — fine-tuning du 2026-08-08 |
+| **Version** | P4 — fine-tuning du 2026-08-08, mené à son terme le 2026-08-09 |
 | **Données** | `fire_smoke_enriched` : jeu Roboflow d'origine (12 127 images) + 4 800 images de fumée `pyronear/pyro-sdis` (Hugging Face, Apache-2.0) |
-| **Entraînement** | Colab T4, 41 époques (patience atteinte) |
-| **Métriques** | `fire` 91.6% · `smoke` 39.1% · mAP@50 65.3% (split `test`, non enrichi) |
+| **Entraînement** | Colab T4, 60 époques (41 au premier jet, poursuivi jusqu'à 60) |
+| **Métriques** | `fire` 90.4% · `smoke` 40.7% · mAP@50 65.5% (split `test`, non enrichi) |
 
 **À savoir** : `smoke` reste le point faible du parc. Le complément pyro-sdis a
 apporté +11.5 points, mais ses images sont des panaches de feu de forêt vus de
 loin depuis une tour de guet — un domaine éloigné d'une caméra de site. Le
 split `test` a été délibérément laissé intact pour que la comparaison avec la
 mesure d'origine (27.6 %) reste valable.
+
+**Ne pas juger ce modèle sur sa mAP@50.** Mesuré au niveau de la scène
+(`tests/mesure_operationnelle.py`, jeu `fire_smoke_v9`, seuil 0.10) il repère
+**96.7 %** des scènes contenant de la fumée pour 2.0 % de fausse alarme, très
+loin de ce que ses 40.7 % d'AP laissent croire : la mAP sanctionne la position
+du rectangle autour d'un panache, qui n'a pas de contour net, et non le service
+rendu. Référence figée dans
+`reports/v3_results/operationnel_fire_smoke_avant.json` — c'est **ce** chiffre
+qu'un remplaçant doit battre.
 
 ### `surveillance_suite/models/license_plate.pt` — plaques
 

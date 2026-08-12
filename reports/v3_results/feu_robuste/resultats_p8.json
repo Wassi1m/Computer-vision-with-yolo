@@ -1,0 +1,41 @@
+{
+  "nom": "feu_robuste",
+  "donnees": "/home/karimmay078/ppe/donnees/fire_smoke_enriched_robuste/data.yaml",
+  "poids_depart": "modeles/fire_smoke.pt",
+  "avant": {
+    "conditions_normales": {
+      "mAP50": 0.7586,
+      "mAP50_95": 0.4024,
+      "classes": {
+        "fire": 0.8802,
+        "smoke": 0.6369
+      }
+    },
+    "jeu_enrichi": {
+      "mAP50": 0.7586,
+      "mAP50_95": 0.4024,
+      "classes": {
+        "fire": 0.8802,
+        "smoke": 0.6369
+      }
+    }
+  },
+  "apres": {
+    "jeu_enrichi": {
+      "mAP50": 0.7537,
+      "mAP50_95": 0.3879,
+      "classes": {
+        "fire": 0.8917,
+        "smoke": 0.6157
+      }
+    },
+    "conditions_normales": {
+      "mAP50": 0.7537,
+      "mAP50_95": 0.3879,
+      "classes": {
+        "fire": 0.8917,
+        "smoke": 0.6157
+      }
+    }
+  }
+}

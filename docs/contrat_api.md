@@ -87,6 +87,8 @@ Objet JSON, encodé en UTF-8.
 | `feu` | `smoke` | Fumée détectée | Boîte de la zone |
 | `ligne` | `franchissement` | Un objet suivi a franchi la ligne virtuelle | `null` |
 | `objet_abandonne` | `objet_abandonne` | Bagage immobile, sans personne à proximité depuis le délai configuré (30 s par défaut) | Boîte de l'objet |
+| `foule` | `foule` | Seuil d'effectif ou de densité franchi dans la zone | `null` |
+| `foule` | `foule_terminee` | Retour sous le seuil | `null` |
 | `porte` | `porte` | Changement d'état de la porte (ouverte/fermée) | `null` |
 | `lpr` | `plaque` | Plaque d'immatriculation lue | Boîte de la plaque |
 | `capture` | `flux_perdu` | Le flux vidéo n'est plus lisible | `null` |

@@ -49,7 +49,8 @@ conduit à croire faible un détecteur qui fonctionne très bien.
 | Personnes, véhicules, objets courants | 80 classes COCO | héritée de YOLO26 | ✅ Exploitable |
 | Franchissement de ligne | calculé, pas détecté | jamais mesurée | ⚠️ Non validé |
 | Objet abandonné | calculé, pas détecté | logique testée, terrain non mesuré | ✅ Disponible |
-| Foule / densité | code existant | **non branché** | ❌ Indisponible |
+| Foule — effectif | calculé, pas détecté | celle du détecteur de personnes | ✅ Disponible |
+| Foule — densité pers/m² | calculé, pas détecté | géométrie exacte **si calibré** | ✅ Disponible |
 | Balisage de chantier | — | — | ❌ Inexistant |
 
 ---
@@ -224,27 +225,52 @@ par image jusqu'à la fin du flux.
 mesurée sur des séquences réelles** — il n'existe pas encore de corpus vidéo
 annoté (plan v6 §4.1). Le taux de fausse alarme sur le terrain est inconnu.
 
----
+**Foule — effectif et densité** — `AnalyseurFoule`. Compte les personnes dont
+le point de contact au sol tombe dans la zone surveillée, et exprime une
+**densité en personnes par mètre carré** lorsque la caméra est calibrée.
 
-## 8. Ce qui existe mais n'est pas disponible
+Aucun entraînement non plus : ce qui manquait n'était pas un modèle mais la
+**géométrie du sol**. Coût mesuré : **0,1 %** du temps de traitement.
 
-**Foule et densité** — `crowd_density_detector_auto.py`, script autonome dans
-`surveillance_suite/detectors/`, sans analyseur correspondant dans le pipeline
-unifié : il ne produit **aucun évènement** aujourd'hui. Il compte les personnes et
-estime les distances **sans calibration** : la hauteur en pixels d'une personne
-donne l'échelle locale, en supposant une taille humaine de 1,70 m.
+| Mode | Ce qui est publié |
+|---|---|
+| **Avec `--calibration-sol`** | effectif **et** densité pers/m² exacte |
+| Sans calibration | effectif seul ; `densite_pers_m2` vaut `null` |
 
-> ⚠️ **Cette approche ne permet pas de mesurer « 10 personnes en 5 m² ».**
-> Elle estime des distances entre paires de personnes, pas une densité
-> surfacique. Et son hypothèse — la taille apparente donne l'échelle —
-> s'effondre précisément en **vue plongeante**, qui est l'angle habituel d'une
-> caméra de comptage de foule : vu du dessus, une personne proche et une
-> personne lointaine ont presque la même hauteur apparente.
->
-> Une densité en personnes/m² exige de connaître la géométrie du sol :
-> **calibration par homographie**, une opération à faire une fois par caméra
-> (quatre points au sol dont on connaît les distances réelles). C'est un
-> réglage d'installation, pas un modèle à entraîner.
+Le champ vaut `null` et non une estimation : mieux vaut annoncer qu'on ne sait
+pas que publier une valeur inventée que l'aval prendrait pour argent comptant.
+
+**Calibration** : `python outils/calibrer_sol.py --source <flux>`, quatre clics
+sur les coins d'un rectangle au sol dont on connaît les dimensions. Une fois par
+caméra, à l'installation. L'outil re-mesure l'aire après projection et prévient
+si l'écart trahit des points mal pointés.
+
+**Tous les seuils sont des paramètres** (`--seuil-densite`, `--seuil-effectif`,
+`--zone-foule`), également réglables par variables d'environnement `MOTEUR_*` :
+ils dépendent du site et de la réglementation applicable, et n'ont aucune valeur
+universelle. Le défaut de 2,0 pers/m² correspond à « 10 personnes pour 5 m² ».
+
+Un seul évènement à la formation de la foule, un à sa dissolution
+(`foule_terminee`) — jamais un par image.
+
+**Limites**
+- La géométrie est exacte, **le comptage reste celui du détecteur**. En foule
+  dense, les occlusions font sous-estimer l'effectif, donc la densité. Au-delà
+  d'environ 3-4 pers/m², un modèle de comptage par carte de densité serait plus
+  adapté que la détection par boîtes.
+- Le rectangle de calibration doit être **posé au sol**. Calibrer sur le sommet
+  d'un muret donnerait un plan qui n'est pas celui où marchent les personnes.
+- La précision dépend entièrement de celle des clics : un coin pointé à 10 px
+  près sur un rectangle de 100 px introduit ~10 % d'erreur sur les distances.
+- **Jamais mesuré sur des séquences réelles** (corpus absent, plan v6 §4.1).
+
+> L'approche précédente (`crowd_density_detector_auto.py`, script autonome
+> conservé pour référence) estimait l'échelle depuis la hauteur apparente des
+> personnes, en supposant 1,70 m. Sans réglage, mais l'hypothèse s'effondre
+> précisément en **vue plongeante** — l'angle habituel d'une caméra de comptage :
+> vu du dessus, une personne proche et une personne lointaine ont presque la
+> même hauteur apparente. Elle ne donnait d'ailleurs que des distances entre
+> paires, jamais une densité surfacique.
 
 ---
 

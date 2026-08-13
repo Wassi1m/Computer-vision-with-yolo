@@ -407,5 +407,131 @@ def test_classe_hors_perimetre_est_ignoree():
     assert a.etats == {}
 
 
+# ── Calibration du sol et densité de foule ───────────────────────────────────
+
+import calibration_sol as cal  # noqa: E402
+from unified_surveillance import AnalyseurFoule  # noqa: E402
+
+# Carre de 100 px representant 5 m de cote : echelle 0,05 m/px, aire 25 m2.
+IMAGE_CARRE = [(0, 0), (100, 0), (100, 100), (0, 100)]
+SOL_CARRE = [(0, 0), (5, 0), (5, 5), (0, 5)]
+
+
+def test_projection_pixels_vers_metres():
+    c = cal.CalibrationSol(IMAGE_CARRE, SOL_CARRE)
+    x, y = c.vers_sol((50, 50))
+    assert x == pytest.approx(2.5, abs=1e-3)
+    assert y == pytest.approx(2.5, abs=1e-3)
+
+
+def test_aire_reelle_d_une_zone():
+    """L'aire en pixels n'a aucun rapport avec l'aire réelle : la perspective
+    écrase le fond de la scène."""
+    c = cal.CalibrationSol(IMAGE_CARRE, SOL_CARRE)
+    assert c.aire_m2(IMAGE_CARRE) == pytest.approx(25.0, abs=1e-2)
+    # moitie de l'image = moitie de la surface
+    assert c.aire_m2([(0, 0), (50, 0), (50, 100), (0, 100)]) == pytest.approx(12.5, abs=1e-2)
+
+
+def test_la_perspective_est_bien_corrigee():
+    """Un trapèze à l'image correspond à un carré au sol : deux écarts de même
+    longueur en pixels doivent donner des distances réelles différentes."""
+    trapeze = [(20, 100), (80, 100), (100, 0), (0, 0)]   # bas etroit = premier plan
+    c = cal.CalibrationSol(trapeze, SOL_CARRE)
+    proche = c.vers_sol((50, 100))
+    loin = c.vers_sol((50, 0))
+    assert proche[1] != pytest.approx(loin[1], abs=0.5)
+
+
+def test_calibration_refuse_des_points_degeneres():
+    with pytest.raises(ValueError):
+        cal.CalibrationSol([(0, 0), (1, 1)], [(0, 0), (1, 1)])
+
+
+def test_point_au_sol_est_le_bas_de_la_boite():
+    """Le seul point de la boîte qui appartienne vraiment au plan du sol."""
+    assert cal.point_au_sol((10, 20, 30, 80)) == (20.0, 80.0)
+
+
+def test_appartenance_a_la_zone():
+    carre = [(0, 0), (10, 0), (10, 10), (0, 10)]
+    assert cal.dans_polygone((5, 5), carre)
+    assert not cal.dans_polygone((15, 5), carre)
+
+
+def _ctx_foule(t, boites):
+    return {"t": t, "frame": int(t * 10), "objets": [],
+            "personnes": [(i, b) for i, b in enumerate(boites)]}
+
+
+ZONE_5M2 = [(0, 0), (20, 0), (20, 100), (0, 100)]   # 20x100 px -> 1 m x 5 m
+
+
+def _gens(n):
+    """n personnes, pieds repartis a l'interieur de ZONE_5M2 (x < 20)."""
+    return [(2 + 1.5 * i - 2, 40, 2 + 1.5 * i + 2, 90) for i in range(n)]
+
+
+def test_densite_declenche_au_seuil():
+    """10 personnes sur 5 m² = 2 pers/m², le cas d'usage demandé."""
+    c = cal.CalibrationSol(IMAGE_CARRE, SOL_CARRE)
+    # zone de 5 m2 : moitie du carre de 25 m2 ne suffit pas, on prend 1/5
+    zone = ZONE_5M2
+    a = AnalyseurFoule(seuil_densite=2.0, zone=zone, calibration=c, fenetre=1, minimum=1)
+    assert a.aire_m2 == pytest.approx(5.0, abs=1e-2)
+    assert a.process(None, _ctx_foule(0.0, _gens(9))) == []       # 1,8 pers/m2
+    evs = a.process(None, _ctx_foule(1.0, _gens(10)))             # 2,0 pers/m2
+    assert len(evs) == 1 and evs[0].type == "foule"
+    assert evs[0].extra["densite_pers_m2"] == pytest.approx(2.0, abs=1e-2)
+
+
+def test_un_seul_evenement_tant_que_la_foule_dure():
+    """Une foule stable ne doit pas produire un evenement par image."""
+    c = cal.CalibrationSol(IMAGE_CARRE, SOL_CARRE)
+    zone = ZONE_5M2
+    a = AnalyseurFoule(seuil_densite=2.0, zone=zone, calibration=c, fenetre=1, minimum=1)
+    total = sum(len(a.process(None, _ctx_foule(t, _gens(12)))) for t in range(10))
+    assert total == 1
+
+
+def test_fin_de_foule_est_signalee():
+    """Sans le front descendant, la plateforme ne saurait pas que c'est fini."""
+    c = cal.CalibrationSol(IMAGE_CARRE, SOL_CARRE)
+    zone = ZONE_5M2
+    a = AnalyseurFoule(seuil_densite=2.0, zone=zone, calibration=c, fenetre=1, minimum=1)
+    a.process(None, _ctx_foule(0.0, _gens(12)))
+    evs = a.process(None, _ctx_foule(1.0, _gens(2)))
+    assert len(evs) == 1 and evs[0].type == "foule_terminee"
+
+
+def test_sans_calibration_la_densite_est_nulle_pas_inventee():
+    """Mieux vaut annoncer qu'on ne sait pas que publier une valeur fausse."""
+    a = AnalyseurFoule(seuil_densite=2.0, seuil_effectif=5, fenetre=1, minimum=1)
+    evs = a.process(None, _ctx_foule(0.0, _gens(6)))
+    assert len(evs) == 1
+    assert evs[0].extra["densite_pers_m2"] is None
+    assert evs[0].extra["calibre"] is False
+    assert evs[0].extra["effectif"] == 6
+
+
+def test_personne_hors_zone_n_est_pas_comptee():
+    c = cal.CalibrationSol(IMAGE_CARRE, SOL_CARRE)
+    zone = ZONE_5M2
+    a = AnalyseurFoule(seuil_densite=2.0, zone=zone, calibration=c, fenetre=1, minimum=1)
+    dehors = [(500 + i, 40, 510 + i, 90) for i in range(20)]
+    assert a.process(None, _ctx_foule(0.0, dehors)) == []
+    assert a.dernier["effectif"] == 0
+
+
+def test_la_confirmation_filtre_un_pic_isole():
+    """Un groupe qui traverse le champ ne doit pas declencher une alerte."""
+    c = cal.CalibrationSol(IMAGE_CARRE, SOL_CARRE)
+    zone = ZONE_5M2
+    a = AnalyseurFoule(seuil_densite=2.0, zone=zone, calibration=c, fenetre=5, minimum=3)
+    assert a.process(None, _ctx_foule(0.0, _gens(12))) == []
+    assert a.process(None, _ctx_foule(1.0, _gens(1))) == []
+    assert a.process(None, _ctx_foule(2.0, _gens(1))) == []
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

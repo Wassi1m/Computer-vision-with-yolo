@@ -719,6 +719,117 @@ class AnalyseurLigne(Analyseur):
         return frame
 
 
+class AnalyseurFoule(Analyseur):
+    """Effectif et densité de personnes dans une zone au sol.
+
+    Ne fait **aucune inférence** : les personnes et leur suivi viennent du
+    détecteur général. Rien à entraîner ici non plus — ce qui manquait n'était
+    pas un modèle mais la **géométrie du sol**, sans laquelle « personnes par
+    mètre carré » n'a pas de sens (voir `improvements/calibration_sol.py`).
+
+    Deux modes, selon ce qui est disponible :
+
+    - **avec calibration** : chaque personne est projetée au sol par son point
+      de contact, l'aire réelle de la zone est connue, la densité est exacte ;
+    - **sans calibration** : seul l'effectif est disponible. Le champ `densite`
+      vaut alors `null` — il vaut mieux annoncer qu'on ne sait pas que publier
+      une valeur inventée.
+
+    Tous les seuils sont des paramètres : ils dépendent du site, du type de
+    lieu et de la réglementation applicable, et n'ont aucune valeur universelle.
+    """
+    nom = "foule"
+    every = 1
+
+    def __init__(self, seuil_densite: float = 2.0, seuil_effectif: int = 0,
+                 zone=None, calibration=None, fenetre: int = 5, minimum: int = 3):
+        self.seuil_densite = seuil_densite      # personnes/m2 (ex. 10 pour 5 m2 = 2.0)
+        self.seuil_effectif = seuil_effectif    # 0 = desactive
+        self.zone = list(zone) if zone else None
+        self.calibration = calibration
+        # Une foule ne se forme pas en une image : la confirmation evite qu'un
+        # groupe qui passe devant l'objectif, ou une detection instable, ne
+        # declenche une alerte.
+        self.confirmation = ConfirmationTemporelle(fenetre, minimum)
+        self.en_alerte = False
+        self.dernier = {"effectif": 0, "densite": None}
+
+        self.aire_m2 = None
+        if self.calibration is not None and self.zone:
+            self.aire_m2 = self.calibration.aire_m2(self.zone)
+
+    def _dans_zone(self, pied) -> bool:
+        if not self.zone:
+            return True
+        from calibration_sol import dans_polygone
+        return dans_polygone(pied, self.zone)
+
+    def process(self, frame, ctx):
+        from calibration_sol import point_au_sol
+
+        pieds = [point_au_sol(b) for _, b in ctx.get("personnes", [])]
+        dedans = [p for p in pieds if self._dans_zone(p)]
+        effectif = len(dedans)
+
+        densite = None
+        if self.aire_m2:
+            densite = effectif / self.aire_m2
+        elif self.calibration is not None and not self.zone:
+            # Zone non definie : la densite n'a pas de surface de reference.
+            densite = None
+        self.dernier = {"effectif": effectif,
+                        "densite": round(densite, 3) if densite is not None else None}
+
+        depasse = False
+        if densite is not None and self.seuil_densite > 0:
+            # Tolerance relative indispensable, et pas une coquetterie : l'aire
+            # sort d'une homographie, donc d'un calcul flottant. Une zone reglee
+            # a 5 m2 se mesure 5.0000000000000036, et 10 personnes y donnent une
+            # densite de 1.9999999999999987 -- juste sous un seuil de 2.0. Sans
+            # cette tolerance, « 10 personnes pour 5 m2 » ne declencherait qu'a
+            # 11 personnes, defaut invisible en test et introuvable sur le terrain.
+            depasse = densite >= self.seuil_densite * (1 - 1e-9)
+        if self.seuil_effectif > 0 and effectif >= self.seuil_effectif:
+            depasse = True
+
+        confirme = self.confirmation.confirmer("foule", depasse)
+        evs = []
+        # Front montant / descendant uniquement : sans cela une foule stable
+        # produirait un evenement par image (cf. plan v6, deluge d'evenements).
+        if confirme and not self.en_alerte:
+            self.en_alerte = True
+            libelle = (f"Densite {densite:.2f} pers/m2 sur {self.aire_m2:.1f} m2 "
+                       f"({effectif} personnes)" if densite is not None
+                       else f"{effectif} personnes dans la zone")
+            evs.append(Evenement(ctx["t"], ctx["frame"], self.nom, "foule", libelle,
+                                 extra={"effectif": effectif,
+                                        "densite_pers_m2": self.dernier["densite"],
+                                        "aire_m2": round(self.aire_m2, 2) if self.aire_m2 else None,
+                                        "seuil_densite": self.seuil_densite,
+                                        "seuil_effectif": self.seuil_effectif,
+                                        "calibre": self.calibration is not None}))
+        elif self.en_alerte and not confirme:
+            self.en_alerte = False
+            evs.append(Evenement(ctx["t"], ctx["frame"], self.nom, "foule_terminee",
+                                 f"Retour sous le seuil ({effectif} personnes)",
+                                 extra={"effectif": effectif,
+                                        "densite_pers_m2": self.dernier["densite"]}))
+        return evs
+
+    def draw(self, frame):
+        if self.zone and len(self.zone) >= 3:
+            import numpy as np
+            pts = np.asarray(self.zone, dtype="int32").reshape(-1, 1, 2)
+            cv2.polylines(frame, [pts], True,
+                          (0, 0, 255) if self.en_alerte else (0, 200, 200), 2)
+        d = self.dernier
+        txt = (f"Foule: {d['effectif']} pers"
+               + (f" / {d['densite']:.2f} pers/m2" if d["densite"] is not None else ""))
+        cv2.putText(frame, txt, (10, 82), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
+                    (0, 0, 255) if self.en_alerte else (0, 200, 200), 2)
+        return frame
+
+
 class AnalyseurObjetAbandonne(Analyseur):
     """Objet posé, immobile, et laissé sans surveillance pendant un délai.
 
@@ -1005,6 +1116,20 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
                               ratio=config.FALL_ASPECT_RATIO_THRESHOLD, angle=config.FALL_ANGLE_THRESHOLD_DEG)
     ajouter("chute", _chute)
     ajouter("objet_abandonne", lambda: AnalyseurObjetAbandonne(delai_s=args.delai_abandon))
+
+    def _foule():
+        calib = None
+        if args.calibration_sol:
+            from calibration_sol import CalibrationSol
+            calib = CalibrationSol.depuis_fichier(existant(Path(args.calibration_sol)))
+        zone = _points(args.zone_foule)
+        if calib is None:
+            log.warning("foule : sans --calibration-sol, la densite en pers/m2 "
+                        "n'est pas calculable ; seul l'effectif est publie")
+        return AnalyseurFoule(seuil_densite=args.seuil_densite,
+                              seuil_effectif=args.seuil_effectif,
+                              zone=zone, calibration=calib)
+    ajouter("foule", _foule)
     ajouter("feu", lambda: AnalyseurFeu(
         str(existant(SUITE / config.MODEL_FIRE_SMOKE)), config.CONF_THRESHOLD, args.every_fire))
     ajouter("lpr", lambda: AnalyseurPlaque(
@@ -1032,6 +1157,29 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
         args.imgsz, args.every_epi))
 
     return analyseurs
+
+
+def _points(texte: str | None):
+    """Lit une liste de points « x1,y1;x2,y2;… » en pixels.
+
+    Format textuel plutôt qu'un fichier : une zone se règle au déploiement, et
+    doit pouvoir passer par une variable d'environnement dans un conteneur.
+    """
+    if not texte:
+        return None
+    pts = []
+    for couple in texte.split(";"):
+        couple = couple.strip()
+        if not couple:
+            continue
+        try:
+            x, y = (float(v) for v in couple.split(","))
+        except ValueError:
+            raise SystemExit(f"zone invalide : « {couple} » n'est pas « x,y »")
+        pts.append((x, y))
+    if len(pts) < 3:
+        raise SystemExit("une zone demande au moins 3 points")
+    return pts
 
 
 def _env(nom: str, defaut, conv=str):
@@ -1062,6 +1210,20 @@ def main():
     ap.add_argument("--delai-abandon", type=float, default=_env("delai_abandon", 30.0, float),
                     help="secondes sans personne a proximite avant de signaler "
                          "un objet abandonne (defaut 30)")
+    # Foule -- tous ces seuils dependent du site et de la reglementation
+    # applicable ; aucune valeur n'est universelle, d'ou le reglage externe.
+    ap.add_argument("--calibration-sol", default=_env("calibration_sol", "", str),
+                    help="JSON de calibration (voir outils/calibrer_sol.py). "
+                         "Sans lui, la densite en pers/m2 n'est pas calculable")
+    ap.add_argument("--zone-foule", default=_env("zone_foule", "", str),
+                    help="polygone de la zone surveillee, « x1,y1;x2,y2;... » "
+                         "en pixels. Defaut : toute l'image")
+    ap.add_argument("--seuil-densite", type=float, default=_env("seuil_densite", 2.0, float),
+                    help="personnes/m2 declenchant l'alerte (defaut 2.0, "
+                         "soit 10 personnes pour 5 m2). 0 pour desactiver")
+    ap.add_argument("--seuil-effectif", type=int, default=_env("seuil_effectif", 0, int),
+                    help="nombre de personnes declenchant l'alerte, "
+                         "independamment de la surface. 0 pour desactiver")
     ap.add_argument("--every-lpr", type=int, default=_env("every_lpr", 10, int))
     ap.add_argument("--every-door", type=int, default=_env("every_door", 3, int))
     ap.add_argument("--conf", type=float, default=_env("conf", None, float),

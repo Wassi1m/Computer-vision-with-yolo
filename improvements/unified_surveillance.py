@@ -57,6 +57,7 @@ sys.path.insert(0, str(SUITE / "modules"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import ppe_taxonomy as tax  # noqa: E402
+import qualification as qual  # noqa: E402
 
 
 # ── Journalisation ───────────────────────────────────────────────────────────
@@ -332,16 +333,49 @@ class BusEvenements:
     rien à ce qui est détecté, seulement à ce qui est dessiné.
     """
 
+    # Evenements techniques : ils decrivent l'etat du moteur, pas un fait
+    # observe dans la scene. Les faire passer par la machine a etats les
+    # retarderait, alors qu'une camera tombee doit se signaler immediatement.
+    TYPES_TECHNIQUES = ("flux_perdu", "flux_repris")
+
     def __init__(self, sorties: list[Sortie] | None = None, anti_repetition_s: float = 3.0,
-                 camera_id: str = "", site_id: str = ""):
+                 camera_id: str = "", site_id: str = "", qualification=None):
         self.sorties = sorties or [SortieConsole()]
         self._dernier: dict[str, float] = {}
         self._anti_rep = anti_repetition_s
         self.camera_id, self.site_id = camera_id, site_id
+        # Machine a etats optionnelle : branchee ici plutot que dans chaque
+        # analyseur, pour que tous en beneficient sans etre modifies, et pour
+        # qu'elle reste debrayable d'un seul drapeau (--sans-qualification).
+        self.qualification = qualification
         self.total = 0
         self.dernier_t = 0.0
 
     def publier(self, ev: Evenement) -> bool:
+        if self.qualification is not None and ev.type not in self.TYPES_TECHNIQUES:
+            return self._publier_qualifie(ev)
+        return self._publier_brut(ev)
+
+    def _publier_qualifie(self, ev: Evenement) -> bool:
+        """Un evenement par changement d'etat, au lieu d'un par image."""
+        q = self.qualification
+        cle = q.cle_de(ev.source, ev.type, ev.box, self.camera_id)
+        piste, nouvel_etat = q.observer(cle, ev.t, ev.conf)
+        publie = False
+        if nouvel_etat is not None:
+            ev.extra = {**ev.extra, **q.preuves(piste, ev.t)}
+            publie = self._publier_brut(ev)
+        # Les pistes que plus rien n'alimente se terminent : sans ce signal, la
+        # plateforme garderait une alerte ouverte indefiniment.
+        for finie in q.expirer(ev.t):
+            fin = Evenement(ev.t, ev.frame, finie.cle.split("|")[1], f"{ev.type}_termine",
+                            f"Fin : {finie.etat} pendant "
+                            f"{finie.derniere_vue - finie.debut:.0f} s",
+                            extra=q.preuves(finie, finie.derniere_vue))
+            self._publier_brut(fin)
+        return publie
+
+    def _publier_brut(self, ev: Evenement) -> bool:
         cle = f"{ev.source}|{ev.type}|{ev.libelle}"
         if ev.t - self._dernier.get(cle, -1e9) < self._anti_rep:
             return False
@@ -667,8 +701,13 @@ class AnalyseurEPI(Analyseur):
     nom = "epi"
 
     def __init__(self, poids_m1, poids_m2=None, imgsz=480, every=3,
-                 hist_n=12, hist_k=4):
+                 hist_n=12, hist_k=4, ancrage=True):
         from ultralytics import YOLO
+        # Derriere un drapeau, comme toute regle de qualification : elle rejette
+        # des detections, donc elle doit pouvoir etre comparee et retiree sans
+        # redeploiement (garde-fou 3 du plan v5).
+        self.ancrage = ancrage
+        self.rejetes_ancrage = 0
         self.every = every
         self.imgsz = imgsz
         self.m1 = YOLO(poids_m1)
@@ -745,10 +784,29 @@ class AnalyseurEPI(Analyseur):
         boites = {cle: box for cle, _, box in cles}
         porte = {cle: set() for cle in boites}
         absent = {cle: set() for cle in boites}
+        noms = list(boites)
         for d in self.dets:
             if not d.epi or not boites:
                 continue
-            cle = max(boites, key=lambda c: tax._iou(d.box, boites[c]))
+            if self.ancrage:
+                # Association par CONFINEMENT, avec rejet possible.
+                #
+                # L'ancienne regle -- `max(boites, key=IoU)` -- avait deux
+                # defauts qui se cumulaient. D'abord l'IoU est la mauvaise
+                # mesure pour un rapport « partie de » : un casque occupe ~3 %
+                # de la boite d'une personne, son IoU vaut donc ~0,03 qu'il soit
+                # porte ou non, valeur indiscernable du bruit. Ensuite `max`
+                # attribue TOUJOURS l'EPI a quelqu'un : un faux positif detecte
+                # a l'autre bout de l'image comptait comme equipement porte et
+                # masquait une vraie infraction -- le sens d'erreur le plus
+                # grave sur un systeme de securite.
+                i = qual.associer_a_personne(d.box, [boites[c] for c in noms], epi=d.epi)
+                if i is None:
+                    self.rejetes_ancrage += 1
+                    continue
+                cle = noms[i]
+            else:
+                cle = max(boites, key=lambda c: tax._iou(d.box, boites[c]))
             (porte if d.porte else absent)[cle].add(d.epi)
 
         self._oublier_absents(set(boites), ctx["t"])
@@ -1323,7 +1381,7 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
     ajouter("epi", lambda: AnalyseurEPI(
         str(existant(ROOT / "ppe_detection/models/best.pt")),
         None if args.sans_gants else str(existant(ROOT / "ppe_detection/models/best_gloves.pt")),
-        args.imgsz, args.every_epi))
+        args.imgsz, args.every_epi, ancrage=not args.sans_ancrage_epi))
 
     return analyseurs
 
@@ -1432,6 +1490,20 @@ def main():
     ap.add_argument("--webhook-tentatives", type=int,
                     default=_env("webhook_tentatives", 8, int),
                     help="tentatives avant abandon journalise (defaut 8)")
+    # Qualification -- derriere un drapeau, pour comparer en parallele et
+    # revenir en arriere sans redeploiement (garde-fou 3 du plan v5).
+    ap.add_argument("--sans-ancrage-epi", action="store_true",
+                    help="revient a l'association EPI par IoU, sans rejet "
+                         "(comportement d'avant le 2026-08-13)")
+    ap.add_argument("--sans-qualification", action="store_true",
+                    help="desactive la machine a etats : un evenement par image, "
+                         "comportement d'avant le 2026-08-13")
+    ap.add_argument("--seuil-probable", type=int, default=_env("seuil_probable", 3, int),
+                    help="observations avant de passer de suspicion a probable")
+    ap.add_argument("--seuil-confirme", type=int, default=_env("seuil_confirme", 8, int),
+                    help="observations avant de passer de probable a confirme")
+    ap.add_argument("--fin-evenement-s", type=float, default=_env("fin_evenement_s", 5.0, float),
+                    help="secondes sans observation avant de clore un evenement")
     ap.add_argument("--boucler", action="store_true",
                     help="relit un fichier video en boucle (tests d'endurance)")
     ap.add_argument("--max-frames", type=int, default=_env("max_frames", 0, int), help="0 = illimite")
@@ -1476,7 +1548,19 @@ def main():
         # defaut invisible des la deuxieme : mieux vaut le dire au demarrage.
         log.warning("aucun --camera-id : les evenements ne diront pas de quelle "
                     "camera ils viennent (indispensable en multi-camera)")
-    bus = BusEvenements(sorties, camera_id=args.camera_id, site_id=args.site_id)
+    qualif = None
+    if not args.sans_qualification:
+        from qualification import MachineEtats
+        qualif = MachineEtats(seuil_probable=args.seuil_probable,
+                              seuil_confirme=args.seuil_confirme,
+                              fin_apres_s=args.fin_evenement_s)
+        log.info("qualification active : suspicion -> probable (%d obs) -> confirme (%d obs)",
+                 args.seuil_probable, args.seuil_confirme)
+    else:
+        log.warning("qualification desactivee : un evenement par image, "
+                    "~137 600 par jour et par camera (mesure)")
+    bus = BusEvenements(sorties, camera_id=args.camera_id, site_id=args.site_id,
+                        qualification=qualif)
 
     source = int(args.source) if args.source.isdigit() else args.source
     cap = CaptureRobuste(source, bus=bus, boucler=args.boucler)

@@ -131,6 +131,109 @@ PROFILS: dict[str, Profil] = {
 }
 
 
+# ── Machine à états des évènements gradués ───────────────────────────────────
+
+ETATS = ("suspicion", "probable", "confirme")
+
+
+@dataclass
+class Piste:
+    """Un fait suivi dans le temps, par opposition à une détection sur image."""
+    cle: str
+    debut: float
+    derniere_vue: float
+    observations: int = 1
+    etat: str = "suspicion"
+    conf_max: float = 0.0
+
+
+class MachineEtats:
+    """Transforme une suite de détections en **un évènement par fait**.
+
+    C'est la brique qui répond au constat central du plan v6 : le moteur émet
+    2 869 évènements en 30 minutes, soit ~137 600 par jour et par caméra, parce
+    qu'il signale chaque *image* où quelque chose est vu au lieu de signaler le
+    *fait* lui-même. Aucune plateforme ne consomme cela, et le problème n'est
+    pas la vision des modèles — le détecteur de fumée repère 96,7 % des scènes.
+
+    Une piste naît en `suspicion`, passe `probable` puis `confirme` à mesure
+    qu'elle persiste, et se termine quand plus rien ne l'alimente. **Seuls les
+    changements d'état produisent un évènement** : un feu observé pendant trois
+    minutes en produit trois ou quatre, pas quatre mille.
+
+    Les seuils sont volontairement des paramètres. Le plan v5 attribue à chaque
+    scénario un budget de latence différent — 30 s pour un départ de feu, 3 à
+    5 s pour une chute, où une personne au sol a besoin d'aide immédiatement.
+    Une valeur unique serait donc fausse pour au moins un scénario.
+    """
+
+    def __init__(self, seuil_probable: int = 3, seuil_confirme: int = 8,
+                 fin_apres_s: float = 5.0, resolution_px: int = 160):
+        self.seuil_probable = seuil_probable
+        self.seuil_confirme = seuil_confirme
+        self.fin_apres_s = fin_apres_s
+        self.resolution_px = resolution_px
+        self.pistes: dict[str, Piste] = {}
+
+    def cle_de(self, source: str, type_ev: str, boite=None, camera_id: str = "") -> str:
+        """Identité d'un fait : sa nature et sa zone, pas sa position exacte.
+
+        La position est arrondie à une grille grossière — deux détections du
+        même panache à trois pixels d'écart sont le même fait. Sans cet
+        arrondi, chaque tremblement de boîte créerait une piste nouvelle et la
+        machine ne servirait à rien.
+        """
+        if not boite:
+            return f"{camera_id}|{source}|{type_ev}"
+        x = int((boite[0] + boite[2]) / 2 / self.resolution_px)
+        y = int((boite[1] + boite[3]) / 2 / self.resolution_px)
+        return f"{camera_id}|{source}|{type_ev}|{x}:{y}"
+
+    def observer(self, cle: str, t: float, conf: float = 0.0) -> tuple[Piste, str | None]:
+        """Enregistre une détection. Renvoie la piste et l'état si celui-ci
+        vient de changer (`None` sinon — donc rien à émettre)."""
+        p = self.pistes.get(cle)
+        if p is None:
+            p = self.pistes[cle] = Piste(cle, t, t, 1, "suspicion", conf)
+            return p, "suspicion"
+
+        p.derniere_vue = t
+        p.observations += 1
+        p.conf_max = max(p.conf_max, conf)
+        avant = p.etat
+        if p.observations >= self.seuil_confirme:
+            p.etat = "confirme"
+        elif p.observations >= self.seuil_probable:
+            p.etat = "probable"
+        return p, (p.etat if p.etat != avant else None)
+
+    def expirer(self, t: float) -> list[Piste]:
+        """Pistes que plus rien n'alimente : elles se terminent.
+
+        Le signal de fin compte autant que celui de début — sans lui, la
+        plateforme ne sait pas qu'un incident est clos et garde une alerte
+        ouverte indéfiniment.
+        """
+        finies = [p for p in self.pistes.values() if t - p.derniere_vue > self.fin_apres_s]
+        for p in finies:
+            del self.pistes[p.cle]
+        return finies
+
+    def preuves(self, p: Piste, t: float) -> dict:
+        """Éléments factuels accompagnant l'évènement.
+
+        Le moteur cesse ainsi de décider à la place de son intégrateur : la
+        plateforme applique sa propre politique — alerter dès `probable` sur un
+        site sensible, attendre `confirme` ailleurs.
+        """
+        return {
+            "etat": p.etat,
+            "duree_s": round(t - p.debut, 2),
+            "observations": p.observations,
+            "conf_max": round(p.conf_max, 3),
+        }
+
+
 class DetecteurProfil:
     """Classe la scène en jour / dégradé / nuit d'après sa luminance.
 

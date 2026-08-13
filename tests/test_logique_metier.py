@@ -682,5 +682,124 @@ def test_le_jeton_part_en_en_tete_authorization():
         assert entetes.get("Authorization") == "Bearer secret-123"
 
 
+# ── Machine à états des évènements gradués (plan v5 §1.3, plan v6 §1.2) ──────
+
+def test_une_detection_isolee_reste_une_suspicion():
+    """Le premier signalement n'est jamais une confirmation."""
+    m = q.MachineEtats(seuil_probable=3, seuil_confirme=8)
+    piste, etat = m.observer("k", 0.0, 0.5)
+    assert etat == "suspicion" and piste.etat == "suspicion"
+
+
+def test_la_piste_monte_en_grade_avec_la_persistance():
+    m = q.MachineEtats(seuil_probable=3, seuil_confirme=5)
+    etats = [m.observer("k", float(i), 0.5)[1] for i in range(6)]
+    # suspicion a la 1re, probable a la 3e, confirme a la 5e, rien entre les deux
+    assert etats == ["suspicion", None, "probable", None, "confirme", None]
+
+
+def test_seuls_les_changements_d_etat_produisent_un_evenement():
+    """C'est LA propriété qui tue le déluge : un feu observé mille fois ne
+    produit pas mille évènements."""
+    m = q.MachineEtats(seuil_probable=3, seuil_confirme=8)
+    changements = [e for _, e in (m.observer("k", float(i), 0.5) for i in range(1000))
+                   if e is not None]
+    assert changements == ["suspicion", "probable", "confirme"]
+
+
+def test_deux_zones_distinctes_sont_deux_faits():
+    """Deux départs de feu éloignés ne doivent pas se confondre en un seul."""
+    m = q.MachineEtats(resolution_px=160)
+    a = m.cle_de("feu", "fire", (10, 10, 50, 50), "cam-1")
+    b = m.cle_de("feu", "fire", (900, 900, 950, 950), "cam-1")
+    assert a != b
+
+
+def test_un_tremblement_de_boite_ne_cree_pas_une_piste_nouvelle():
+    """Sans arrondi spatial, chaque oscillation de rectangle ouvrirait une
+    piste et la machine ne servirait à rien."""
+    m = q.MachineEtats(resolution_px=160)
+    a = m.cle_de("feu", "fire", (100, 100, 200, 200), "cam-1")
+    b = m.cle_de("feu", "fire", (103, 98, 204, 201), "cam-1")
+    assert a == b
+
+
+def test_deux_cameras_ne_se_melangent_pas():
+    m = q.MachineEtats()
+    a = m.cle_de("feu", "fire", (10, 10, 50, 50), "cam-1")
+    b = m.cle_de("feu", "fire", (10, 10, 50, 50), "cam-2")
+    assert a != b
+
+
+def test_une_piste_non_alimentee_se_termine():
+    """Sans signal de fin, la plateforme garderait une alerte ouverte
+    indéfiniment."""
+    m = q.MachineEtats(fin_apres_s=5.0)
+    m.observer("k", 0.0, 0.5)
+    assert m.expirer(3.0) == []
+    finies = m.expirer(10.0)
+    assert len(finies) == 1 and finies[0].cle == "k"
+    assert "k" not in m.pistes          # la piste est bien liberee
+
+
+def test_les_preuves_accompagnent_l_evenement():
+    """Le moteur cesse de décider à la place de son intégrateur : la plateforme
+    applique sa politique à partir de ces éléments."""
+    m = q.MachineEtats(seuil_probable=2, seuil_confirme=3)
+    for i in range(3):
+        piste, _ = m.observer("k", float(i), 0.4 + i / 10)
+    p = m.preuves(piste, 10.0)
+    assert p["etat"] == "confirme"
+    assert p["observations"] == 3
+    assert p["duree_s"] == 10.0
+    assert p["conf_max"] == pytest.approx(0.6)
+
+
+# ── Intégration de la qualification dans le bus ──────────────────────────────
+
+def test_le_bus_qualifie_reduit_le_flux():
+    """Mille détections du même fait -> trois évènements, pas mille."""
+    s = SortieMemoire()
+    bus = BusEvenements([s], anti_repetition_s=0, camera_id="cam-1",
+                        qualification=q.MachineEtats(seuil_probable=3, seuil_confirme=8,
+                                                     fin_apres_s=1e9))
+    for i in range(1000):
+        bus.publier(Evenement(float(i) / 100, i, "feu", "fire", "FIRE",
+                              conf=0.5, box=(100, 100, 200, 200)))
+    assert [e.type for e in s.recus] == ["fire", "fire", "fire"]
+    assert [e.extra["etat"] for e in s.recus] == ["suspicion", "probable", "confirme"]
+
+
+def test_le_bus_signale_la_fin_de_l_evenement():
+    s = SortieMemoire()
+    bus = BusEvenements([s], anti_repetition_s=0, camera_id="cam-1",
+                        qualification=q.MachineEtats(fin_apres_s=2.0))
+    bus.publier(Evenement(0.0, 1, "feu", "fire", "FIRE", box=(10, 10, 50, 50)))
+    # un autre fait, bien plus tard : il fait expirer le premier
+    bus.publier(Evenement(60.0, 2, "feu", "fire", "FIRE", box=(900, 900, 950, 950)))
+    assert any(e.type == "fire_termine" for e in s.recus)
+
+
+def test_les_evenements_techniques_ne_sont_jamais_retardes():
+    """Une caméra tombée doit se signaler immédiatement : la faire passer par
+    la machine à états la mettrait en « suspicion »."""
+    s = SortieMemoire()
+    bus = BusEvenements([s], anti_repetition_s=0,
+                        qualification=q.MachineEtats(seuil_probable=3))
+    bus.publier(Evenement(0.0, -1, "capture", "flux_perdu", "Flux vidéo perdu"))
+    assert len(s.recus) == 1
+    assert "etat" not in s.recus[0].extra
+
+
+def test_sans_qualification_le_comportement_d_origine_est_intact():
+    """Garde-fou du plan v5 : la couche doit être débrayable pour comparer en
+    parallèle et revenir en arrière sans redéploiement."""
+    s = SortieMemoire()
+    bus = BusEvenements([s], anti_repetition_s=0, qualification=None)
+    for i in range(5):
+        bus.publier(Evenement(float(i), i, "feu", "fire", f"FIRE {i}", box=(10, 10, 50, 50)))
+    assert len(s.recus) == 5
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

@@ -48,7 +48,7 @@ conduit à croire faible un détecteur qui fonctionne très bien.
 | Porte | ouverte / fermée / entrouverte | non mesurée | ⚠️ À valider |
 | Personnes, véhicules, objets courants | 80 classes COCO | héritée de YOLO26 | ✅ Exploitable |
 | Franchissement de ligne | calculé, pas détecté | jamais mesurée | ⚠️ Non validé |
-| Objet abandonné | code existant | **non branché** | ❌ Indisponible |
+| Objet abandonné | calculé, pas détecté | logique testée, terrain non mesuré | ✅ Disponible |
 | Foule / densité | code existant | **non branché** | ❌ Indisponible |
 | Balisage de chantier | — | — | ❌ Inexistant |
 
@@ -205,20 +205,32 @@ détection générale.
 `track_id` de part et d'autre d'une ligne définie en configuration.
 **Jamais mesuré** sur un jeu annoté. Fonctionne, mais aucun chiffre ne l'étaye.
 
+**Objet abandonné** — `AnalyseurObjetAbandonne`. Un bagage (`backpack`,
+`handbag`, `suitcase`, `bicycle`, `skateboard` — classes COCO déjà connues du
+détecteur général) resté immobile, sans personne à proximité, pendant le délai
+configuré (`--delai-abandon`, 30 s par défaut).
+
+**Aucun entraînement n'a été nécessaire** : les classes existent dans COCO et le
+suivi est déjà calculé. Le coût mesuré est de **0,2 % du temps de traitement**.
+
+Les seuils sont relatifs à la taille de l'objet et non en pixels absolus : un
+sac à 5 m et le même sac à 50 m n'occupent pas le même nombre de pixels, et un
+rayon fixe n'aurait pas le même sens selon la profondeur de la scène.
+
+Une alerte au plus par objet : sans cela un sac oublié produirait un évènement
+par image jusqu'à la fin du flux.
+
+**Limite** : la logique est couverte par sept tests unitaires, mais **jamais
+mesurée sur des séquences réelles** — il n'existe pas encore de corpus vidéo
+annoté (plan v6 §4.1). Le taux de fausse alarme sur le terrain est inconnu.
+
 ---
 
 ## 8. Ce qui existe mais n'est pas disponible
 
-Deux détecteurs sont écrits mais **ne sont branchés dans aucun pipeline** — ce
-sont des scripts autonomes dans `surveillance_suite/detectors/`, sans analyseur
-correspondant dans `improvements/unified_surveillance.py`. Ils ne produisent
-donc **aucun évènement** aujourd'hui.
-
-**Objet abandonné** — `abandoned_object_detector.py`. Principe : un objet
-(sac, valise) suivi immobile pendant N secondes sans personne à proximité.
-Jamais mesuré.
-
-**Foule et densité** — `crowd_density_detector_auto.py`. Compte les personnes et
+**Foule et densité** — `crowd_density_detector_auto.py`, script autonome dans
+`surveillance_suite/detectors/`, sans analyseur correspondant dans le pipeline
+unifié : il ne produit **aucun évènement** aujourd'hui. Il compte les personnes et
 estime les distances **sans calibration** : la hauteur en pixels d'une personne
 donne l'échelle locale, en supposant une taille humaine de 1,70 m.
 

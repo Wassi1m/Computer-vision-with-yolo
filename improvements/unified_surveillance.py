@@ -719,6 +719,128 @@ class AnalyseurLigne(Analyseur):
         return frame
 
 
+class AnalyseurObjetAbandonne(Analyseur):
+    """Objet posé, immobile, et laissé sans surveillance pendant un délai.
+
+    Comme `AnalyseurLigne`, ne fait **aucune inférence** : les classes visées
+    (sac à dos, valise, sac à main…) appartiennent déjà aux 80 classes COCO du
+    détecteur général, et leur suivi est déjà calculé. Il n'y a donc rien à
+    entraîner et le coût est celui de quelques comparaisons de boîtes.
+
+    C'est aussi pourquoi cet analyseur remplace
+    `surveillance_suite/detectors/abandoned_object_detector.py`, qui chargeait
+    et exécutait *son propre* modèle YOLO — doublant l'inférence la plus coûteuse
+    du pipeline pour un résultat déjà disponible.
+
+    Les seuils sont exprimés **relativement à la taille de l'objet** et non en
+    pixels absolus comme dans le détecteur d'origine. Un sac à 5 m et le même
+    sac à 50 m n'occupent pas le même nombre de pixels : un rayon de proximité
+    fixe de 150 px vaudrait quelques centimètres au premier plan et plusieurs
+    mètres au fond de la scène. Rapporté à la diagonale de l'objet, le critère
+    garde le même sens partout dans l'image.
+    """
+    nom = "objet_abandonne"
+    every = 1
+
+    # Bagagerie et objets encombrants susceptibles d'etre deposes puis oublies.
+    # Volontairement restreint : elargir a « bottle » ou « cell phone » noierait
+    # l'aval sous des objets sans enjeu de securite.
+    CLASSES = ("backpack", "handbag", "suitcase", "bicycle", "skateboard")
+
+    def __init__(self, delai_s: float = 30.0, classes=None,
+                 immobilite: float = 0.30, proximite: float = 2.0,
+                 oubli_s: float = 10.0):
+        self.delai_s = delai_s
+        self.classes = set(classes or self.CLASSES)
+        self.immobilite = immobilite      # fraction de la diagonale de l'objet
+        self.proximite = proximite        # multiple de la diagonale de l'objet
+        self.oubli_s = oubli_s
+        self.etats: dict[int, dict] = {}  # track_id -> etat
+
+    @staticmethod
+    def _centre(b):
+        return (b[0] + b[2]) / 2, (b[1] + b[3]) / 2
+
+    @staticmethod
+    def _diagonale(b):
+        return max(1.0, ((b[2] - b[0]) ** 2 + (b[3] - b[1]) ** 2) ** 0.5)
+
+    @staticmethod
+    def _distance_a_boite(point, b) -> float:
+        """Distance du point au bord de la boîte, nulle s'il est dedans.
+
+        On mesure jusqu'au *bord* et non jusqu'au centre : une personne est une
+        boîte haute, et la distance à son centre placerait ses pieds à plusieurs
+        dizaines de pixels d'elle-même.
+        """
+        x, y = point
+        dx = max(b[0] - x, 0, x - b[2])
+        dy = max(b[1] - y, 0, y - b[3])
+        return (dx * dx + dy * dy) ** 0.5
+
+    def process(self, frame, ctx):
+        t = ctx["t"]
+        personnes = [b for _, b in ctx.get("personnes", [])]
+        evs = []
+        vus = set()
+
+        for o in ctx.get("objets", []):
+            tid = o.get("track_id", -1)
+            if tid < 0 or o.get("label") not in self.classes:
+                continue
+            vus.add(tid)
+            boite = o["box"]
+            centre, diag = self._centre(boite), self._diagonale(boite)
+
+            e = self.etats.get(tid)
+            if e is None:
+                # Un objet deja pose a l'ouverture du flux doit pouvoir alerter :
+                # on part du principe qu'il vient d'etre laisse, faute de savoir
+                # ce qui s'est passe avant. L'alerte ne partira qu'apres `delai_s`.
+                self.etats[tid] = {"ancre": centre, "derniere_personne": t,
+                                   "vu": t, "signale": False}
+                continue
+
+            e["vu"] = t
+            # L'objet s'est-il deplace depuis son point d'ancrage ? Si oui, il est
+            # manipule ou transporte : on re-ancre et on repart de zero.
+            if (abs(centre[0] - e["ancre"][0]) ** 2
+                    + abs(centre[1] - e["ancre"][1]) ** 2) ** 0.5 > self.immobilite * diag:
+                e["ancre"] = centre
+                e["derniere_personne"] = t
+                e["signale"] = False
+                continue
+
+            if any(self._distance_a_boite(centre, p) <= self.proximite * diag
+                   for p in personnes):
+                e["derniere_personne"] = t
+                e["signale"] = False
+                continue
+
+            seul_depuis = t - e["derniere_personne"]
+            if seul_depuis >= self.delai_s and not e["signale"]:
+                e["signale"] = True
+                evs.append(Evenement(
+                    t, ctx["frame"], self.nom, "objet_abandonne",
+                    f"{o['label']} #{tid} laissé sans surveillance "
+                    f"depuis {int(seul_depuis)} s",
+                    conf=float(o.get("conf", 0.0)), box=tuple(boite),
+                    extra={"track_id": tid, "classe": o["label"],
+                           "secondes_sans_surveillance": round(seul_depuis, 1)}))
+
+        # Un flux de longue duree voit passer des milliers d'identifiants : sans
+        # cet oubli, l'etat croitrait indefiniment (cf. plan v6 §2.2, derive
+        # memoire).
+        for tid in [k for k, e in self.etats.items()
+                    if t - e["vu"] > self.oubli_s and k not in vus]:
+            del self.etats[tid]
+
+        return evs
+
+    def draw(self, frame):
+        return frame
+
+
 class AnalyseurFeu(Analyseur):
     nom = "feu"
 
@@ -882,6 +1004,7 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
                               imgsz=args.imgsz, every=args.every_pose,
                               ratio=config.FALL_ASPECT_RATIO_THRESHOLD, angle=config.FALL_ANGLE_THRESHOLD_DEG)
     ajouter("chute", _chute)
+    ajouter("objet_abandonne", lambda: AnalyseurObjetAbandonne(delai_s=args.delai_abandon))
     ajouter("feu", lambda: AnalyseurFeu(
         str(existant(SUITE / config.MODEL_FIRE_SMOKE)), config.CONF_THRESHOLD, args.every_fire))
     ajouter("lpr", lambda: AnalyseurPlaque(
@@ -936,6 +1059,9 @@ def main():
     ap.add_argument("--every-epi", type=int, default=_env("every_epi", 3, int))
     ap.add_argument("--every-pose", type=int, default=_env("every_pose", 2, int))
     ap.add_argument("--every-fire", type=int, default=_env("every_fire", 5, int))
+    ap.add_argument("--delai-abandon", type=float, default=_env("delai_abandon", 30.0, float),
+                    help="secondes sans personne a proximite avant de signaler "
+                         "un objet abandonne (defaut 30)")
     ap.add_argument("--every-lpr", type=int, default=_env("every_lpr", 10, int))
     ap.add_argument("--every-door", type=int, default=_env("every_door", 3, int))
     ap.add_argument("--conf", type=float, default=_env("conf", None, float),

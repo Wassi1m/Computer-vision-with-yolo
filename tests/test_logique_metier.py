@@ -323,5 +323,89 @@ def test_smoke_distant_est_replie_sur_l_evenement_smoke():
     assert dets[2]["label_modele"] == "smoke_distant"
 
 
+# ── Objet abandonné ──────────────────────────────────────────────────────────
+
+from unified_surveillance import AnalyseurObjetAbandonne  # noqa: E402
+
+SAC = (400, 400, 440, 440)          # diagonale ~57 px
+
+
+def _ctx(t, objets, personnes=()):
+    return {"t": t, "frame": int(t * 10), "objets": objets,
+            "personnes": [(i, b) for i, b in enumerate(personnes)]}
+
+
+def _sac(box=SAC, tid=1):
+    return [{"box": box, "label": "backpack", "track_id": tid, "conf": 0.8}]
+
+
+def test_objet_seul_declenche_apres_le_delai():
+    """Le cœur du scénario : un sac posé, personne autour, 30 secondes."""
+    a = AnalyseurObjetAbandonne(delai_s=30.0)
+    assert a.process(None, _ctx(0.0, _sac())) == []      # premiere vue : ancrage
+    assert a.process(None, _ctx(29.0, _sac())) == []     # pas encore
+    evs = a.process(None, _ctx(30.5, _sac()))
+    assert len(evs) == 1 and evs[0].type == "objet_abandonne"
+    assert evs[0].extra["classe"] == "backpack"
+
+
+def test_une_seule_alerte_par_objet():
+    """Sans cela, un sac oublié produirait une alerte par image jusqu'à la fin
+    du flux -- exactement le deluge que le plan v6 combat."""
+    a = AnalyseurObjetAbandonne(delai_s=30.0)
+    a.process(None, _ctx(0.0, _sac()))
+    total = sum(len(a.process(None, _ctx(t, _sac()))) for t in (31.0, 32.0, 60.0, 120.0))
+    assert total == 1
+
+
+def test_personne_a_proximite_empeche_l_alerte():
+    """Un sac au pied de son propriétaire n'est pas abandonné."""
+    a = AnalyseurObjetAbandonne(delai_s=30.0)
+    proprietaire = (420, 300, 460, 440)      # accole au sac
+    for t in (0.0, 10.0, 20.0, 30.0, 40.0):
+        evs = a.process(None, _ctx(t, _sac(), [proprietaire]))
+    assert evs == []
+
+
+def test_objet_deplace_n_est_pas_abandonne():
+    """Un sac transporté bouge : le compteur doit repartir de zéro."""
+    a = AnalyseurObjetAbandonne(delai_s=30.0)
+    a.process(None, _ctx(0.0, _sac()))
+    a.process(None, _ctx(20.0, _sac()))
+    a.process(None, _ctx(25.0, _sac((600, 400, 640, 440))))   # deplace
+    assert a.process(None, _ctx(40.0, _sac((600, 400, 640, 440)))) == []
+
+
+def test_le_rayon_de_proximite_suit_la_taille_de_l_objet():
+    """Seuils relatifs, pas en pixels absolus : à 50 m un sac fait quelques
+    pixels, et un rayon fixe de 150 px y couvrirait la moitié de la scène."""
+    a = AnalyseurObjetAbandonne(delai_s=30.0, proximite=2.0)
+    petit, grand = (100, 100, 110, 110), (100, 100, 300, 300)
+    personne = (140, 100, 160, 200)
+    # meme personne, meme ecart : trop loin du petit objet, proche du grand
+    assert a._distance_a_boite(a._centre(petit), personne) > 2.0 * a._diagonale(petit)
+    assert a._distance_a_boite(a._centre(grand), personne) <= 2.0 * a._diagonale(grand)
+
+
+def test_les_pistes_disparues_sont_oubliees():
+    """Un flux de longue durée voit passer des milliers d'identifiants ; sans
+    oubli, l'état croît indéfiniment (derive memoire, plan v6 §2.2)."""
+    a = AnalyseurObjetAbandonne(delai_s=30.0, oubli_s=5.0)
+    a.process(None, _ctx(0.0, _sac(tid=7)))
+    assert 7 in a.etats
+    a.process(None, _ctx(20.0, _sac(tid=8)))    # 7 a disparu depuis longtemps
+    assert 7 not in a.etats
+
+
+def test_classe_hors_perimetre_est_ignoree():
+    """Restreindre le périmètre évite de noyer l'aval sous des objets sans
+    enjeu de sécurité."""
+    a = AnalyseurObjetAbandonne(delai_s=30.0)
+    chaise = [{"box": SAC, "label": "chair", "track_id": 1, "conf": 0.9}]
+    a.process(None, _ctx(0.0, chaise))
+    assert a.process(None, _ctx(60.0, chaise)) == []
+    assert a.etats == {}
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

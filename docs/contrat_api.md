@@ -1,6 +1,6 @@
 # Contrat d'interface — moteur de détection
 
-Version : 1.0 (2026-08-08)
+Version : 1.1 (2026-08-13)
 
 Ce document décrit ce que le moteur de détection produit et comment le
 consommer. Il s'adresse à l'équipe qui développe la plateforme d'alerting
@@ -38,16 +38,36 @@ Disponibles aujourd'hui, cumulables :
 | **Fichier JSONL** | `--events chemin.jsonl` | Un objet JSON par ligne. Utile en test et comme trace locale de secours. |
 | **Console** | (défaut si aucun autre) | Une ligne lisible par évènement. |
 
-**Garanties et limites du webhook**, à connaître avant intégration :
+**Garanties du webhook**, à connaître avant intégration :
 
+- **Livraison garantie, « au moins une fois ».** Chaque évènement est écrit sur
+  disque (`--journal-livraison`) *avant* toute tentative d'envoi, et la position
+  de lecture n'avance qu'après un accusé du serveur. Une coupure réseau ou un
+  redémarrage du moteur ne perd donc rien : l'envoi reprend où il s'était
+  arrêté. **Utiliser `event_id` pour dédupliquer** — un accusé perdu en chemin
+  fait renvoyer l'évènement.
+- **Réessais avec temporisation croissante** (1 s, 2 s, 4 s… plafonnée à 60 s),
+  jusqu'à `--webhook-tentatives` (8 par défaut). Marteler un serveur qui
+  redémarre ne ferait que retarder son rétablissement.
+- **L'abandon est possible mais jamais silencieux** : au-delà des tentatives,
+  l'évènement est compté (`abandons` sur `/health`), journalisé en `ERROR`, et
+  **reste dans le fichier journal** pour reprise manuelle. Un abandon fait
+  passer `/health` en état non sain.
 - L'envoi est **asynchrone** : le moteur n'attend pas la réponse et ne ralentit
-  pas si le consommateur est lent.
-- Il n'y a **ni réessai ni accusé de réception** : un évènement perdu est perdu.
-  C'est un choix assumé — la détection ne doit jamais s'arrêter parce que le
-  consommateur est indisponible. Si une livraison garantie est nécessaire, il
-  faudra passer à une file de messages ; c'est précisément la décision à
-  arrêter ensemble.
+  jamais, quelle que soit la lenteur du consommateur.
+- **Authentification** : `--webhook-jeton` ajoute un en-tête
+  `Authorization: Bearer …`. Sans lui, quiconque connaît l'URL peut injecter de
+  faux évènements dans la plateforme.
 - L'ordre d'arrivée **n'est pas garanti**. Utiliser le champ `t` pour ordonner.
+
+L'endpoint `/health` expose l'état de la livraison :
+
+```json
+"livraison": {"livres": 1284, "echecs": 3, "abandons": 0, "octets_en_attente": 0}
+```
+
+`octets_en_attente` durablement non nul signifie que la plateforme ne consomme
+plus — c'est le signal à surveiller côté supervision.
 
 ## 3. Format d'un évènement
 
@@ -62,12 +82,18 @@ Objet JSON, encodé en UTF-8.
   "libelle": "Personne 1 — SANS CASQUE !",
   "conf": 0.0,
   "box": [189, 250, 266, 556],
-  "extra": {}
+  "extra": {},
+  "camera_id": "cam-quai-3",
+  "site_id": "site-A",
+  "event_id": "dc3c64a9bc5743be8bbdbdf7e6d4b611"
 }
 ```
 
 | Champ | Type | Description |
 |---|---|---|
+| `camera_id` | string | **Caméra émettrice**, issue de la configuration (`--camera-id`). Vide si non configuré — le moteur émet alors un avertissement au démarrage. Indispensable dès qu'un site compte plusieurs caméras. |
+| `site_id` | string | Site, issu de la configuration (`--site-id`). Facultatif. |
+| `event_id` | string | Identifiant unique (hexadécimal, 32 caractères). **À utiliser pour dédupliquer** : la livraison étant « au moins une fois », un accusé perdu fait renvoyer l'évènement. |
 | `t` | float | Horodatage Unix (secondes, décimales). **Clé d'ordonnancement.** |
 | `frame` | int | Numéro d'image depuis le démarrage. `-1` pour les évènements techniques (flux perdu/repris) qui ne proviennent pas d'une image. |
 | `source` | string | Module émetteur : `epi`, `chute`, `feu`, `ligne`, `porte`, `lpr`, `capture`. |
@@ -159,10 +185,10 @@ provoque un arrêt immédiat.
 - **Cadence** : environ 3,8 images/seconde sur CPU (12 cœurs, sans GPU). Ce
   n'est pas un flux temps réel à 25 images/seconde ; les évènements sont
   échantillonnés à cette cadence.
-- **Pas de livraison garantie** sur le webhook (voir §2).
+- ~~Pas de livraison garantie sur le webhook~~ — **corrigé le 2026-08-13** : journal sur disque, réessais, reprise après redémarrage (voir §2).
 - **Une seule caméra par processus.** Plusieurs caméras demandent plusieurs
-  instances, et le champ identifiant de caméra n'existe pas encore dans le
-  format d'évènement — à ajouter dès que le multi-caméra sera au programme.
+  instances. Chacune porte désormais son `camera_id` (`--camera-id`), donc les
+  flux d'évènements de plusieurs instances peuvent être agrégés sans ambiguïté.
 - **Données sensibles** : les évènements `plaque` contiennent des numéros
   d'immatriculation en clair. La politique de rétention côté plateforme doit
   être définie explicitement.

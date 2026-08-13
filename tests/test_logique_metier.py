@@ -533,5 +533,154 @@ def test_la_confirmation_filtre_un_pic_isole():
     assert a.process(None, _ctx_foule(2.0, _gens(1))) == []
 
 
+# ── Identité des évènements (plan v6 §1.1, §1.3) ─────────────────────────────
+
+def test_le_bus_appose_camera_id_et_site_id():
+    """Sans identifiant de caméra, la plateforme reçoit des évènements sans
+    savoir d'où ils viennent — inexploitable dès la deuxième caméra."""
+    s = SortieMemoire()
+    bus = BusEvenements([s], anti_repetition_s=0, camera_id="cam-quai-3", site_id="site-A")
+    bus.publier(Evenement(time.time(), 1, "feu", "fire", "FIRE détecté"))
+    assert s.recus[0].camera_id == "cam-quai-3"
+    assert s.recus[0].site_id == "site-A"
+
+
+def test_chaque_evenement_recoit_un_identifiant_unique():
+    """`event_id` permet à la plateforme de dédupliquer après un rejeu réseau :
+    sans lui, un webhook réémis crée un doublon indiscernable."""
+    s = SortieMemoire()
+    bus = BusEvenements([s], anti_repetition_s=0)
+    for i in range(3):
+        bus.publier(Evenement(time.time() + i, i, "feu", "fire", f"feu {i}"))
+    ids = [e.event_id for e in s.recus]
+    assert all(ids) and len(set(ids)) == 3
+
+
+def test_un_identifiant_deja_pose_n_est_pas_ecrase():
+    """Un analyseur qui met à jour un évènement existant doit pouvoir conserver
+    son identité."""
+    s = SortieMemoire()
+    bus = BusEvenements([s], anti_repetition_s=0, camera_id="cam-1")
+    ev = Evenement(time.time(), 1, "feu", "fire", "feu")
+    ev.event_id, ev.camera_id = "fixe-123", "cam-9"
+    bus.publier(ev)
+    assert s.recus[0].event_id == "fixe-123"
+    assert s.recus[0].camera_id == "cam-9"
+
+
+# ── Livraison garantie (plan v6 §2.1) ────────────────────────────────────────
+
+from unified_surveillance import SortieWebhook  # noqa: E402
+
+
+def _webhook(tmp_path, reponses, **kw):
+    """SortieWebhook dont l'envoi réseau est remplacé par une liste de verdicts."""
+    w = SortieWebhook.__new__(SortieWebhook)
+    w.url, w.timeout_s, w.jeton = "http://test", 0.01, ""
+    w.tentatives_max = kw.get("tentatives_max", 3)
+    w.attente_max_s = 0.0
+    w.journal = tmp_path / "journal.jsonl"
+    w.position = w.journal.with_suffix(".pos")
+    w.echecs = w.abandons = w.livres = 0
+    w._verrou = __import__("threading").Lock()
+    w._reveil = __import__("threading").Event()
+    w._stop = __import__("threading").Event()
+    w._f = open(w.journal, "a", encoding="utf-8")
+    w.envoyes = []
+
+    def faux_poster(charge):
+        ok = reponses.pop(0) if reponses else True
+        if ok:
+            w.envoyes.append(charge)
+        else:
+            w.echecs += 1
+        return ok
+    w._poster = faux_poster
+    return w
+
+
+def _ev(n=1):
+    return Evenement(1000.0 + n, n, "feu", "fire", f"feu {n}", extra={"n": n})
+
+
+def test_l_evenement_est_ecrit_sur_disque_avant_tout_envoi():
+    """C'est ce qui garantit qu'un arrêt brutal ne perd rien."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        w = _webhook(Path(d), [])
+        w.emettre(_ev())
+        assert w.journal.exists() and w.journal.read_text().strip()
+
+
+def test_un_echec_reseau_ne_perd_pas_l_evenement():
+    """Le cas qui motive tout : un départ de feu détecté pendant un redémarrage
+    de la plateforme ne doit pas disparaître."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        w = _webhook(Path(d), [False, False, True])
+        w.emettre(_ev())
+        ligne = w.journal.read_bytes().strip()
+        assert w._livrer(ligne) is True        # reussit a la 3e tentative
+        assert w.echecs == 2 and w.abandons == 0
+        assert len(w.envoyes) == 1
+
+
+def test_l_abandon_est_compte_jamais_silencieux():
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        w = _webhook(Path(d), [False] * 3, tentatives_max=3)
+        w.emettre(_ev())
+        w._livrer(w.journal.read_bytes().strip())
+        assert w.abandons == 1
+
+
+def test_la_position_reprend_apres_redemarrage():
+    """Position sur disque : au redémarrage, l'envoi repart où il s'était
+    arrêté, sans rejouer ce qui est déjà parti ni perdre le reste."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        w = _webhook(Path(d), [])
+        for i in (1, 2, 3):
+            w.emettre(_ev(i))
+        lignes = w.journal.read_bytes().splitlines(keepends=True)
+        w._ecrire_position(len(lignes[0]))       # le premier est parti
+        assert w._lire_position() == len(lignes[0])
+        # ce qui reste a livrer = les deux suivants
+        assert w.en_attente == len(lignes[1]) + len(lignes[2])
+
+
+def test_position_illisible_rejoue_tout_plutot_que_de_perdre():
+    """Si le fichier de position est corrompu, mieux vaut renvoyer des doublons
+    — que `event_id` permet de filtrer — que perdre des évènements."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        w = _webhook(Path(d), [])
+        w.emettre(_ev())
+        w.position.write_text("pas un nombre")
+        assert w._lire_position() == 0
+
+
+def test_le_jeton_part_en_en_tete_authorization():
+    """Sans authentification, quiconque connaît l'URL peut injecter de faux
+    évènements dans la plateforme."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        w = _webhook(Path(d), [])
+        w.jeton = "secret-123"
+        entetes = {}
+
+        def capture(url, data=None, headers=None):
+            entetes.update(headers or {})
+            raise RuntimeError("pas d'envoi reel")
+        import urllib.request
+        vrai = urllib.request.Request
+        urllib.request.Request = capture
+        try:
+            SortieWebhook._poster(w, b"{}")
+        finally:
+            urllib.request.Request = vrai
+        assert entetes.get("Authorization") == "Bearer secret-123"
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

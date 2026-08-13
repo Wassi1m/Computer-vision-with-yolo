@@ -42,6 +42,7 @@ import os
 import signal
 import sys
 import threading
+import uuid
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, asdict, field
@@ -101,6 +102,26 @@ class Evenement:
     box: tuple[int, int, int, int] | None = None
     extra: dict = field(default_factory=dict)
 
+    # ── Identité ─────────────────────────────────────────────────────────────
+    #
+    # `camera_id` est rempli par le bus au moment de la publication, et non par
+    # les analyseurs : ceux-ci ignorent tout de la source, et le leur faire
+    # porter obligerait a le passer a chacun.
+    #
+    # Il vient toujours de la CONFIGURATION, jamais d'une deduction depuis
+    # l'URL du flux : deux sites peuvent exposer la meme adresse locale, et un
+    # identifiant qui change parce qu'on a modifie un port serait pire que pas
+    # d'identifiant du tout. Un site reel compte dix a cent cameras ; sans ce
+    # champ la plateforme recoit des evenements sans savoir d'ou ils viennent.
+    camera_id: str = ""
+    site_id: str = ""
+
+    # Identite propre de l'evenement, pour que la plateforme puisse dedupliquer
+    # apres un rejeu reseau et relier les mises a jour d'un meme fait. Sans lui,
+    # un webhook reemis produit un doublon indiscernable d'un vrai second
+    # evenement.
+    event_id: str = ""
+
 
 def _json_defaut(obj):
     """Convertit les types numpy (int64 des coordonnées de boîte, notamment)
@@ -150,35 +171,157 @@ class SortieJSONL(Sortie):
 
 
 class SortieWebhook(Sortie):
-    """POST HTTP par évènement, en tâche de fond.
+    """POST HTTP par évènement, avec **livraison garantie**.
 
-    Implémentation par défaut en attendant la décision de protocole : c'est le
-    mode d'intégration le plus universel. L'envoi est asynchrone et les échecs
-    sont comptés, jamais propagés — le moteur ne doit pas ralentir ni s'arrêter
-    parce que le consommateur est momentanément indisponible.
+    L'implémentation précédente envoyait « au mieux » : sur exception, elle
+    incrémentait un compteur et l'évènement était perdu. Le raisonnement était
+    juste — ne jamais ralentir la détection pour un consommateur indisponible —
+    mais la conséquence ne l'était pas : **un départ de feu détecté pendant un
+    redémarrage de la plateforme disparaissait sans trace**, et personne, ni
+    côté moteur ni côté plateforme, ne pouvait savoir qu'il avait existé.
+
+    Ici, l'évènement est d'abord **écrit sur disque**, puis envoyé par un fil
+    dédié qui n'avance sa position de lecture qu'après un accusé du serveur.
+    Trois propriétés en découlent :
+
+    - une coupure réseau ne perd rien : les évènements s'accumulent et partent
+      au rétablissement ;
+    - un arrêt brutal du moteur ne perd rien non plus, la position étant elle
+      aussi sur disque : au redémarrage, l'envoi reprend où il s'était arrêté ;
+    - l'abandon reste possible après `tentatives_max`, mais il est **journalisé
+      et compté**, jamais silencieux.
+
+    Le prix est une livraison « au moins une fois » : un accusé perdu en chemin
+    fait renvoyer l'évènement. C'est le bon compromis pour de la sécurité, et
+    c'est précisément à cela que sert `event_id` — la plateforme déduplique.
     """
 
-    def __init__(self, url: str, timeout_s: float = 3.0, workers: int = 2):
+    def __init__(self, url: str, timeout_s: float = 3.0, workers: int = 2,
+                 journal: Path | None = None, tentatives_max: int = 8,
+                 attente_max_s: float = 60.0, jeton: str = ""):
         self.url = url
         self.timeout_s = timeout_s
-        self._pool = ThreadPoolExecutor(max_workers=workers)
-        self.echecs = 0
+        self.tentatives_max = tentatives_max
+        self.attente_max_s = attente_max_s
+        self.jeton = jeton
+        self.journal = Path(journal) if journal else Path("evenements_a_livrer.jsonl")
+        self.position = self.journal.with_suffix(".pos")
+        self.journal.parent.mkdir(parents=True, exist_ok=True)
 
-    def _envoyer(self, charge: bytes):
-        import urllib.request
-        try:
-            req = urllib.request.Request(
-                self.url, data=charge, headers={"Content-Type": "application/json"})
-            urllib.request.urlopen(req, timeout=self.timeout_s).close()
-        except Exception:
-            self.echecs += 1
+        self.echecs = 0          # tentatives ratees (cumul)
+        self.abandons = 0        # evenements definitivement abandonnes
+        self.livres = 0
+        self._verrou = threading.Lock()
+        self._reveil = threading.Event()
+        self._stop = threading.Event()
+        self._f = open(self.journal, "a", encoding="utf-8")
+        self._fil = threading.Thread(target=self._boucle, name="webhook", daemon=True)
+        self._fil.start()
+
+    # ── Ecriture (appelee par le bus, doit rester instantanee) ───────────────
 
     def emettre(self, ev):
-        charge = json.dumps(asdict(ev), ensure_ascii=False, default=_json_defaut).encode()
-        self._pool.submit(self._envoyer, charge)
+        ligne = json.dumps(asdict(ev), ensure_ascii=False, default=_json_defaut)
+        with self._verrou:
+            self._f.write(ligne + "\n")
+            self._f.flush()
+            os.fsync(self._f.fileno())   # sans cela, un arret brutal perd le tampon
+        self._reveil.set()
+
+    # ── Livraison (fil dedie) ────────────────────────────────────────────────
+
+    def _lire_position(self) -> int:
+        try:
+            return int(self.position.read_text().strip())
+        except Exception:
+            return 0
+
+    def _ecrire_position(self, octets: int):
+        # Ecriture atomique : un arret entre l'ouverture et l'ecriture laisserait
+        # sinon un fichier de position vide, donc un rejeu de tout le journal.
+        tmp = self.position.with_suffix(".pos.tmp")
+        tmp.write_text(str(octets))
+        tmp.replace(self.position)
+
+    def _poster(self, charge: bytes) -> bool:
+        import urllib.request
+        entetes = {"Content-Type": "application/json"}
+        if self.jeton:
+            # Sans authentification, quiconque connait l'URL peut injecter de
+            # faux evenements dans la plateforme (plan v6 §3.2).
+            entetes["Authorization"] = f"Bearer {self.jeton}"
+        try:
+            req = urllib.request.Request(self.url, data=charge, headers=entetes)
+            urllib.request.urlopen(req, timeout=self.timeout_s).close()
+            return True
+        except Exception as e:
+            self.echecs += 1
+            log.debug("webhook en echec (%s) : %s", type(e).__name__, e)
+            return False
+
+    def _boucle(self):
+        while not self._stop.is_set():
+            pos = self._lire_position()
+            envoye = False
+            try:
+                with open(self.journal, "rb") as f:
+                    f.seek(pos)
+                    ligne = f.readline()
+                    if ligne and ligne.endswith(b"\n"):
+                        if self._livrer(ligne.strip()):
+                            self._ecrire_position(pos + len(ligne))
+                            self.livres += 1
+                        envoye = True
+            except FileNotFoundError:
+                pass
+            if not envoye:
+                # Rien a envoyer : on dort jusqu'au prochain evenement.
+                self._reveil.wait(timeout=1.0)
+                self._reveil.clear()
+
+    def _livrer(self, charge: bytes) -> bool:
+        """Tente la livraison avec temporisation croissante. Renvoie True quand
+        la ligne peut etre consideree comme traitee -- livree, ou abandonnee."""
+        attente = 1.0
+        for tentative in range(1, self.tentatives_max + 1):
+            if self._stop.is_set():
+                return False
+            if self._poster(charge):
+                return True
+            if tentative < self.tentatives_max:
+                # Temporisation croissante : marteler un serveur qui redemarre
+                # ne fait que retarder son retablissement.
+                self._stop.wait(timeout=attente)
+                attente = min(attente * 2, self.attente_max_s)
+        self.abandons += 1
+        log.error("evenement abandonne apres %d tentatives -- conserve dans %s",
+                  self.tentatives_max, self.journal)
+        return True
+
+    @property
+    def en_attente(self) -> int:
+        """Octets de journal pas encore livrés — indicateur à exposer sur /health."""
+        try:
+            return max(0, self.journal.stat().st_size - self._lire_position())
+        except Exception:
+            return 0
 
     def fermer(self):
-        self._pool.shutdown(wait=True)
+        """Laisse une chance de vider la file, sans bloquer l'arrêt indéfiniment.
+
+        Ce qui reste dans le journal n'est pas perdu : la position sur disque
+        fera reprendre la livraison au prochain démarrage.
+        """
+        self._reveil.set()
+        self._fil.join(timeout=5.0)
+        self._stop.set()
+        self._reveil.set()
+        with self._verrou:
+            self._f.close()
+        if self.en_attente:
+            log.warning("%d octets d'evenements restent a livrer dans %s "
+                        "-- ils partiront au prochain demarrage",
+                        self.en_attente, self.journal)
 
 
 class BusEvenements:
@@ -189,10 +332,12 @@ class BusEvenements:
     rien à ce qui est détecté, seulement à ce qui est dessiné.
     """
 
-    def __init__(self, sorties: list[Sortie] | None = None, anti_repetition_s: float = 3.0):
+    def __init__(self, sorties: list[Sortie] | None = None, anti_repetition_s: float = 3.0,
+                 camera_id: str = "", site_id: str = ""):
         self.sorties = sorties or [SortieConsole()]
         self._dernier: dict[str, float] = {}
         self._anti_rep = anti_repetition_s
+        self.camera_id, self.site_id = camera_id, site_id
         self.total = 0
         self.dernier_t = 0.0
 
@@ -201,6 +346,14 @@ class BusEvenements:
         if ev.t - self._dernier.get(cle, -1e9) < self._anti_rep:
             return False
         self._dernier[cle] = ev.t
+        # L'identite est apposee ici, une seule fois, plutot que dans chaque
+        # analyseur : elle ne depend pas de ce qui a ete detecte.
+        if not ev.camera_id:
+            ev.camera_id = self.camera_id
+        if not ev.site_id:
+            ev.site_id = self.site_id
+        if not ev.event_id:
+            ev.event_id = uuid.uuid4().hex
         self.total += 1
         self.dernier_t = ev.t
         for s in self.sorties:
@@ -251,7 +404,18 @@ class EtatSante:
                 frames=frames, fps=round(fps, 2), evenements=bus.total,
                 derniere_detection=bus.dernier_t or None,
                 flux_connecte=cap.connecte, reconnexions=cap.reconnexions,
+                camera_id=bus.camera_id or None, site_id=bus.site_id or None,
             )
+            # Etat de la livraison : ces compteurs existaient sans jamais etre
+            # publies, alors qu'ils sont le seul moyen pour un exploitant de
+            # voir que la plateforme aval ne recoit plus rien.
+            for s in bus.sorties:
+                if isinstance(s, SortieWebhook):
+                    self._etat["livraison"] = {
+                        "livres": s.livres, "echecs": s.echecs,
+                        "abandons": s.abandons, "octets_en_attente": s.en_attente,
+                    }
+                    break
 
     def instantane(self) -> dict:
         with self._verrou:
@@ -260,6 +424,11 @@ class EtatSante:
         # Le moteur est « sain » s'il voit le flux ET progresse : un flux
         # connecté mais figé (0 image analysée) n'est pas un état sain.
         e["sain"] = bool(e["flux_connecte"] and e["frames"] > 0)
+        # Un abandon de livraison signifie qu'un evenement n'atteindra jamais la
+        # plateforme : le moteur detecte correctement mais ne sert plus a rien.
+        # Cela doit se voir dans l'etat de sante, pas seulement dans les logs.
+        if e.get("livraison", {}).get("abandons"):
+            e["sain"] = False
         return e
 
     def demarrer_serveur(self, port: int):
@@ -1247,6 +1416,22 @@ def main():
                     help="fichier JSONL des evenements")
     ap.add_argument("--webhook", default=_env("webhook", None),
                     help="URL POST recevant chaque evenement en JSON")
+    # Identite -- toujours issue de la configuration, jamais deduite du flux.
+    ap.add_argument("--camera-id", default=_env("camera_id", "", str),
+                    help="identifiant de la camera, appose sur chaque evenement. "
+                         "INDISPENSABLE des qu'un site compte plusieurs cameras")
+    ap.add_argument("--site-id", default=_env("site_id", "", str),
+                    help="identifiant du site, appose sur chaque evenement")
+    # Livraison garantie
+    ap.add_argument("--journal-livraison", type=Path,
+                    default=_env("journal_livraison", None, Path),
+                    help="journal des evenements a livrer (defaut : a cote du "
+                         "processus). Permet la reprise apres coupure ou redemarrage")
+    ap.add_argument("--webhook-jeton", default=_env("webhook_jeton", "", str),
+                    help="jeton porteur envoye en en-tete Authorization")
+    ap.add_argument("--webhook-tentatives", type=int,
+                    default=_env("webhook_tentatives", 8, int),
+                    help="tentatives avant abandon journalise (defaut 8)")
     ap.add_argument("--boucler", action="store_true",
                     help="relit un fichier video en boucle (tests d'endurance)")
     ap.add_argument("--max-frames", type=int, default=_env("max_frames", 0, int), help="0 = illimite")
@@ -1278,11 +1463,20 @@ def main():
     sorties: list[Sortie] = []
     if args.events:
         sorties.append(SortieJSONL(args.events))
+    webhook = None
     if args.webhook:
-        sorties.append(SortieWebhook(args.webhook))
+        webhook = SortieWebhook(args.webhook, journal=args.journal_livraison,
+                                jeton=args.webhook_jeton,
+                                tentatives_max=args.webhook_tentatives)
+        sorties.append(webhook)
     if not sorties:
         sorties.append(SortieConsole())
-    bus = BusEvenements(sorties)
+    if not args.camera_id:
+        # Un identifiant vide passe silencieusement en mono-camera et devient un
+        # defaut invisible des la deuxieme : mieux vaut le dire au demarrage.
+        log.warning("aucun --camera-id : les evenements ne diront pas de quelle "
+                    "camera ils viennent (indispensable en multi-camera)")
+    bus = BusEvenements(sorties, camera_id=args.camera_id, site_id=args.site_id)
 
     source = int(args.source) if args.source.isdigit() else args.source
     cap = CaptureRobuste(source, bus=bus, boucler=args.boucler)

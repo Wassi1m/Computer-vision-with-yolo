@@ -47,3 +47,6 @@ surveillance_suite/models/*.pt
 # et sauvegardes des anciens poids avant installation : memes raisons que ci-dessus.
 reports/v3_results/*_robuste/*.pt
 reports/v3_results/poids_remplaces/
+
+# Jeu equilibre reconstruit par improvements/p10_sous_ensemble_epi.py
+ppe_detection/data/extracted/ppe_14c_equilibre/

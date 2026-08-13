@@ -1,0 +1,36 @@
+{
+  "date": "2026-08-13",
+  "modele": "ppe_detection/models/best.pt",
+  "jeu": "ppe_dataset",
+  "split": "test",
+  "images": 4423,
+  "methode": "YOLO.val, imgsz 640, CPU",
+  "par_classe": {
+    "Fall-Detected": 0.0,
+    "Gloves": 0.0,
+    "Goggles": 0.0,
+    "Hardhat": 0.0,
+    "Ladder": 0.0,
+    "Mask": 0.0,
+    "NO-Gloves": 0.0,
+    "NO-Goggles": 0.0,
+    "NO-Hardhat": 0.0,
+    "NO-Mask": 0.0,
+    "NO-Safety Vest": 0.0621,
+    "Person": 0.0,
+    "Safety Cone": 0.0,
+    "Safety Vest": 0.5354
+  },
+  "mAP50": 0.0427,
+  "sondage_detection_scene": {
+    "Safety Vest": 0.95,
+    "NO-Safety Vest": 0.85,
+    "les_12_autres": 0.0,
+    "note": "20 images par classe, seuil 0.25, cas temoin inclus"
+  },
+  "reference_vest_clean_14c_val": {
+    "Safety Vest": 0.9173,
+    "NO-Safety Vest": 0.8534,
+    "note": "reference de test_non_regression.py, a ne pas perdre"
+  }
+}

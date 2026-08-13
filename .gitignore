@@ -6,6 +6,12 @@ __pycache__/
 ppe_detection/data/
 surveillance_suite/data/
 
+# Jeux de donnees deposes a la racine. Cas vu le 2026-08-13 : un telechargement
+# de sortie Kaggle sans chemin explicite ecrit dans le repertoire courant, et un
+# `git add -A` y embarque des milliers d'images sans qu'on le remarque.
+/donnees/
+/data/
+
 # Cache Hugging Face (téléchargements de datasets, régénérable)
 .cache_hf/
 

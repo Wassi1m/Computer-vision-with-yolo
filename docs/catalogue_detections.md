@@ -51,7 +51,6 @@ conduit à croire faible un détecteur qui fonctionne très bien.
 | Objet abandonné | calculé, pas détecté | logique testée, terrain non mesuré | ✅ Disponible |
 | Foule — effectif | calculé, pas détecté | celle du détecteur de personnes | ✅ Disponible |
 | Foule — densité pers/m² | calculé, pas détecté | géométrie exacte **si calibré** | ✅ Disponible |
-| Balisage de chantier | — | — | ❌ Inexistant |
 
 ---
 
@@ -271,25 +270,6 @@ Un seul évènement à la formation de la foule, un à sa dissolution
 > vu du dessus, une personne proche et une personne lointaine ont presque la
 > même hauteur apparente. Elle ne donnait d'ailleurs que des distances entre
 > paires, jamais une densité surfacique.
-
----
-
-## 9. Ce qui n'existe pas du tout
-
-Aucun modèle, aucun jeu de données, aucune classe existante ne couvre le
-**balisage de chantier** :
-
-- `ligne_balisage_jaune` — marquage au sol
-- `piquet_balisage` — piquet, jalon
-- `barriere_chantier` — barrière type Heras, barrière de police
-- `garde_corps_provisoire` — garde-corps de protection antichute
-
-Seul `Safety Cone` (cône de signalisation, classe 12 du modèle EPI) relève de
-cette famille, et il n'a jamais été mesuré séparément.
-
-Ces classes demandent un **jeu de données annoté qui n'existe pas dans le
-projet**. Voir le plan de création correspondant avant d'engager tout
-entraînement : le facteur limitant est la donnée, pas le modèle.
 
 ---
 

@@ -2,8 +2,8 @@
 """P3 — Banc de mesure et accélération du pipeline EPI sur CPU.
 
 Point de départ : ~3.5 FPS mesurés pour les trois modèles en cascade
-(`yolov8n` personnes + `best.pt` + `best_gloves.pt`) à imgsz=480, dominés par
-`best.pt` (YOLOv8m, 78.7 GFLOPs).
+(`yolov8n` personnes + `ppe_detector.pt` + `ppe_complement.pt`) à imgsz=480, dominés par
+`ppe_detector.pt` (YOLOv8m, 78.7 GFLOPs).
 
 Le script mesure, sur les mêmes images et le même processus, quatre leviers :
 
@@ -14,7 +14,7 @@ Le script mesure, sur les mêmes images et le même processus, quatre leviers :
 2. **ONNX + onnxruntime.** Même graphe, même précision numérique (fp32), un
    runtime différent : c'est le levier sans contrepartie, à tenter en premier.
 3. **Composition de la cascade.** Coût de chaque modèle isolé, pour chiffrer
-   ce que rapporte le retrait de `best_gloves.pt` (cf. P2 : son seul apport
+   ce que rapporte le retrait de `ppe_complement.pt` (cf. P2 : son seul apport
    propre est la classe `safety_shoe`).
 4. **Threads.** `torch.set_num_threads` : par défaut PyTorch prend tous les
    cœurs, ce qui n'est pas optimal quand plusieurs modèles tournent en parallèle
@@ -34,8 +34,8 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "reports/v2_results"
 MODELES = {
     "personnes_yolov8n": ROOT / "ppe_detection/models/yolov8n.pt",
-    "epi_best":          ROOT / "ppe_detection/models/best.pt",
-    "epi_gloves":        ROOT / "ppe_detection/models/best_gloves.pt",
+    "epi_ppe_detector":          ROOT / "ppe_detection/models/ppe_detector.pt",
+    "epi_gloves":        ROOT / "ppe_detection/models/ppe_complement.pt",
 }
 
 
@@ -80,11 +80,11 @@ def bench_pytorch(images, tailles, threads):
         # Cascades : somme des coûts médians, la boucle vidéo étant séquentielle
         # par frame pour ces trois modèles.
         c3 = sum(par_modele[k]["ms_median"] for k in MODELES)
-        c2 = par_modele["personnes_yolov8n"]["ms_median"] + par_modele["epi_best"]["ms_median"]
+        c2 = par_modele["personnes_yolov8n"]["ms_median"] + par_modele["epi_ppe_detector"]["ms_median"]
         par_modele["cascade_3_modeles"] = {"ms_median": round(c3, 2), "fps": round(1000 / c3, 2)}
         par_modele["cascade_2_modeles_sans_gloves"] = {"ms_median": round(c2, 2), "fps": round(1000 / c2, 2)}
         print(f"  -> cascade 3 modeles : {c3:.1f} ms ({1000 / c3:.2f} FPS)"
-              f" | sans best_gloves : {c2:.1f} ms ({1000 / c2:.2f} FPS)")
+              f" | sans ppe_complement : {c2:.1f} ms ({1000 / c2:.2f} FPS)")
         res[str(imgsz)] = par_modele
     return res
 
@@ -115,17 +115,17 @@ def bench_onnx(images, tailles, threads, exports):
                 lambda im, m=m, s=imgsz: m.predict(im, imgsz=s, conf=0.25, verbose=False), images)
             print(f"  onnx    imgsz={imgsz:4} {nom:20} {par_modele[nom]['ms_median']:8.1f} ms")
         c3 = sum(par_modele[k]["ms_median"] for k in MODELES)
-        c2 = par_modele["personnes_yolov8n"]["ms_median"] + par_modele["epi_best"]["ms_median"]
+        c2 = par_modele["personnes_yolov8n"]["ms_median"] + par_modele["epi_ppe_detector"]["ms_median"]
         par_modele["cascade_3_modeles"] = {"ms_median": round(c3, 2), "fps": round(1000 / c3, 2)}
         par_modele["cascade_2_modeles_sans_gloves"] = {"ms_median": round(c2, 2), "fps": round(1000 / c2, 2)}
         print(f"  -> cascade 3 modeles : {c3:.1f} ms ({1000 / c3:.2f} FPS)"
-              f" | sans best_gloves : {c2:.1f} ms ({1000 / c2:.2f} FPS)")
+              f" | sans ppe_complement : {c2:.1f} ms ({1000 / c2:.2f} FPS)")
         res[str(imgsz)] = par_modele
     return res
 
 
 def valider_precision(tailles):
-    """Impact réel de la résolution sur la précision de `best.pt`.
+    """Impact réel de la résolution sur la précision de `ppe_detector.pt`.
 
     Mesuré sur le sous-ensemble gilet propre (779 images) : assez petit pour
     tenir sur CPU à quatre résolutions, et surtout exempt du mélange de lots qui
@@ -136,7 +136,7 @@ def valider_precision(tailles):
     if not data.exists():
         print("  (sous-ensemble propre absent : lancer p1_build_vest_dataset.py)")
         return {}
-    model = YOLO(str(MODELES["epi_best"]))
+    model = YOLO(str(MODELES["epi_ppe_detector"]))
     res = {}
     for imgsz in tailles:
         m = model.val(data=str(data), split="val", imgsz=imgsz, device="cpu", batch=4,

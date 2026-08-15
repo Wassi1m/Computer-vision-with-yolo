@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""P1 — Mesure de `best.pt` concept par concept, sur des sous-ensembles cohérents.
+"""P1 — Mesure de `ppe_detector.pt` concept par concept, sur des sous-ensembles cohérents.
 
 Généralisation du constat établi sur les gilets. Le jeu `ppe_dataset` étant un
 patchwork de lots annotés chacun sur un seul concept, **toute** classe est
@@ -91,7 +91,7 @@ def main():
     args = ap.parse_args()
 
     from ultralytics import YOLO
-    model = YOLO(str(ROOT / "ppe_detection/models/best.pt"))
+    model = YOLO(str(ROOT / "ppe_detection/models/ppe_detector.pt"))
 
     resultats = {}
     for concept, ids in CONCEPTS.items():

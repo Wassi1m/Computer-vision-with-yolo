@@ -46,39 +46,39 @@ def test_traduction_respecte_le_seuil_propre_a_la_classe():
     C'est tout l'intérêt de la table : les deux modèles ne sont pas calibrés
     pareil, un seuil unique en ignorerait un.
     """
-    assert tax.traduire("best_gloves.pt", "Vest", 0.06, (0, 0, 10, 10)) is not None
-    assert tax.traduire("best.pt", "Safety Vest", 0.06, (0, 0, 10, 10)) is None
-    assert tax.traduire("best.pt", "Safety Vest", 0.20, (0, 0, 10, 10)) is not None
+    assert tax.traduire("ppe_complement.pt", "Vest", 0.06, (0, 0, 10, 10)) is not None
+    assert tax.traduire("ppe_detector.pt", "Safety Vest", 0.06, (0, 0, 10, 10)) is None
+    assert tax.traduire("ppe_detector.pt", "Safety Vest", 0.20, (0, 0, 10, 10)) is not None
 
 
 def test_traduction_classe_inconnue_est_ignoree():
-    assert tax.traduire("best.pt", "ClasseQuiNExistePas", 0.9, (0, 0, 10, 10)) is None
+    assert tax.traduire("ppe_detector.pt", "ClasseQuiNExistePas", 0.9, (0, 0, 10, 10)) is None
 
 
 def test_fusion_supprime_le_doublon_inter_modeles():
     """Un même gilet vu par M1 et M2 ne doit produire qu'une détection, celle de M1."""
     box = (10, 10, 50, 50)
-    m1 = tax.traduire("best.pt", "Safety Vest", 0.5, box)
-    m2 = tax.traduire("best_gloves.pt", "Vest", 0.9, (12, 12, 52, 52))  # meme objet, decale
+    m1 = tax.traduire("ppe_detector.pt", "Safety Vest", 0.5, box)
+    m2 = tax.traduire("ppe_complement.pt", "Vest", 0.9, (12, 12, 52, 52))  # meme objet, decale
     fusion = tax.fusionner([m1, m2])
     assert len(fusion) == 1
     # M1 fait autorite meme avec une confiance plus faible : lui seul sait dire
     # l'absence, et ses scores sont calibres sur une plage utile.
-    assert fusion[0].modele == "best.pt"
+    assert fusion[0].modele == "ppe_detector.pt"
 
 
 def test_fusion_conserve_les_chaussures_apport_unique_de_m2():
     """`safety_shoe` n'a pas d'équivalent dans M1 : jamais dédupliquée."""
-    shoe = tax.traduire("best_gloves.pt", "safety_shoe", 0.5, (10, 10, 50, 50))
-    casque = tax.traduire("best.pt", "Hardhat", 0.5, (10, 10, 50, 50))
+    shoe = tax.traduire("ppe_complement.pt", "safety_shoe", 0.5, (10, 10, 50, 50))
+    casque = tax.traduire("ppe_detector.pt", "Hardhat", 0.5, (10, 10, 50, 50))
     fusion = tax.fusionner([casque, shoe])
     assert {d.epi for d in fusion} == {"casque", "chaussures"}
 
 
 def test_fusion_garde_deux_objets_distincts_du_meme_concept():
     """Deux casques éloignés sont deux casques, pas un doublon."""
-    a = tax.traduire("best.pt", "Hardhat", 0.5, (0, 0, 20, 20))
-    b = tax.traduire("best.pt", "Hardhat", 0.5, (200, 200, 220, 220))
+    a = tax.traduire("ppe_detector.pt", "Hardhat", 0.5, (0, 0, 20, 20))
+    b = tax.traduire("ppe_detector.pt", "Hardhat", 0.5, (200, 200, 220, 220))
     assert len(tax.fusionner([a, b])) == 2
 
 

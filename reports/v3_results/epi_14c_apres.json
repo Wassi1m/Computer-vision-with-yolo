@@ -1,0 +1,41 @@
+{
+  "date": "2026-08-15",
+  "modele": "ppe_detection/models/ppe_detector.pt",
+  "origine": "Kaggle, 78/80 epoques (coupe a 12 h), best.pt de l'epoque 52",
+  "avant": {
+    "mAP50": 0.0427,
+    "note": "12 classes sur 14 a exactement 0.0"
+  },
+  "apres_ppe_dataset_test": {
+    "jeu": "ppe_dataset",
+    "split": "test",
+    "images": 4423,
+    "par_classe": {
+      "Fall-Detected": 0.8242,
+      "Gloves": 0.9014,
+      "Goggles": 0.9598,
+      "Hardhat": 0.5965,
+      "Ladder": 0.9619,
+      "Mask": 0.5271,
+      "NO-Gloves": 0.8268,
+      "NO-Goggles": 0.9571,
+      "NO-Hardhat": 0.415,
+      "NO-Mask": 0.4678,
+      "NO-Safety Vest": 0.1593,
+      "Person": 0.9524,
+      "Safety Cone": 0.6484,
+      "Safety Vest": 0.5688
+    },
+    "mAP50": 0.6976
+  },
+  "apres_vest_clean_val": {
+    "jeu": "ppe_vest_clean_14c",
+    "split": "val",
+    "par_classe": {
+      "NO-Safety Vest": 0.7786,
+      "Safety Vest": 0.917
+    },
+    "mAP50": 0.8478
+  },
+  "arbitrage": "12 classes recuperees de 0.0 a 0.42-0.96, contre -0.0748 sur NO-Safety Vest mesure sur le jeu gilet. Perte assumee et documentee ; correction prevue par sur-echantillonnage."
+}

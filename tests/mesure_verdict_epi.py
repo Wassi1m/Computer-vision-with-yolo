@@ -98,7 +98,7 @@ def verdict(dets, personnes, mode: str, seuil_confinement: float) -> bool:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--modele", default="ppe_detection/models/best.pt")
+    ap.add_argument("--modele", default="ppe_detection/models/ppe_detector.pt")
     ap.add_argument("--modele-personnes", default="surveillance_suite/models/yolo26n.pt")
     ap.add_argument("--donnees", default="ppe_detection/data/extracted/ppe_vest_clean_14c")
     ap.add_argument("--split", default="test")
@@ -137,7 +137,7 @@ def main() -> int:
             continue
         dets = []
         for b in modele.predict(img, conf=args.conf, verbose=False)[0].boxes:
-            d = tax.traduire("best.pt", modele.names[int(b.cls)], float(b.conf),
+            d = tax.traduire("ppe_detector.pt", modele.names[int(b.cls)], float(b.conf),
                              tuple(map(int, b.xyxy[0])))
             if d and d.epi:
                 dets.append(d)

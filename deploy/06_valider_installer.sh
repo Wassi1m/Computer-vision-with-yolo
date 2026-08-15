@@ -33,7 +33,7 @@ INSTALLES=(); REFUSES=()
 
 for jeu in "${JEUX[@]}"; do
     case "$jeu" in
-        epi)    DEST="ppe_detection/models/best.pt";               REF=ppe_best ;;
+        epi)    DEST="ppe_detection/models/ppe_detector.pt";               REF=ppe_detector ;;
         chute)  DEST="surveillance_suite/models/fall_detector.pt"; REF=fall_detector ;;
         feu)    DEST="surveillance_suite/models/fire_smoke.pt";    REF=fire_smoke ;;
         plaque) DEST="surveillance_suite/models/license_plate.pt"; REF=license_plate ;;

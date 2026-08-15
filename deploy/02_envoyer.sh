@@ -22,7 +22,7 @@ CIBLE_JEU="${1:-}"
 case "$CIBLE_JEU" in
     epi)
         DATASET="$RACINE/ppe_detection/data/extracted/ppe_vest_clean_14c"
-        POIDS="$RACINE/ppe_detection/models/best.pt" ;;
+        POIDS="$RACINE/ppe_detection/models/ppe_detector.pt" ;;
     chute)
         DATASET="$RACINE/ppe_detection/data/extracted/fall_detection_enriched"
         POIDS="$RACINE/surveillance_suite/models/fall_detector.pt" ;;

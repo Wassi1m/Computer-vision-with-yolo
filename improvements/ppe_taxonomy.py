@@ -3,8 +3,8 @@
 
 Problème traité
 ---------------
-`ppe_dual_model_backup2.py` fait cohabiter `best.pt` (M1, 14 classes) et
-`best_gloves.pt` (M2, 6 classes) en associant leurs sorties par simple
+`ppe_dual_model_backup2.py` fait cohabiter `ppe_detector.pt` (M1, 14 classes) et
+`ppe_complement.pt` (M2, 6 classes) en associant leurs sorties par simple
 recherche de sous-chaîne (`MOTS_CLES_EPI`) puis par IoU avec les personnes.
 Trois défauts en découlent :
 
@@ -84,7 +84,7 @@ class Correspondance:
 # ── M1 : best.pt — YOLOv8m, 14 classes ───────────────────────────────────────
 # Seul modèle porteur de classes négatives, donc seul capable de déclencher une
 # alerte de non-conformité. Référence en cas de conflit avec M2.
-M1_NOM = "best.pt"
+M1_NOM = "ppe_detector.pt"
 M1 = {
     "Hardhat":        Correspondance("casque",     True,  0.15),
     "NO-Hardhat":     Correspondance("casque",     False, 0.15),
@@ -102,11 +102,11 @@ M1 = {
     "Safety Cone":    Correspondance(None, None, 0.25, evenement="cone"),
 }
 
-# ── M2 : best_gloves.pt — YOLOv8n, 6 classes ─────────────────────────────────
+# ── M2 : ppe_complement.pt — YOLOv8n, 6 classes ─────────────────────────────────
 # Aucune classe négative. Scores structurellement bas (observés : `helmet` et
 # `goggles` plafonnent vers 0.04), d'où des seuils propres bien plus bas que
 # ceux de M1 — les mélanger était l'erreur de calibration d'origine.
-M2_NOM = "best_gloves.pt"
+M2_NOM = "ppe_complement.pt"
 M2 = {
     "helmet":      Correspondance("casque",     True, 0.03),
     "mask":        Correspondance("masque",     True, 0.03),

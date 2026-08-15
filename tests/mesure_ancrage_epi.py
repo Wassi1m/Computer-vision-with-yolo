@@ -73,7 +73,7 @@ def charger_verite(lbl: Path, l: int, h: int):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--modele", default="ppe_detection/models/best.pt")
+    ap.add_argument("--modele", default="ppe_detection/models/ppe_detector.pt")
     ap.add_argument("--modele-personnes", default="surveillance_suite/models/yolo26n.pt",
                     help="modele COCO fournissant les personnes, comme en production")
     ap.add_argument("--conf-personne", type=float, default=0.4)
@@ -117,7 +117,7 @@ def main() -> int:
         res = modele.predict(img, conf=args.conf, verbose=False)[0]
         for b in res.boxes:
             nom = modele.names[int(b.cls)]
-            d = tax.traduire("best.pt", nom, float(b.conf), tuple(map(int, b.xyxy[0])))
+            d = tax.traduire("ppe_detector.pt", nom, float(b.conf), tuple(map(int, b.xyxy[0])))
             if not d or not d.epi:
                 continue
             boite = d.box

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""P2 — Table de correspondance de classes entre `best.pt` et `best_gloves.pt`.
+"""P2 — Table de correspondance de classes entre `ppe_detector.pt` et `ppe_complement.pt`.
 
 Alternative retenue à "ré-entraîner un seul modèle sur l'union des deux
 taxonomies" (l'option recommandée par `v2_plan_amelioration.md`) : celle-ci
 est **impossible en l'état**, GPU ou pas -- il n'existe aucun dataset local
-pour les classes propres à `best_gloves.pt`. `safety_shoe` en particulier
+pour les classes propres à `ppe_complement.pt`. `safety_shoe` en particulier
 n'apparaît dans aucune image annotée disponible sur cette machine ; l'union
 des taxonomies ne peut donc pas être apprise, seulement supposée.
 
@@ -14,22 +14,22 @@ double-compter les concepts qu'ils partagent sous des noms différents
 `Gloves`/`Gloves`) -- correction du bug documenté en v1 (IndexError lors de la
 validation croisée, dû à cette incohérence non résolue.
 
-Seule `safety_shoe` reste un apport net et sans ambiguïté de `best_gloves.pt` :
+Seule `safety_shoe` reste un apport net et sans ambiguïté de `ppe_complement.pt` :
 aucun équivalent, aucun conflit possible.
 """
 
 CORRESPONDANCE = {
-    # classe best_gloves.pt -> classe best.pt équivalente (None si aucun équivalent)
+    # classe ppe_complement.pt -> classe ppe_detector.pt équivalente (None si aucun équivalent)
     "Gloves":      "Gloves",
     "Vest":        "Safety Vest",
     "goggles":     "Goggles",
     "helmet":      "Hardhat",
     "mask":        "Mask",
-    "safety_shoe": None,  # seul apport net, pas de classe "chaussure" dans best.pt
+    "safety_shoe": None,  # seul apport net, pas de classe "chaussure" dans ppe_detector.pt
 }
 
-# Classes de best.pt qui n'ont pas de contrepartie dans best_gloves.pt : à ne
-# détecter que via best.pt (pas de choix à faire, pas de fusion nécessaire).
+# Classes de ppe_detector.pt qui n'ont pas de contrepartie dans ppe_complement.pt : à ne
+# détecter que via ppe_detector.pt (pas de choix à faire, pas de fusion nécessaire).
 SANS_EQUIVALENT_BEST = [
     "Fall-Detected", "Ladder", "NO-Gloves", "NO-Goggles", "NO-Hardhat",
     "NO-Mask", "NO-Safety Vest", "Person", "Safety Cone",
@@ -39,7 +39,7 @@ SANS_EQUIVALENT_BEST = [
 def fusionner_detections(dets_best: list[dict], dets_gloves: list[dict], iou_seuil: float = 0.5) -> list[dict]:
     """Fusionne deux listes de détections {"classe": str, "box": (x1,y1,x2,y2), "conf": float}.
 
-    Règle : si une détection `best_gloves` correspond (même concept + IoU >= seuil)
+    Règle : si une détection `ppe_complement` correspond (même concept + IoU >= seuil)
     à une détection `best`, on garde celle de `best` (modèle de référence, mieux
     mesuré) et on ignore le doublon. Sinon on l'ajoute -- c'est le cas de
     `safety_shoe`, systématiquement conservée.
@@ -68,6 +68,6 @@ def fusionner_detections(dets_best: list[dict], dets_gloves: list[dict], iou_seu
 
 
 if __name__ == "__main__":
-    print("Correspondance best_gloves.pt -> best.pt :")
+    print("Correspondance ppe_complement.pt -> ppe_detector.pt :")
     for src, dst in CORRESPONDANCE.items():
         print(f"  {src:14} -> {dst or '(aucun équivalent -- apport net)'}")

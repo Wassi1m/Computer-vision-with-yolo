@@ -24,7 +24,7 @@ courbes précision/rappel/F1 échantillonnées sur tout l'axe de confiance
 chaque seuil.
 
     python tests/calibrer_seuils.py
-    python tests/calibrer_seuils.py --modele ppe_best --beta 2
+    python tests/calibrer_seuils.py --modele ppe_detector --beta 2
 """
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ SORTIE = ROOT / "reports/v3_results"
 
 # Bêta par modèle : traduit le coût relatif d'un manqué face à une fausse alerte.
 BETA_PAR_MODELE = {
-    "ppe_best": 2.0,        # conformite EPI : le manque d'EPI ne doit pas passer
+    "ppe_detector": 2.0,        # conformite EPI : le manque d'EPI ne doit pas passer
     "fall_detector": 2.0,   # une chute non detectee est un risque corporel
     "fire_smoke": 2.0,      # un depart de feu non detecte est un risque majeur
     "license_plate": 1.0,   # une plaque manquee se rattrape a l'image suivante

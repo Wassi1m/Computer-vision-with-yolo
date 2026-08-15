@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """P1 — Mesure des classes gilet à périmètre identique.
 
-`best.pt` est évalué sur `ppe_vest_clean_14c` (les images du sous-ensemble
+`ppe_detector.pt` est évalué sur `ppe_vest_clean_14c` (les images du sous-ensemble
 propre, labels 14 classes intacts) et le spécialiste sur `ppe_vest_clean_2c`
 (les mêmes images, 2 classes). Les deux voient donc exactement les mêmes images
 et la même vérité terrain pour les gilets : les AP@50 sont directement
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "baseline"
     split = sys.argv[3] if len(sys.argv) > 3 else "val"
     if mode == "baseline":
-        run(ROOT / "ppe_detection/models/best.pt",
+        run(ROOT / "ppe_detection/models/ppe_detector.pt",
             ROOT / "ppe_detection/data/extracted/ppe_vest_clean_14c/data.yaml",
             "baseline_best_sur_sousensemble_propre", split,
             classes_of_interest=["Safety Vest", "NO-Safety Vest"])

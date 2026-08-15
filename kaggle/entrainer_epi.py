@@ -3,7 +3,7 @@
 
 Pourquoi ce ré-entraînement
 ---------------------------
-Le modèle déployé `ppe_detection/models/best.pt` ne détecte plus que deux de
+Le modèle déployé `ppe_detection/models/ppe_detector.pt` ne détecte plus que deux de
 ses quatorze classes. Mesuré le 2026-08-13 sur les 4 423 images du split test,
 avec cas témoin :
 
@@ -37,7 +37,7 @@ Ce qui protège contre la répétition
    de 0.61 à 0.43 en quatre époques, puis 22 époques à remonter sans y
    parvenir), et ce qui a failli recommencer le 2026-08-15 : `lr0` avait alors
    été corrigé, mais sans nommer l'optimiseur — donc en pure perte.
-3. **Départ depuis `best.pt`** et non depuis un modèle COCO neutre : son
+3. **Départ depuis `ppe_detector.pt`** et non depuis un modèle COCO neutre : son
    ossature est déjà adaptée à l'imagerie de chantier. Seule la tête est à
    réapprendre, ce que le jeu équilibré permet sans sacrifier le gilet.
 
@@ -117,7 +117,7 @@ def entrainer(epochs: int = 80, imgsz: int = 640, batch: int = 16,
     if source is None:
         print("Attacher le jeu 14 classes a la session (voir README).", file=sys.stderr)
         return 1
-    poids = trouver("best.pt", "poids EPI de depart") or "yolov8m.pt"
+    poids = trouver("ppe_detector.pt", "poids EPI de depart") or "yolov8m.pt"
     print(f"Jeu   : {source}")
     print(f"Poids : {poids}")
 

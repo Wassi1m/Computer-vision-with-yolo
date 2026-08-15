@@ -746,7 +746,7 @@ class AnalyseurEPI(Analyseur):
     def process(self, frame, ctx):
         seuil_bas = min(c.conf_min for t in tax.TABLES.values() for c in t.values())
         brutes = []
-        for nom_modele, model in (("best.pt", self.m1), ("best_gloves.pt", self.m2)):
+        for nom_modele, model in (("ppe_detector.pt", self.m1), ("ppe_complement.pt", self.m2)):
             if model is None:
                 continue
             for b in model.predict(frame, conf=seuil_bas, imgsz=self.imgsz, verbose=False)[0].boxes:
@@ -1379,8 +1379,8 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
     ajouter("porte", _porte)
 
     ajouter("epi", lambda: AnalyseurEPI(
-        str(existant(ROOT / "ppe_detection/models/best.pt")),
-        None if args.sans_gants else str(existant(ROOT / "ppe_detection/models/best_gloves.pt")),
+        str(existant(ROOT / "ppe_detection/models/ppe_detector.pt")),
+        None if args.sans_gants else str(existant(ROOT / "ppe_detection/models/ppe_complement.pt")),
         args.imgsz, args.every_epi, ancrage=not args.sans_ancrage_epi))
 
     return analyseurs
@@ -1463,7 +1463,7 @@ def main():
                     default=_env("lpr_retention", "pseudonymise"),
                     help="ce que le moteur transmet des plaques lues (defaut : pseudonymise)")
     ap.add_argument("--sans-gants", action="store_true",
-                    help="retire best_gloves.pt de la cascade EPI (seul apport : chaussures)")
+                    help="retire ppe_complement.pt de la cascade EPI (seul apport : chaussures)")
     ap.add_argument("--disable", default="", help="analyseurs a desactiver, separes par des virgules")
     # Headless par defaut : c'est le mode de production. L'affichage reste
     # disponible a la demande pour les tests, les demonstrations client et le

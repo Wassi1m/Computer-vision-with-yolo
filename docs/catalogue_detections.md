@@ -41,8 +41,8 @@ conduit à croire faible un détecteur qui fonctionne très bien.
 | Domaine | Détecté | Fiabilité | Statut |
 |---|---|---|---|
 | Feu et fumée | `fire`, `smoke` | 96,7 % des scènes (jour) | ✅ Exploitable |
-| EPI — gilet | porté / non porté | 91,7 % / 85,3 % | ✅ Exploitable |
-| EPI — casque, masque, lunettes, gants | porté / non porté | non mesurée séparément | ⚠️ À valider |
+| EPI — gilet | porté / non porté | 91,7 % / 77,9 % | ✅ Exploitable |
+| EPI — casque, masque, lunettes, gants | porté / non porté | 0,42 à 0,96 selon la classe | ✅ Exploitable |
 | Chute | `falling` / `stand` | 99,0 % | ✅ Exploitable |
 | Plaque d'immatriculation | `plate` | 86,2 % | ✅ Exploitable |
 | Porte | ouverte / fermée / entrouverte | non mesurée | ⚠️ À valider |
@@ -90,7 +90,7 @@ bon sur les deux axes.
 
 ## 2. Équipements de protection individuelle
 
-**Modèle principal** : `ppe_detection/models/best.pt` — YOLOv8m, 25,8 M
+**Modèle principal** : `ppe_detection/models/ppe_detector.pt` — YOLOv8m, 25,8 M
 paramètres, 14 classes. C'est le modèle le plus lourd du parc : il consomme à
 lui seul ~78 % du temps de la cascade EPI.
 
@@ -106,23 +106,45 @@ lui seul ~78 % du temps de la cascade EPI.
 | `Ladder` | Échelle |
 | `Fall-Detected` | Personne au sol (redondant avec le modèle chute) |
 
-**Modèle secondaire** : `ppe_detection/models/best_gloves.pt` — YOLO26n,
+**Modèle secondaire** : `ppe_detection/models/ppe_complement.pt` — YOLO26n,
 6 classes (`Gloves`, `Vest`, `goggles`, `helmet`, `mask`, `safety_shoe`).
 Ajoute `safety_shoe`, absent du modèle principal. Désactivable par
 `--sans-gants` : le retirer de la cascade rend ~15 % de cadence.
 
-**Performance mesurée**
+**Performance mesurée** — les 14 classes, sur les 4 423 images du split `test`
+de `ppe_dataset`, jamais vues à l'entraînement (2026-08-15) :
 
-| Classe | AP@50 |
-|---|---|
-| `Safety Vest` | 0,9173 |
-| `NO-Safety Vest` | 0,8534 |
-| mAP@50 global (14 classes) | 0,8854 |
+| Classe | AP@50 | | Classe | AP@50 |
+|---|---|---|---|---|
+| `Ladder` | 0,9619 | | `Safety Cone` | 0,6484 |
+| `Goggles` | 0,9598 | | `Hardhat` | 0,5965 |
+| `NO-Goggles` | 0,9571 | | `Safety Vest` | 0,5688 |
+| `Person` | 0,9524 | | `Mask` | 0,5271 |
+| `Gloves` | 0,9014 | | `NO-Mask` | 0,4678 |
+| `NO-Gloves` | 0,8268 | | `NO-Hardhat` | 0,4150 |
+| `Fall-Detected` | 0,8242 | | `NO-Safety Vest` | 0,1593 |
+| | | | **mAP@50** | **0,6976** |
+
+Sur `ppe_vest_clean_14c/val`, seul jeu où le gilet est annoté proprement :
+`Safety Vest` **0,9170** et `NO-Safety Vest` **0,7786**.
+
+**Pourquoi deux jeux d'évaluation.** Chacun ne peut juger que ce qu'il annote
+correctement. `ppe_dataset` annote les douze autres classes mais son gilet est
+incohérent — environ 14 300 de ses 30 765 images laissent la zone du gilet non
+annotée, ce qui compte toute détection correcte comme une fausse alarme.
+`ppe_vest_clean_14c` fait l'inverse. Ne lire qu'un des deux conduit à une
+conclusion fausse, dans un sens ou dans l'autre.
 
 **Limites**
-- **Seules les classes gilet ont été retravaillées en profondeur.** Casque,
-  masque, lunettes et gants sont hérités du jeu d'origine et n'ont jamais été
-  mesurés séparément. Leur fiabilité réelle est inconnue.
+- **`NO-Safety Vest` a reculé de 7,5 points** lors du ré-entraînement du
+  2026-08-15 (0,8534 → 0,7786 sur le jeu gilet). Perte assumée en échange de la
+  récupération des douze classes qui étaient à zéro, mais réelle : cette classe
+  signale l'infraction, l'erreur y est donc la plus coûteuse. Cause probable :
+  elle ne compte que 1 435 instances contre 4 499 pour `Safety Vest`, et souffre
+  le plus du partage de capacité avec douze classes supplémentaires. Correction
+  prévue par sur-échantillonnage au prochain entraînement.
+- `NO-Hardhat` (0,415) et `NO-Mask` (0,468) restent les plus faibles : les
+  classes négatives sont partout moins bien apprises que leurs positives.
 - Les deux modèles ont des taxonomies différentes (`helmet` vs `Hardhat`,
   `Vest` vs `Safety Vest`) ; la correspondance est faite par
   `improvements/ppe_taxonomy.py`, avec un seuil propre à chaque classe.
@@ -281,7 +303,7 @@ mAP@50 mesurée sous dégradation simulée
 | Modèle | Référence | Faible lum. | Contre-jour | Pluie/brouillard | Flou | Basse rés. |
 |---|---|---|---|---|---|---|
 | `fall_detector` | 0,991 | 0,981 | 0,984 | 0,993 | 0,992 | 0,991 |
-| `ppe_best` | 0,906 | 0,830 | 0,857 | 0,877 | 0,824 | 0,879 |
+| `ppe_detector` | 0,906 | 0,830 | 0,857 | 0,877 | 0,824 | 0,879 |
 | `license_plate` | 0,854 | 0,780 | 0,862 | 0,772 | **0,486** | 0,619 |
 | `fire_smoke` | 0,739 | **0,351** | 0,582 | 0,635 | 0,659 | 0,643 |
 

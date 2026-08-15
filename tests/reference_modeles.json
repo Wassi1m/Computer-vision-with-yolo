@@ -42,17 +42,17 @@
       },
       "mAP50": 0.8619
     },
-    "ppe_best": {
-      "poids": "ppe_detection/models/best.pt",
+    "ppe_detector": {
+      "poids": "ppe_detection/models/ppe_detector.pt",
       "data": "ppe_detection/data/extracted/ppe_vest_clean_14c/data.yaml",
       "split": "val",
-      "origine": "P1 — fine-tuning Colab T4 sur le sous-ensemble d'annotations gilet propres",
+      "origine": "P11 — re-entrainement 14 classes sur jeu equilibre (Kaggle T4, 78 epoques, optimizer=SGD lr0=0.001)",
       "commentaire": "Mesuré sur `val` faute de split `test` dédié pour ce sous-ensemble. Seules les deux classes gilet sont suivies : ce sont elles que le fine-tuning P1 visait, et les seules dont le périmètre de mesure est cohérent sur ce jeu.",
       "classes": {
-        "Safety Vest": 0.9173,
-        "NO-Safety Vest": 0.8534
+        "Safety Vest": 0.917,
+        "NO-Safety Vest": 0.7786
       },
-      "mAP50": 0.8854
+      "mAP50": 0.8478
     }
   }
 }

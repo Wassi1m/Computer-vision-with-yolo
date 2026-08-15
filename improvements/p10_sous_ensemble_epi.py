@@ -3,7 +3,7 @@
 
 Pourquoi
 --------
-Le modèle EPI déployé (`ppe_detection/models/best.pt`) ne détecte plus que deux
+Le modèle EPI déployé (`ppe_detection/models/ppe_detector.pt`) ne détecte plus que deux
 de ses quatorze classes. Mesuré le 2026-08-13, avec cas témoin : `Safety Vest`
 95 % et `NO-Safety Vest` 85 % de détection de scène, **les douze autres à 0 %**,
 et rien d'autre ne sort même en abaissant le seuil à 0,01.

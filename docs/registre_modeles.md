@@ -13,27 +13,44 @@ de garde-fou automatique (`python tests/test_non_regression.py`).
 
 ## Modèles en service
 
-### `ppe_detection/models/best.pt` — conformité EPI
+### `ppe_detection/models/ppe_detector.pt` — conformité EPI
 
 | | |
 |---|---|
 | **Rôle** | Détection des EPI et de leur absence (14 classes) |
 | **Architecture** | YOLOv8m (25,9 M paramètres, ~79 GFLOPs) |
-| **Version** | P1 — fine-tuning du 2026-08-08 |
-| **Origine** | `Hexmon/vyra-yolo-ppe-detection` (Hugging Face), puis fine-tuné |
-| **Données** | `ppe_vest_clean_14c` — sous-ensemble des images où le gilet est réellement annoté (voir ci-dessous) |
-| **Entraînement** | Colab T4, 40 époques, lr0=0.001, batch 32 — `reports/colab_package/p1_vest/p1_finetune_vest_colab.ipynb` |
-| **Métriques** | `Safety Vest` 92.5% · `NO-Safety Vest` 84.2% · mAP@50 88.3% |
-| **Version précédente** | Voir l'historique git (commit `023f92f` et antérieurs) |
+| **Version** | P11 — ré-entraînement 14 classes du 2026-08-15 |
+| **Origine** | Fine-tuning du modèle P1, lui-même issu de `Hexmon/vyra-yolo-ppe-detection` |
+| **Données** | `ppe_14c_equilibre` — 13 174 images, ~2 500 instances par classe et l'intégralité du gilet (`improvements/p10_sous_ensemble_epi.py`) |
+| **Entraînement** | Kaggle T4, 78 époques sur 80 (session coupée à 12 h), `optimizer=SGD`, `lr0=0.001`, batch 16 |
+| **Métriques** | `Safety Vest` 91.7% · `NO-Safety Vest` 77.9% (jeu gilet) · mAP@50 **69.8 % sur les 14 classes** |
+| **Version précédente** | `ppe_detector_pre_14c.pt` (hors dépôt, voir `.gitignore`) |
 
-**À savoir** : le jeu d'origine `ppe_dataset` est un patchwork de lots annotés
-chacun sur un seul concept. Environ 14 300 images sur 30 765 enseignaient au
-modèle que la zone du gilet est du fond. Le fine-tuning a donc porté sur le
-seul sous-ensemble où le gilet est effectivement annoté — c'est ce qui a fait
-passer `NO-Safety Vest` de 4.8 % à 84.2 %. Ré-entraîner sur le jeu complet
-reproduirait le défaut.
+**Pourquoi ce ré-entraînement.** Le modèle P1 avait été fine-tuné sur
+`ppe_vest_clean_14c`, le sous-ensemble des images où le gilet est annoté. Ce
+choix était défendable — il avait fait passer `NO-Safety Vest` de 4.8 % à
+84.2 % — mais il a eu une conséquence non mesurée à l'époque : en s'entraînant
+longtemps sur 2 728 images ne contenant que du gilet, le réseau a réaffecté sa
+capacité et **effacé les douze autres classes**. Constaté le 2026-08-13 : AP@50
+à exactement 0.0000 pour casque, gants, masque, lunettes, cône et personne, et
+rien ne sortait même au seuil de confiance 0.01.
 
-### `ppe_detection/models/best_gloves.pt` — EPI complémentaires
+**Ce que le ré-entraînement a changé**, sur les 4 423 images du split `test` :
+mAP@50 **0.0427 → 0.6976**, les douze classes remontant de zéro à 0.42–0.96.
+
+**Le prix payé, et il est réel** : `NO-Safety Vest` recule de 84.2 % à 77.9 %
+sur le jeu gilet. Cette classe ne compte que 1 435 instances contre 4 499 pour
+`Safety Vest` ; elle souffre le plus du partage de capacité avec douze classes
+de plus. C'est la classe qui signale l'infraction, donc celle où l'erreur coûte
+le plus cher — la correction par sur-échantillonnage est à faire au prochain
+entraînement.
+
+**Leçon de méthode** : un jeu d'évaluation ne juge que ce qu'il annote. Mesuré
+sur le seul `ppe_vest_clean_14c`, ce ré-entraînement paraissait être une
+régression ; mesuré sur le seul `ppe_dataset`, un triomphe. Les deux mesures
+étaient nécessaires pour voir l'arbitrage réel.
+
+### `ppe_detection/models/ppe_complement.pt` — EPI complémentaires
 
 | | |
 |---|---|
@@ -42,7 +59,7 @@ reproduirait le défaut.
 | **Origine** | `Tanishjain9/yolov8n-ppe-detection-6classes` (Hugging Face), jamais ré-entraîné |
 | **Métriques** | **Non mesurées** — aucun jeu de validation local ne couvre sa taxonomie |
 
-**À savoir** : ce modèle ne couvre aucun concept absent de `best.pt` **sauf**
+**À savoir** : ce modèle ne couvre aucun concept absent de `ppe_detector.pt` **sauf**
 `safety_shoe`, et ne possède aucune classe négative (il ne peut donc jamais
 signaler une non-conformité). Le retirer de la cascade fait gagner 15 % de
 FPS. Si les chaussures de sécurité ne font pas partie du référentiel du client,

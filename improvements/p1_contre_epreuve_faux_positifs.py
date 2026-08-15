@@ -7,7 +7,7 @@ Sur le jeu de validation complet, `Safety Vest` plafonne à AP@50 = 49.4 % et
 `NO-Safety Vest` à 4.8 %. Sur le sous-ensemble où les gilets sont réellement
 annotés, le **même modèle** obtient 89.1 % et 62.8 %. Si l'écart vient bien du
 jeu de données et non du modèle, alors sur les images du « lot casques » — celles
-qui n'annotent que `Hardhat`/`NO-Hardhat` — `best.pt` doit produire un grand
+qui n'annotent que `Hardhat`/`NO-Hardhat` — `ppe_detector.pt` doit produire un grand
 nombre de détections gilet, comptées comme faux positifs par la métrique, alors
 qu'elles sont visuellement correctes.
 
@@ -48,7 +48,7 @@ def main():
     echant = random.sample(candidats, min(args.n, len(candidats)))
     print(f"{len(candidats)} images 'casque seul' dans le val ; {len(echant)} tirées")
 
-    model = YOLO(str(ROOT / "ppe_detection/models/best.pt"))
+    model = YOLO(str(ROOT / "ppe_detection/models/ppe_detector.pt"))
     n_img_avec_gilet = 0
     n_det = 0
     confs = []

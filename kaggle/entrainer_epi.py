@@ -28,10 +28,15 @@ Ce qui protège contre la répétition
    gilet (4 499 + 1 435, les totaux exacts du jeu complet). Le gilet est la
    seule paire de classes qui fonctionne encore ; en perdre une partie serait
    la régression à éviter.
-2. **`lr0=0.001`**, taux de fine-tuning. Le run feu/fumée du 2026-08-12 avait
-   laissé le défaut d'Ultralytics (0.01), prévu pour un entraînement depuis
-   zéro : il avait effondré la fitness de 0.61 à 0.43 en quatre époques avant
-   de passer 22 époques à remonter sans y parvenir.
+2. **`optimizer="SGD"` avec `lr0=0.001`.** Les deux ensemble, et c'est le
+   point à ne pas manquer : `lr0` seul est **sans aucun effet**. Avec le
+   réglage par défaut `optimizer="auto"`, Ultralytics recalcule le taux
+   d'apprentissage et jette celui qu'on lui a donné, en le disant dans son
+   journal — « optimizer='auto' found, ignoring 'lr0=0.001' ... MuSGD(lr=0.01) ».
+   C'est ce qui a détruit le modèle feu/fumée le 2026-08-12 (fitness effondrée
+   de 0.61 à 0.43 en quatre époques, puis 22 époques à remonter sans y
+   parvenir), et ce qui a failli recommencer le 2026-08-15 : `lr0` avait alors
+   été corrigé, mais sans nommer l'optimiseur — donc en pure perte.
 3. **Départ depuis `best.pt`** et non depuis un modèle COCO neutre : son
    ossature est déjà adaptée à l'imagerie de chantier. Seule la tête est à
    réapprendre, ce que le jeu équilibré permet sans sacrifier le gilet.
@@ -122,7 +127,14 @@ def entrainer(epochs: int = 80, imgsz: int = 640, batch: int = 16,
         epochs=epochs, imgsz=imgsz, batch=batch, workers=workers,
         device=0, patience=patience,
         project=str(sorties), name=NOM_RUN, exist_ok=True, seed=0, plots=True,
-        # Voir l'en-tete : c'est ce reglage qui avait sabote le run du 12 aout.
+        # `optimizer` DOIT etre nomme explicitement. Avec le defaut `auto`,
+        # Ultralytics recalcule le taux d'apprentissage et ecrase celui qu'on
+        # lui donne -- son propre journal l'annonce :
+        #   « optimizer='auto' found, ignoring 'lr0=0.001' ... MuSGD(lr=0.01) »
+        # C'est ainsi que le run du 2026-08-15 est reparti a 0.01, la valeur
+        # meme qui avait detruit le modele feu/fumee trois jours plus tot.
+        # Passer lr0 sans fixer l'optimiseur ne sert donc a RIEN.
+        optimizer="SGD",
         lr0=lr0,
         save_period=5,
     )

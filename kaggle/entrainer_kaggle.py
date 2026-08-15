@@ -180,6 +180,12 @@ def entrainer(epochs: int = 60, imgsz: int = 896, batch: int = 16,
         # jamais retrouver son point de depart -- 2 h 54 de GPU pour rien, et un
         # arret par patience declenche precisement parce que l'epoque 1 n'a
         # jamais ete battue.
+        # `optimizer` doit etre nomme : avec le defaut `auto`, Ultralytics
+        # recalcule le taux d'apprentissage et ignore `lr0`, comme son journal
+        # l'annonce (« optimizer='auto' found, ignoring 'lr0=0.001' »). Corriger
+        # lr0 sans fixer l'optimiseur ne change donc rien -- constate le
+        # 2026-08-15, apres avoir cru le probleme resolu.
+        optimizer="SGD",
         lr0=lr0,
 
         project=str(sorties), name=NOM_RUN, exist_ok=True, seed=0, plots=True,
@@ -270,5 +276,7 @@ if __name__ == "__main__":
     ap.add_argument("--proportion", type=float, default=0.35)
     ap.add_argument("--patience", type=int, default=25)
     ap.add_argument("--workers", type=int, default=2)
+    ap.add_argument("--lr0", type=float, default=0.001)
     a = ap.parse_args()
-    sys.exit(entrainer(a.epochs, a.imgsz, a.batch, a.proportion, a.patience, a.workers))
+    sys.exit(entrainer(a.epochs, a.imgsz, a.batch, a.proportion, a.patience,
+                       a.workers, a.lr0))

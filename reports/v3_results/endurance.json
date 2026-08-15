@@ -1,732 +1,5772 @@
 {
-  "duree_s": 1801,
+  "duree_s": 86408,
   "mesures": [
     {
-      "t": 20.0,
-      "memoire_mo": 1094.9,
-      "fps": 5.8,
-      "frames": 39,
-      "evenements": 34,
-      "sain": true
-    },
-    {
-      "t": 40.0,
-      "memoire_mo": 1077.5,
-      "fps": 5.44,
-      "frames": 112,
-      "evenements": 78,
-      "sain": true
-    },
-    {
-      "t": 60.0,
-      "memoire_mo": 1093.6,
-      "fps": 5.87,
-      "frames": 188,
-      "evenements": 116,
-      "sain": true
-    },
-    {
-      "t": 80.0,
-      "memoire_mo": 1092.8,
-      "fps": 5.74,
-      "frames": 260,
-      "evenements": 148,
-      "sain": true
-    },
-    {
-      "t": 100.0,
-      "memoire_mo": 1102.2,
-      "fps": 6.25,
-      "frames": 338,
-      "evenements": 183,
-      "sain": true
-    },
-    {
       "t": 120.0,
-      "memoire_mo": 1095.6,
-      "fps": 5.96,
-      "frames": 416,
-      "evenements": 222,
+      "memoire_mo": 1060.6,
+      "fps": 3.57,
+      "frames": 260,
+      "evenements": 107,
       "sain": true
     },
     {
-      "t": 140.1,
-      "memoire_mo": 1065.7,
-      "fps": 5.83,
-      "frames": 493,
-      "evenements": 251,
+      "t": 240.0,
+      "memoire_mo": 1061.2,
+      "fps": 3.62,
+      "frames": 521,
+      "evenements": 214,
       "sain": true
     },
     {
-      "t": 160.1,
-      "memoire_mo": 1098.4,
-      "fps": 5.05,
-      "frames": 561,
-      "evenements": 282,
+      "t": 360.0,
+      "memoire_mo": 1061.3,
+      "fps": 3.4,
+      "frames": 794,
+      "evenements": 325,
       "sain": true
     },
     {
-      "t": 180.1,
-      "memoire_mo": 1098.5,
-      "fps": 5.52,
-      "frames": 635,
-      "evenements": 316,
+      "t": 480.0,
+      "memoire_mo": 1061.4,
+      "fps": 3.03,
+      "frames": 1075,
+      "evenements": 427,
       "sain": true
     },
     {
-      "t": 200.1,
-      "memoire_mo": 1098.5,
-      "fps": 5.7,
-      "frames": 704,
-      "evenements": 349,
+      "t": 600.0,
+      "memoire_mo": 1061.4,
+      "fps": 3.59,
+      "frames": 1367,
+      "evenements": 518,
       "sain": true
     },
     {
-      "t": 220.1,
-      "memoire_mo": 1097.3,
-      "fps": 4.46,
-      "frames": 761,
-      "evenements": 376,
+      "t": 720.0,
+      "memoire_mo": 1064.0,
+      "fps": 4.49,
+      "frames": 1689,
+      "evenements": 580,
       "sain": true
     },
     {
-      "t": 240.1,
-      "memoire_mo": 1098.5,
-      "fps": 4.85,
-      "frames": 823,
-      "evenements": 410,
-      "sain": true
-    },
-    {
-      "t": 260.1,
-      "memoire_mo": 1097.3,
-      "fps": 4.04,
-      "frames": 878,
-      "evenements": 437,
-      "sain": true
-    },
-    {
-      "t": 280.1,
-      "memoire_mo": 1099.7,
-      "fps": 4.99,
-      "frames": 932,
-      "evenements": 470,
-      "sain": true
-    },
-    {
-      "t": 300.1,
-      "memoire_mo": 1078.0,
-      "fps": 4.63,
-      "frames": 993,
-      "evenements": 500,
-      "sain": true
-    },
-    {
-      "t": 320.1,
-      "memoire_mo": 1098.6,
-      "fps": 3.77,
-      "frames": 1046,
-      "evenements": 529,
-      "sain": true
-    },
-    {
-      "t": 340.1,
-      "memoire_mo": 1097.4,
-      "fps": 4.26,
-      "frames": 1100,
-      "evenements": 560,
-      "sain": true
-    },
-    {
-      "t": 360.1,
-      "memoire_mo": 1097.4,
-      "fps": 4.94,
-      "frames": 1162,
+      "t": 840.0,
+      "memoire_mo": 1064.0,
+      "fps": 4.71,
+      "frames": 2051,
       "evenements": 592,
       "sain": true
     },
     {
-      "t": 380.1,
-      "memoire_mo": 1098.6,
-      "fps": 4.2,
-      "frames": 1221,
-      "evenements": 626,
+      "t": 960.0,
+      "memoire_mo": 1061.4,
+      "fps": 4.36,
+      "frames": 2412,
+      "evenements": 604,
       "sain": true
     },
     {
-      "t": 400.1,
-      "memoire_mo": 1078.1,
-      "fps": 4.27,
-      "frames": 1277,
-      "evenements": 654,
-      "sain": true
-    },
-    {
-      "t": 420.1,
-      "memoire_mo": 1126.7,
-      "fps": 3.76,
-      "frames": 1328,
-      "evenements": 677,
-      "sain": true
-    },
-    {
-      "t": 440.1,
-      "memoire_mo": 1117.3,
-      "fps": 4.24,
-      "frames": 1388,
-      "evenements": 715,
-      "sain": true
-    },
-    {
-      "t": 460.1,
-      "memoire_mo": 1117.3,
-      "fps": 3.73,
-      "frames": 1444,
-      "evenements": 740,
-      "sain": true
-    },
-    {
-      "t": 480.1,
-      "memoire_mo": 1135.3,
-      "fps": 3.82,
-      "frames": 1497,
-      "evenements": 773,
-      "sain": true
-    },
-    {
-      "t": 500.1,
-      "memoire_mo": 1130.3,
-      "fps": 5.93,
-      "frames": 1559,
-      "evenements": 805,
-      "sain": true
-    },
-    {
-      "t": 520.1,
-      "memoire_mo": 1133.9,
-      "fps": 5.07,
-      "frames": 1625,
-      "evenements": 841,
-      "sain": true
-    },
-    {
-      "t": 540.1,
-      "memoire_mo": 1136.5,
-      "fps": 4.42,
-      "frames": 1683,
-      "evenements": 865,
-      "sain": true
-    },
-    {
-      "t": 560.1,
-      "memoire_mo": 1111.9,
-      "fps": 4.69,
-      "frames": 1742,
-      "evenements": 899,
-      "sain": true
-    },
-    {
-      "t": 580.1,
-      "memoire_mo": 1109.9,
-      "fps": 5.2,
-      "frames": 1803,
-      "evenements": 928,
-      "sain": true
-    },
-    {
-      "t": 600.1,
-      "memoire_mo": 1133.9,
-      "fps": 4.3,
-      "frames": 1860,
-      "evenements": 962,
-      "sain": true
-    },
-    {
-      "t": 620.1,
-      "memoire_mo": 1132.7,
-      "fps": 5.18,
-      "frames": 1919,
-      "evenements": 993,
-      "sain": true
-    },
-    {
-      "t": 640.1,
-      "memoire_mo": 1135.4,
-      "fps": 5.15,
-      "frames": 1985,
-      "evenements": 1030,
-      "sain": true
-    },
-    {
-      "t": 660.1,
-      "memoire_mo": 1143.3,
-      "fps": 4.38,
-      "frames": 2042,
-      "evenements": 1055,
-      "sain": true
-    },
-    {
-      "t": 680.1,
-      "memoire_mo": 1133.9,
-      "fps": 5.17,
-      "frames": 2102,
-      "evenements": 1088,
-      "sain": true
-    },
-    {
-      "t": 700.1,
-      "memoire_mo": 1136.5,
-      "fps": 5.49,
-      "frames": 2168,
-      "evenements": 1115,
-      "sain": true
-    },
-    {
-      "t": 720.1,
-      "memoire_mo": 1135.4,
-      "fps": 4.25,
-      "frames": 2229,
-      "evenements": 1154,
-      "sain": true
-    },
-    {
-      "t": 740.1,
-      "memoire_mo": 1135.0,
-      "fps": 5.3,
-      "frames": 2288,
-      "evenements": 1178,
-      "sain": true
-    },
-    {
-      "t": 760.1,
-      "memoire_mo": 1132.7,
-      "fps": 4.18,
-      "frames": 2348,
-      "evenements": 1214,
-      "sain": true
-    },
-    {
-      "t": 780.1,
-      "memoire_mo": 1136.5,
-      "fps": 4.17,
-      "frames": 2405,
-      "evenements": 1237,
-      "sain": true
-    },
-    {
-      "t": 800.1,
-      "memoire_mo": 1116.0,
-      "fps": 4.92,
-      "frames": 2469,
-      "evenements": 1273,
-      "sain": true
-    },
-    {
-      "t": 820.1,
-      "memoire_mo": 1111.8,
-      "fps": 5.04,
-      "frames": 2534,
-      "evenements": 1300,
-      "sain": true
-    },
-    {
-      "t": 840.1,
-      "memoire_mo": 1114.3,
-      "fps": 4.49,
-      "frames": 2597,
-      "evenements": 1332,
-      "sain": true
-    },
-    {
-      "t": 860.1,
-      "memoire_mo": 1136.4,
-      "fps": 3.47,
-      "frames": 2649,
-      "evenements": 1353,
-      "sain": true
-    },
-    {
-      "t": 880.1,
-      "memoire_mo": 1101.1,
-      "fps": 5.38,
-      "frames": 2713,
-      "evenements": 1390,
-      "sain": true
-    },
-    {
-      "t": 900.1,
-      "memoire_mo": 1135.2,
-      "fps": 5.01,
-      "frames": 2787,
-      "evenements": 1421,
-      "sain": true
-    },
-    {
-      "t": 920.1,
-      "memoire_mo": 1143.1,
-      "fps": 5.22,
-      "frames": 2855,
-      "evenements": 1454,
-      "sain": true
-    },
-    {
-      "t": 940.1,
-      "memoire_mo": 1139.0,
-      "fps": 5.84,
-      "frames": 2926,
-      "evenements": 1484,
-      "sain": true
-    },
-    {
-      "t": 960.1,
-      "memoire_mo": 1137.9,
-      "fps": 6.5,
-      "frames": 3003,
-      "evenements": 1516,
-      "sain": true
-    },
-    {
-      "t": 980.1,
-      "memoire_mo": 1135.2,
-      "fps": 4.31,
-      "frames": 3069,
-      "evenements": 1553,
-      "sain": true
-    },
-    {
-      "t": 1000.1,
-      "memoire_mo": 1136.7,
-      "fps": 5.01,
-      "frames": 3135,
-      "evenements": 1583,
-      "sain": true
-    },
-    {
-      "t": 1020.1,
-      "memoire_mo": 1135.2,
-      "fps": 6.33,
-      "frames": 3209,
-      "evenements": 1609,
-      "sain": true
-    },
-    {
-      "t": 1040.1,
-      "memoire_mo": 1135.2,
-      "fps": 6.0,
-      "frames": 3284,
-      "evenements": 1645,
-      "sain": true
-    },
-    {
-      "t": 1060.1,
-      "memoire_mo": 1132.6,
-      "fps": 5.24,
-      "frames": 3350,
-      "evenements": 1679,
-      "sain": true
-    },
-    {
-      "t": 1080.1,
-      "memoire_mo": 1136.4,
-      "fps": 5.83,
-      "frames": 3419,
-      "evenements": 1710,
-      "sain": true
-    },
-    {
-      "t": 1100.1,
-      "memoire_mo": 1103.7,
-      "fps": 5.11,
-      "frames": 3491,
-      "evenements": 1735,
-      "sain": true
-    },
-    {
-      "t": 1120.1,
-      "memoire_mo": 1115.9,
-      "fps": 5.03,
-      "frames": 3557,
-      "evenements": 1770,
-      "sain": true
-    },
-    {
-      "t": 1140.1,
-      "memoire_mo": 1135.2,
-      "fps": 5.93,
-      "frames": 3624,
-      "evenements": 1799,
-      "sain": true
-    },
-    {
-      "t": 1160.1,
-      "memoire_mo": 1116.5,
-      "fps": 6.65,
-      "frames": 3698,
-      "evenements": 1832,
-      "sain": true
-    },
-    {
-      "t": 1180.1,
-      "memoire_mo": 1137.0,
-      "fps": 5.89,
-      "frames": 3769,
-      "evenements": 1863,
+      "t": 1080.0,
+      "memoire_mo": 1064.0,
+      "fps": 4.04,
+      "frames": 2780,
+      "evenements": 617,
       "sain": true
     },
     {
       "t": 1200.1,
-      "memoire_mo": 1116.5,
-      "fps": 5.14,
-      "frames": 3836,
-      "evenements": 1896,
+      "memoire_mo": 1064.0,
+      "fps": 4.46,
+      "frames": 3137,
+      "evenements": 629,
       "sain": true
     },
     {
-      "t": 1220.1,
-      "memoire_mo": 1139.7,
-      "fps": 5.85,
-      "frames": 3909,
-      "evenements": 1929,
+      "t": 1320.1,
+      "memoire_mo": 1064.0,
+      "fps": 6.06,
+      "frames": 3559,
+      "evenements": 643,
       "sain": true
     },
     {
-      "t": 1240.1,
-      "memoire_mo": 1134.4,
-      "fps": 6.46,
-      "frames": 3983,
-      "evenements": 1960,
+      "t": 1440.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.46,
+      "frames": 3992,
+      "evenements": 657,
       "sain": true
     },
     {
-      "t": 1260.1,
-      "memoire_mo": 1135.9,
-      "fps": 4.57,
-      "frames": 4048,
-      "evenements": 1988,
+      "t": 1560.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.72,
+      "frames": 4427,
+      "evenements": 672,
       "sain": true
     },
     {
-      "t": 1280.2,
-      "memoire_mo": 1130.6,
-      "fps": 6.04,
-      "frames": 4112,
-      "evenements": 2020,
+      "t": 1680.1,
+      "memoire_mo": 1064.0,
+      "fps": 4.02,
+      "frames": 4821,
+      "evenements": 685,
       "sain": true
     },
     {
-      "t": 1300.2,
-      "memoire_mo": 1136.6,
-      "fps": 5.92,
-      "frames": 4181,
-      "evenements": 2054,
+      "t": 1800.1,
+      "memoire_mo": 1064.0,
+      "fps": 4.33,
+      "frames": 5176,
+      "evenements": 697,
       "sain": true
     },
     {
-      "t": 1320.2,
-      "memoire_mo": 1131.0,
-      "fps": 5.49,
-      "frames": 4254,
-      "evenements": 2091,
+      "t": 1920.1,
+      "memoire_mo": 1061.4,
+      "fps": 4.27,
+      "frames": 5536,
+      "evenements": 709,
       "sain": true
     },
     {
-      "t": 1340.2,
-      "memoire_mo": 1129.5,
-      "fps": 5.79,
-      "frames": 4322,
-      "evenements": 2116,
+      "t": 2040.1,
+      "memoire_mo": 1061.4,
+      "fps": 4.25,
+      "frames": 5906,
+      "evenements": 721,
       "sain": true
     },
     {
-      "t": 1360.2,
-      "memoire_mo": 1104.4,
-      "fps": 5.37,
-      "frames": 4391,
-      "evenements": 2153,
+      "t": 2160.1,
+      "memoire_mo": 1061.4,
+      "fps": 4.3,
+      "frames": 6261,
+      "evenements": 733,
       "sain": true
     },
     {
-      "t": 1380.2,
-      "memoire_mo": 1130.6,
-      "fps": 6.73,
-      "frames": 4472,
-      "evenements": 2186,
+      "t": 2280.1,
+      "memoire_mo": 1061.4,
+      "fps": 4.94,
+      "frames": 6619,
+      "evenements": 745,
       "sain": true
     },
     {
-      "t": 1400.2,
-      "memoire_mo": 1135.9,
-      "fps": 5.77,
-      "frames": 4544,
-      "evenements": 2221,
+      "t": 2400.1,
+      "memoire_mo": 1061.4,
+      "fps": 4.16,
+      "frames": 6977,
+      "evenements": 757,
       "sain": true
     },
     {
-      "t": 1420.2,
-      "memoire_mo": 1113.9,
-      "fps": 5.6,
-      "frames": 4613,
-      "evenements": 2253,
+      "t": 2520.1,
+      "memoire_mo": 1061.4,
+      "fps": 4.21,
+      "frames": 7337,
+      "evenements": 769,
       "sain": true
     },
     {
-      "t": 1440.2,
-      "memoire_mo": 1131.8,
-      "fps": 6.62,
-      "frames": 4688,
-      "evenements": 2281,
+      "t": 2640.1,
+      "memoire_mo": 1061.4,
+      "fps": 6.21,
+      "frames": 7739,
+      "evenements": 782,
       "sain": true
     },
     {
-      "t": 1460.2,
-      "memoire_mo": 1137.0,
-      "fps": 5.88,
-      "frames": 4766,
-      "evenements": 2316,
+      "t": 2760.1,
+      "memoire_mo": 1070.3,
+      "fps": 5.73,
+      "frames": 8174,
+      "evenements": 796,
       "sain": true
     },
     {
-      "t": 1480.2,
-      "memoire_mo": 1143.8,
-      "fps": 5.2,
-      "frames": 4835,
-      "evenements": 2350,
+      "t": 2880.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.61,
+      "frames": 8609,
+      "evenements": 811,
       "sain": true
     },
     {
-      "t": 1500.2,
-      "memoire_mo": 1135.9,
-      "fps": 5.83,
-      "frames": 4904,
-      "evenements": 2383,
+      "t": 3000.1,
+      "memoire_mo": 1053.5,
+      "fps": 6.02,
+      "frames": 9047,
+      "evenements": 826,
       "sain": true
     },
     {
-      "t": 1520.2,
-      "memoire_mo": 1113.9,
-      "fps": 5.67,
-      "frames": 4977,
-      "evenements": 2417,
+      "t": 3120.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.5,
+      "frames": 9485,
+      "evenements": 840,
       "sain": true
     },
     {
-      "t": 1540.2,
-      "memoire_mo": 1138.5,
-      "fps": 6.58,
-      "frames": 5054,
-      "evenements": 2446,
+      "t": 3240.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.36,
+      "frames": 9922,
+      "evenements": 855,
       "sain": true
     },
     {
-      "t": 1560.2,
-      "memoire_mo": 1133.2,
+      "t": 3360.1,
+      "memoire_mo": 1061.4,
+      "fps": 6.01,
+      "frames": 10364,
+      "evenements": 870,
+      "sain": true
+    },
+    {
+      "t": 3480.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.32,
+      "frames": 10803,
+      "evenements": 884,
+      "sain": true
+    },
+    {
+      "t": 3600.1,
+      "memoire_mo": 1053.5,
+      "fps": 5.38,
+      "frames": 11246,
+      "evenements": 899,
+      "sain": true
+    },
+    {
+      "t": 3720.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.46,
+      "frames": 11687,
+      "evenements": 914,
+      "sain": true
+    },
+    {
+      "t": 3840.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.96,
+      "frames": 12125,
+      "evenements": 928,
+      "sain": true
+    },
+    {
+      "t": 3960.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.33,
+      "frames": 12570,
+      "evenements": 943,
+      "sain": true
+    },
+    {
+      "t": 4080.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.16,
+      "frames": 13012,
+      "evenements": 958,
+      "sain": true
+    },
+    {
+      "t": 4200.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.94,
+      "frames": 13454,
+      "evenements": 972,
+      "sain": true
+    },
+    {
+      "t": 4320.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.12,
+      "frames": 13896,
+      "evenements": 988,
+      "sain": true
+    },
+    {
+      "t": 4440.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.98,
+      "frames": 14339,
+      "evenements": 1002,
+      "sain": true
+    },
+    {
+      "t": 4560.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.78,
+      "frames": 14777,
+      "evenements": 1017,
+      "sain": true
+    },
+    {
+      "t": 4680.1,
+      "memoire_mo": 1061.4,
       "fps": 5.54,
-      "frames": 5124,
-      "evenements": 2477,
+      "frames": 15212,
+      "evenements": 1031,
       "sain": true
     },
     {
-      "t": 1580.2,
-      "memoire_mo": 1135.9,
+      "t": 4800.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.47,
+      "frames": 15652,
+      "evenements": 1046,
+      "sain": true
+    },
+    {
+      "t": 4920.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.53,
+      "frames": 16095,
+      "evenements": 1061,
+      "sain": true
+    },
+    {
+      "t": 5040.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.43,
+      "frames": 16535,
+      "evenements": 1076,
+      "sain": true
+    },
+    {
+      "t": 5160.1,
+      "memoire_mo": 1053.5,
+      "fps": 6.02,
+      "frames": 16973,
+      "evenements": 1090,
+      "sain": true
+    },
+    {
+      "t": 5280.1,
+      "memoire_mo": 1061.4,
+      "fps": 6.28,
+      "frames": 17419,
+      "evenements": 1105,
+      "sain": true
+    },
+    {
+      "t": 5400.1,
+      "memoire_mo": 1053.5,
+      "fps": 5.46,
+      "frames": 17861,
+      "evenements": 1120,
+      "sain": true
+    },
+    {
+      "t": 5520.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.0,
+      "frames": 18305,
+      "evenements": 1134,
+      "sain": true
+    },
+    {
+      "t": 5640.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.27,
+      "frames": 18746,
+      "evenements": 1149,
+      "sain": true
+    },
+    {
+      "t": 5760.1,
+      "memoire_mo": 1064.0,
+      "fps": 6.05,
+      "frames": 19187,
+      "evenements": 1164,
+      "sain": true
+    },
+    {
+      "t": 5880.1,
+      "memoire_mo": 1056.1,
+      "fps": 5.39,
+      "frames": 19628,
+      "evenements": 1178,
+      "sain": true
+    },
+    {
+      "t": 6000.1,
+      "memoire_mo": 1064.0,
       "fps": 5.35,
-      "frames": 5195,
-      "evenements": 2511,
+      "frames": 20065,
+      "evenements": 1193,
       "sain": true
     },
     {
-      "t": 1600.2,
-      "memoire_mo": 1134.4,
-      "fps": 7.21,
-      "frames": 5269,
-      "evenements": 2546,
+      "t": 6120.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.58,
+      "frames": 20498,
+      "evenements": 1208,
       "sain": true
     },
     {
-      "t": 1620.2,
-      "memoire_mo": 1147.6,
-      "fps": 5.28,
-      "frames": 5345,
-      "evenements": 2583,
+      "t": 6240.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.38,
+      "frames": 20936,
+      "evenements": 1222,
       "sain": true
     },
     {
-      "t": 1640.2,
-      "memoire_mo": 1147.9,
-      "fps": 5.66,
-      "frames": 5414,
-      "evenements": 2610,
+      "t": 6360.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.48,
+      "frames": 21374,
+      "evenements": 1236,
       "sain": true
     },
     {
-      "t": 1660.2,
-      "memoire_mo": 1137.0,
+      "t": 6480.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.53,
+      "frames": 21813,
+      "evenements": 1251,
+      "sain": true
+    },
+    {
+      "t": 6600.1,
+      "memoire_mo": 1053.5,
+      "fps": 5.19,
+      "frames": 22253,
+      "evenements": 1266,
+      "sain": true
+    },
+    {
+      "t": 6720.1,
+      "memoire_mo": 1061.4,
+      "fps": 6.63,
+      "frames": 22697,
+      "evenements": 1281,
+      "sain": true
+    },
+    {
+      "t": 6840.1,
+      "memoire_mo": 1071.9,
+      "fps": 5.64,
+      "frames": 23141,
+      "evenements": 1296,
+      "sain": true
+    },
+    {
+      "t": 6960.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.57,
+      "frames": 23582,
+      "evenements": 1310,
+      "sain": true
+    },
+    {
+      "t": 7080.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.81,
+      "frames": 24014,
+      "evenements": 1324,
+      "sain": true
+    },
+    {
+      "t": 7200.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.87,
+      "frames": 24452,
+      "evenements": 1339,
+      "sain": true
+    },
+    {
+      "t": 7320.1,
+      "memoire_mo": 1070.3,
+      "fps": 6.2,
+      "frames": 24889,
+      "evenements": 1354,
+      "sain": true
+    },
+    {
+      "t": 7440.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.46,
+      "frames": 25325,
+      "evenements": 1368,
+      "sain": true
+    },
+    {
+      "t": 7560.1,
+      "memoire_mo": 1064.0,
+      "fps": 4.94,
+      "frames": 25761,
+      "evenements": 1383,
+      "sain": true
+    },
+    {
+      "t": 7680.1,
+      "memoire_mo": 1058.7,
+      "fps": 5.06,
+      "frames": 26199,
+      "evenements": 1398,
+      "sain": true
+    },
+    {
+      "t": 7800.1,
+      "memoire_mo": 1064.0,
+      "fps": 4.84,
+      "frames": 26637,
+      "evenements": 1412,
+      "sain": true
+    },
+    {
+      "t": 7920.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.61,
+      "frames": 27077,
+      "evenements": 1427,
+      "sain": true
+    },
+    {
+      "t": 8040.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.54,
+      "frames": 27512,
+      "evenements": 1441,
+      "sain": true
+    },
+    {
+      "t": 8160.1,
+      "memoire_mo": 1061.4,
+      "fps": 5.34,
+      "frames": 27956,
+      "evenements": 1456,
+      "sain": true
+    },
+    {
+      "t": 8280.1,
+      "memoire_mo": 1064.0,
+      "fps": 5.45,
+      "frames": 28400,
+      "evenements": 1471,
+      "sain": true
+    },
+    {
+      "t": 8400.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.4,
+      "frames": 28838,
+      "evenements": 1486,
+      "sain": true
+    },
+    {
+      "t": 8520.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.91,
+      "frames": 29279,
+      "evenements": 1500,
+      "sain": true
+    },
+    {
+      "t": 8640.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.38,
+      "frames": 29714,
+      "evenements": 1514,
+      "sain": true
+    },
+    {
+      "t": 8760.2,
+      "memoire_mo": 1054.8,
+      "fps": 5.31,
+      "frames": 30153,
+      "evenements": 1529,
+      "sain": true
+    },
+    {
+      "t": 8880.2,
+      "memoire_mo": 1058.7,
+      "fps": 5.24,
+      "frames": 30590,
+      "evenements": 1544,
+      "sain": true
+    },
+    {
+      "t": 9000.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.61,
+      "frames": 31031,
+      "evenements": 1558,
+      "sain": true
+    },
+    {
+      "t": 9120.2,
+      "memoire_mo": 1064.0,
       "fps": 5.56,
-      "frames": 5484,
-      "evenements": 2641,
+      "frames": 31469,
+      "evenements": 1573,
       "sain": true
     },
     {
-      "t": 1680.2,
-      "memoire_mo": 1138.5,
-      "fps": 6.89,
-      "frames": 5558,
+      "t": 9240.2,
+      "memoire_mo": 1061.4,
+      "fps": 6.01,
+      "frames": 31909,
+      "evenements": 1588,
+      "sain": true
+    },
+    {
+      "t": 9360.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.37,
+      "frames": 32345,
+      "evenements": 1602,
+      "sain": true
+    },
+    {
+      "t": 9480.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.08,
+      "frames": 32788,
+      "evenements": 1617,
+      "sain": true
+    },
+    {
+      "t": 9600.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.47,
+      "frames": 33231,
+      "evenements": 1632,
+      "sain": true
+    },
+    {
+      "t": 9720.2,
+      "memoire_mo": 1064.0,
+      "fps": 6.24,
+      "frames": 33674,
+      "evenements": 1646,
+      "sain": true
+    },
+    {
+      "t": 9840.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.66,
+      "frames": 34118,
+      "evenements": 1662,
+      "sain": true
+    },
+    {
+      "t": 9960.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.75,
+      "frames": 34559,
+      "evenements": 1676,
+      "sain": true
+    },
+    {
+      "t": 10080.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.54,
+      "frames": 35003,
+      "evenements": 1691,
+      "sain": true
+    },
+    {
+      "t": 10200.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.4,
+      "frames": 35441,
+      "evenements": 1706,
+      "sain": true
+    },
+    {
+      "t": 10320.2,
+      "memoire_mo": 1056.1,
+      "fps": 5.16,
+      "frames": 35885,
+      "evenements": 1720,
+      "sain": true
+    },
+    {
+      "t": 10440.2,
+      "memoire_mo": 1058.7,
+      "fps": 5.28,
+      "frames": 36328,
+      "evenements": 1735,
+      "sain": true
+    },
+    {
+      "t": 10560.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.73,
+      "frames": 36774,
+      "evenements": 1750,
+      "sain": true
+    },
+    {
+      "t": 10680.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.49,
+      "frames": 37220,
+      "evenements": 1765,
+      "sain": true
+    },
+    {
+      "t": 10800.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.98,
+      "frames": 37664,
+      "evenements": 1780,
+      "sain": true
+    },
+    {
+      "t": 10920.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.11,
+      "frames": 38110,
+      "evenements": 1794,
+      "sain": true
+    },
+    {
+      "t": 11040.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.72,
+      "frames": 38551,
+      "evenements": 1809,
+      "sain": true
+    },
+    {
+      "t": 11160.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.85,
+      "frames": 38993,
+      "evenements": 1824,
+      "sain": true
+    },
+    {
+      "t": 11280.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.27,
+      "frames": 39427,
+      "evenements": 1838,
+      "sain": true
+    },
+    {
+      "t": 11400.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.04,
+      "frames": 39867,
+      "evenements": 1853,
+      "sain": true
+    },
+    {
+      "t": 11520.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.69,
+      "frames": 40310,
+      "evenements": 1868,
+      "sain": true
+    },
+    {
+      "t": 11640.2,
+      "memoire_mo": 1061.4,
+      "fps": 6.0,
+      "frames": 40754,
+      "evenements": 1882,
+      "sain": true
+    },
+    {
+      "t": 11760.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.85,
+      "frames": 41198,
+      "evenements": 1898,
+      "sain": true
+    },
+    {
+      "t": 11880.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.54,
+      "frames": 41636,
+      "evenements": 1912,
+      "sain": true
+    },
+    {
+      "t": 12000.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.88,
+      "frames": 42079,
+      "evenements": 1927,
+      "sain": true
+    },
+    {
+      "t": 12120.2,
+      "memoire_mo": 1053.5,
+      "fps": 6.19,
+      "frames": 42524,
+      "evenements": 1942,
+      "sain": true
+    },
+    {
+      "t": 12240.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.6,
+      "frames": 42962,
+      "evenements": 1956,
+      "sain": true
+    },
+    {
+      "t": 12360.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.32,
+      "frames": 43406,
+      "evenements": 1971,
+      "sain": true
+    },
+    {
+      "t": 12480.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.72,
+      "frames": 43853,
+      "evenements": 1986,
+      "sain": true
+    },
+    {
+      "t": 12600.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.86,
+      "frames": 44299,
+      "evenements": 2001,
+      "sain": true
+    },
+    {
+      "t": 12720.2,
+      "memoire_mo": 1079.8,
+      "fps": 5.9,
+      "frames": 44735,
+      "evenements": 2015,
+      "sain": true
+    },
+    {
+      "t": 12840.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.3,
+      "frames": 45176,
+      "evenements": 2030,
+      "sain": true
+    },
+    {
+      "t": 12960.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.42,
+      "frames": 45617,
+      "evenements": 2045,
+      "sain": true
+    },
+    {
+      "t": 13080.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.52,
+      "frames": 46059,
+      "evenements": 2060,
+      "sain": true
+    },
+    {
+      "t": 13200.2,
+      "memoire_mo": 1053.5,
+      "fps": 5.36,
+      "frames": 46496,
+      "evenements": 2074,
+      "sain": true
+    },
+    {
+      "t": 13320.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.76,
+      "frames": 46933,
+      "evenements": 2088,
+      "sain": true
+    },
+    {
+      "t": 13440.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.48,
+      "frames": 47366,
+      "evenements": 2103,
+      "sain": true
+    },
+    {
+      "t": 13560.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.9,
+      "frames": 47804,
+      "evenements": 2118,
+      "sain": true
+    },
+    {
+      "t": 13680.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.53,
+      "frames": 48239,
+      "evenements": 2132,
+      "sain": true
+    },
+    {
+      "t": 13800.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.88,
+      "frames": 48677,
+      "evenements": 2147,
+      "sain": true
+    },
+    {
+      "t": 13920.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.46,
+      "frames": 49117,
+      "evenements": 2162,
+      "sain": true
+    },
+    {
+      "t": 14040.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.36,
+      "frames": 49555,
+      "evenements": 2176,
+      "sain": true
+    },
+    {
+      "t": 14160.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.81,
+      "frames": 49991,
+      "evenements": 2190,
+      "sain": true
+    },
+    {
+      "t": 14280.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.38,
+      "frames": 50427,
+      "evenements": 2205,
+      "sain": true
+    },
+    {
+      "t": 14400.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.68,
+      "frames": 50865,
+      "evenements": 2220,
+      "sain": true
+    },
+    {
+      "t": 14520.2,
+      "memoire_mo": 1064.0,
+      "fps": 6.29,
+      "frames": 51308,
+      "evenements": 2234,
+      "sain": true
+    },
+    {
+      "t": 14640.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.61,
+      "frames": 51749,
+      "evenements": 2249,
+      "sain": true
+    },
+    {
+      "t": 14760.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.22,
+      "frames": 52191,
+      "evenements": 2264,
+      "sain": true
+    },
+    {
+      "t": 14880.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.65,
+      "frames": 52634,
+      "evenements": 2278,
+      "sain": true
+    },
+    {
+      "t": 15000.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.02,
+      "frames": 53080,
+      "evenements": 2294,
+      "sain": true
+    },
+    {
+      "t": 15120.2,
+      "memoire_mo": 1064.0,
+      "fps": 6.12,
+      "frames": 53522,
+      "evenements": 2308,
+      "sain": true
+    },
+    {
+      "t": 15240.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.47,
+      "frames": 53966,
+      "evenements": 2323,
+      "sain": true
+    },
+    {
+      "t": 15360.2,
+      "memoire_mo": 1061.4,
+      "fps": 5.06,
+      "frames": 54411,
+      "evenements": 2338,
+      "sain": true
+    },
+    {
+      "t": 15480.2,
+      "memoire_mo": 1064.0,
+      "fps": 5.62,
+      "frames": 54853,
+      "evenements": 2352,
+      "sain": true
+    },
+    {
+      "t": 15600.3,
+      "memoire_mo": 1061.4,
+      "fps": 4.76,
+      "frames": 55300,
+      "evenements": 2368,
+      "sain": true
+    },
+    {
+      "t": 15720.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.19,
+      "frames": 55743,
+      "evenements": 2382,
+      "sain": true
+    },
+    {
+      "t": 15840.3,
+      "memoire_mo": 1061.4,
+      "fps": 6.0,
+      "frames": 56191,
+      "evenements": 2397,
+      "sain": true
+    },
+    {
+      "t": 15960.3,
+      "memoire_mo": 1061.4,
+      "fps": 4.99,
+      "frames": 56635,
+      "evenements": 2412,
+      "sain": true
+    },
+    {
+      "t": 16080.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.79,
+      "frames": 57079,
+      "evenements": 2427,
+      "sain": true
+    },
+    {
+      "t": 16200.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.14,
+      "frames": 57519,
+      "evenements": 2442,
+      "sain": true
+    },
+    {
+      "t": 16320.3,
+      "memoire_mo": 1061.4,
+      "fps": 4.99,
+      "frames": 57956,
+      "evenements": 2456,
+      "sain": true
+    },
+    {
+      "t": 16440.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.2,
+      "frames": 58392,
+      "evenements": 2470,
+      "sain": true
+    },
+    {
+      "t": 16560.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.26,
+      "frames": 58829,
+      "evenements": 2485,
+      "sain": true
+    },
+    {
+      "t": 16680.3,
+      "memoire_mo": 1061.4,
+      "fps": 6.04,
+      "frames": 59267,
+      "evenements": 2500,
+      "sain": true
+    },
+    {
+      "t": 16800.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.77,
+      "frames": 59708,
+      "evenements": 2514,
+      "sain": true
+    },
+    {
+      "t": 16920.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.79,
+      "frames": 60146,
+      "evenements": 2529,
+      "sain": true
+    },
+    {
+      "t": 17040.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.87,
+      "frames": 60587,
+      "evenements": 2544,
+      "sain": true
+    },
+    {
+      "t": 17160.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.51,
+      "frames": 61025,
+      "evenements": 2558,
+      "sain": true
+    },
+    {
+      "t": 17280.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.7,
+      "frames": 61465,
+      "evenements": 2573,
+      "sain": true
+    },
+    {
+      "t": 17400.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.08,
+      "frames": 61911,
+      "evenements": 2588,
+      "sain": true
+    },
+    {
+      "t": 17520.3,
+      "memoire_mo": 1052.8,
+      "fps": 5.85,
+      "frames": 62354,
+      "evenements": 2602,
+      "sain": true
+    },
+    {
+      "t": 17640.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.71,
+      "frames": 62795,
+      "evenements": 2617,
+      "sain": true
+    },
+    {
+      "t": 17760.3,
+      "memoire_mo": 1067.6,
+      "fps": 6.22,
+      "frames": 63239,
+      "evenements": 2632,
+      "sain": true
+    },
+    {
+      "t": 17880.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.97,
+      "frames": 63679,
+      "evenements": 2647,
+      "sain": true
+    },
+    {
+      "t": 18000.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.27,
+      "frames": 64119,
+      "evenements": 2662,
+      "sain": true
+    },
+    {
+      "t": 18120.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.99,
+      "frames": 64559,
       "evenements": 2676,
       "sain": true
     },
     {
-      "t": 1700.2,
-      "memoire_mo": 1134.4,
-      "fps": 5.58,
-      "frames": 5636,
-      "evenements": 2708,
+      "t": 18240.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.3,
+      "frames": 65000,
+      "evenements": 2691,
       "sain": true
     },
     {
-      "t": 1720.2,
-      "memoire_mo": 1137.0,
+      "t": 18360.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.16,
+      "frames": 65440,
+      "evenements": 2706,
+      "sain": true
+    },
+    {
+      "t": 18480.3,
+      "memoire_mo": 1064.0,
+      "fps": 6.1,
+      "frames": 65882,
+      "evenements": 2720,
+      "sain": true
+    },
+    {
+      "t": 18600.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.26,
+      "frames": 66322,
+      "evenements": 2735,
+      "sain": true
+    },
+    {
+      "t": 18720.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.61,
+      "frames": 66769,
+      "evenements": 2750,
+      "sain": true
+    },
+    {
+      "t": 18840.3,
+      "memoire_mo": 1064.0,
+      "fps": 6.1,
+      "frames": 67208,
+      "evenements": 2764,
+      "sain": true
+    },
+    {
+      "t": 18960.3,
+      "memoire_mo": 1064.0,
+      "fps": 6.03,
+      "frames": 67655,
+      "evenements": 2779,
+      "sain": true
+    },
+    {
+      "t": 19080.3,
+      "memoire_mo": 1061.4,
+      "fps": 6.16,
+      "frames": 68099,
+      "evenements": 2794,
+      "sain": true
+    },
+    {
+      "t": 19200.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.96,
+      "frames": 68539,
+      "evenements": 2809,
+      "sain": true
+    },
+    {
+      "t": 19320.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.38,
+      "frames": 68974,
+      "evenements": 2824,
+      "sain": true
+    },
+    {
+      "t": 19440.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.08,
+      "frames": 69411,
+      "evenements": 2838,
+      "sain": true
+    },
+    {
+      "t": 19560.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.23,
+      "frames": 69849,
+      "evenements": 2852,
+      "sain": true
+    },
+    {
+      "t": 19680.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.43,
+      "frames": 70289,
+      "evenements": 2867,
+      "sain": true
+    },
+    {
+      "t": 19800.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.51,
+      "frames": 70723,
+      "evenements": 2882,
+      "sain": true
+    },
+    {
+      "t": 19920.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.64,
+      "frames": 71168,
+      "evenements": 2896,
+      "sain": true
+    },
+    {
+      "t": 20040.3,
+      "memoire_mo": 1061.4,
+      "fps": 4.07,
+      "frames": 71579,
+      "evenements": 2921,
+      "sain": true
+    },
+    {
+      "t": 20160.3,
+      "memoire_mo": 1061.4,
+      "fps": 3.77,
+      "frames": 71922,
+      "evenements": 2935,
+      "sain": true
+    },
+    {
+      "t": 20280.3,
+      "memoire_mo": 1061.4,
+      "fps": 4.18,
+      "frames": 72279,
+      "evenements": 2947,
+      "sain": true
+    },
+    {
+      "t": 20400.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.7,
+      "frames": 72644,
+      "evenements": 2959,
+      "sain": true
+    },
+    {
+      "t": 20520.3,
+      "memoire_mo": 1061.4,
+      "fps": 4.7,
+      "frames": 73047,
+      "evenements": 2972,
+      "sain": true
+    },
+    {
+      "t": 20640.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.74,
+      "frames": 73451,
+      "evenements": 2985,
+      "sain": true
+    },
+    {
+      "t": 20760.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.66,
+      "frames": 73871,
+      "evenements": 2999,
+      "sain": true
+    },
+    {
+      "t": 20880.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.56,
+      "frames": 74300,
+      "evenements": 3014,
+      "sain": true
+    },
+    {
+      "t": 21000.3,
+      "memoire_mo": 1064.0,
+      "fps": 4.87,
+      "frames": 74727,
+      "evenements": 3028,
+      "sain": true
+    },
+    {
+      "t": 21120.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.39,
+      "frames": 75150,
+      "evenements": 3042,
+      "sain": true
+    },
+    {
+      "t": 21240.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.66,
+      "frames": 75586,
+      "evenements": 3057,
+      "sain": true
+    },
+    {
+      "t": 21360.3,
+      "memoire_mo": 1064.0,
+      "fps": 4.85,
+      "frames": 76017,
+      "evenements": 3071,
+      "sain": true
+    },
+    {
+      "t": 21480.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.66,
+      "frames": 76448,
+      "evenements": 3085,
+      "sain": true
+    },
+    {
+      "t": 21600.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.68,
+      "frames": 76879,
+      "evenements": 3100,
+      "sain": true
+    },
+    {
+      "t": 21720.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.65,
+      "frames": 77312,
+      "evenements": 3114,
+      "sain": true
+    },
+    {
+      "t": 21840.3,
+      "memoire_mo": 1053.5,
+      "fps": 5.6,
+      "frames": 77741,
+      "evenements": 3129,
+      "sain": true
+    },
+    {
+      "t": 21960.3,
+      "memoire_mo": 1061.4,
+      "fps": 5.4,
+      "frames": 78169,
+      "evenements": 3143,
+      "sain": true
+    },
+    {
+      "t": 22080.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.83,
+      "frames": 78602,
+      "evenements": 3157,
+      "sain": true
+    },
+    {
+      "t": 22200.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.56,
+      "frames": 79031,
+      "evenements": 3171,
+      "sain": true
+    },
+    {
+      "t": 22320.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.45,
+      "frames": 79462,
+      "evenements": 3186,
+      "sain": true
+    },
+    {
+      "t": 22440.3,
+      "memoire_mo": 1064.0,
+      "fps": 6.06,
+      "frames": 79892,
+      "evenements": 3200,
+      "sain": true
+    },
+    {
+      "t": 22560.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.95,
+      "frames": 80323,
+      "evenements": 3215,
+      "sain": true
+    },
+    {
+      "t": 22680.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.39,
+      "frames": 80756,
+      "evenements": 3229,
+      "sain": true
+    },
+    {
+      "t": 22800.3,
+      "memoire_mo": 1064.0,
+      "fps": 5.91,
+      "frames": 81187,
+      "evenements": 3243,
+      "sain": true
+    },
+    {
+      "t": 22920.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.3,
+      "frames": 81618,
+      "evenements": 3258,
+      "sain": true
+    },
+    {
+      "t": 23040.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.39,
+      "frames": 82053,
+      "evenements": 3272,
+      "sain": true
+    },
+    {
+      "t": 23160.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.3,
+      "frames": 82481,
+      "evenements": 3287,
+      "sain": true
+    },
+    {
+      "t": 23280.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.91,
+      "frames": 82910,
+      "evenements": 3301,
+      "sain": true
+    },
+    {
+      "t": 23400.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.71,
+      "frames": 83339,
+      "evenements": 3315,
+      "sain": true
+    },
+    {
+      "t": 23520.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.6,
+      "frames": 83773,
+      "evenements": 3329,
+      "sain": true
+    },
+    {
+      "t": 23640.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.21,
+      "frames": 84195,
+      "evenements": 3344,
+      "sain": true
+    },
+    {
+      "t": 23760.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.7,
+      "frames": 84620,
+      "evenements": 3358,
+      "sain": true
+    },
+    {
+      "t": 23880.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.0,
+      "frames": 85044,
+      "evenements": 3372,
+      "sain": true
+    },
+    {
+      "t": 24000.4,
+      "memoire_mo": 1064.0,
+      "fps": 4.75,
+      "frames": 85467,
+      "evenements": 3386,
+      "sain": true
+    },
+    {
+      "t": 24120.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.13,
+      "frames": 85889,
+      "evenements": 3400,
+      "sain": true
+    },
+    {
+      "t": 24240.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.42,
+      "frames": 86313,
+      "evenements": 3414,
+      "sain": true
+    },
+    {
+      "t": 24360.4,
+      "memoire_mo": 1066.7,
+      "fps": 4.92,
+      "frames": 86735,
+      "evenements": 3429,
+      "sain": true
+    },
+    {
+      "t": 24480.4,
+      "memoire_mo": 1064.0,
+      "fps": 4.91,
+      "frames": 87160,
+      "evenements": 3443,
+      "sain": true
+    },
+    {
+      "t": 24600.4,
+      "memoire_mo": 1064.0,
+      "fps": 6.08,
+      "frames": 87587,
+      "evenements": 3457,
+      "sain": true
+    },
+    {
+      "t": 24720.4,
+      "memoire_mo": 1064.0,
+      "fps": 4.94,
+      "frames": 88001,
+      "evenements": 3471,
+      "sain": true
+    },
+    {
+      "t": 24840.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.03,
+      "frames": 88419,
+      "evenements": 3485,
+      "sain": true
+    },
+    {
+      "t": 24960.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.12,
+      "frames": 88846,
+      "evenements": 3499,
+      "sain": true
+    },
+    {
+      "t": 25080.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.59,
+      "frames": 89273,
+      "evenements": 3513,
+      "sain": true
+    },
+    {
+      "t": 25200.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.51,
+      "frames": 89699,
+      "evenements": 3527,
+      "sain": true
+    },
+    {
+      "t": 25320.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.9,
+      "frames": 90128,
+      "evenements": 3541,
+      "sain": true
+    },
+    {
+      "t": 25440.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.15,
+      "frames": 90555,
+      "evenements": 3556,
+      "sain": true
+    },
+    {
+      "t": 25560.4,
+      "memoire_mo": 1064.0,
+      "fps": 4.83,
+      "frames": 90981,
+      "evenements": 3570,
+      "sain": true
+    },
+    {
+      "t": 25680.4,
+      "memoire_mo": 1070.3,
+      "fps": 5.2,
+      "frames": 91409,
+      "evenements": 3584,
+      "sain": true
+    },
+    {
+      "t": 25800.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.47,
+      "frames": 91837,
+      "evenements": 3599,
+      "sain": true
+    },
+    {
+      "t": 25920.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.77,
+      "frames": 92264,
+      "evenements": 3613,
+      "sain": true
+    },
+    {
+      "t": 26040.4,
+      "memoire_mo": 1064.0,
+      "fps": 5.53,
+      "frames": 92690,
+      "evenements": 3627,
+      "sain": true
+    },
+    {
+      "t": 26160.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.41,
+      "frames": 93119,
+      "evenements": 3641,
+      "sain": true
+    },
+    {
+      "t": 26280.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.8,
+      "frames": 93547,
+      "evenements": 3655,
+      "sain": true
+    },
+    {
+      "t": 26400.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.61,
+      "frames": 93974,
+      "evenements": 3669,
+      "sain": true
+    },
+    {
+      "t": 26520.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.17,
+      "frames": 94401,
+      "evenements": 3684,
+      "sain": true
+    },
+    {
+      "t": 26640.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.42,
+      "frames": 94829,
+      "evenements": 3698,
+      "sain": true
+    },
+    {
+      "t": 26760.4,
+      "memoire_mo": 1061.4,
+      "fps": 4.77,
+      "frames": 95259,
+      "evenements": 3713,
+      "sain": true
+    },
+    {
+      "t": 26880.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.85,
+      "frames": 95689,
+      "evenements": 3727,
+      "sain": true
+    },
+    {
+      "t": 27000.4,
+      "memoire_mo": 1061.4,
+      "fps": 4.96,
+      "frames": 96120,
+      "evenements": 3741,
+      "sain": true
+    },
+    {
+      "t": 27120.4,
+      "memoire_mo": 1061.4,
+      "fps": 5.52,
+      "frames": 96553,
+      "evenements": 3755,
+      "sain": true
+    },
+    {
+      "t": 27240.4,
+      "memoire_mo": 1064.0,
+      "fps": 6.02,
+      "frames": 96983,
+      "evenements": 3770,
+      "sain": true
+    },
+    {
+      "t": 27360.4,
+      "memoire_mo": 1064.2,
+      "fps": 5.75,
+      "frames": 97411,
+      "evenements": 3784,
+      "sain": true
+    },
+    {
+      "t": 27480.4,
+      "memoire_mo": 1061.5,
+      "fps": 5.39,
+      "frames": 97835,
+      "evenements": 3799,
+      "sain": true
+    },
+    {
+      "t": 27600.4,
+      "memoire_mo": 1033.7,
+      "fps": 5.4,
+      "frames": 98251,
+      "evenements": 3812,
+      "sain": true
+    },
+    {
+      "t": 27720.4,
+      "memoire_mo": 745.4,
+      "fps": 5.13,
+      "frames": 98682,
+      "evenements": 3827,
+      "sain": true
+    },
+    {
+      "t": 27840.4,
+      "memoire_mo": 701.7,
+      "fps": 5.15,
+      "frames": 99112,
+      "evenements": 3841,
+      "sain": true
+    },
+    {
+      "t": 27960.4,
+      "memoire_mo": 684.1,
+      "fps": 5.51,
+      "frames": 99539,
+      "evenements": 3855,
+      "sain": true
+    },
+    {
+      "t": 28080.4,
+      "memoire_mo": 686.3,
+      "fps": 5.64,
+      "frames": 99968,
+      "evenements": 3869,
+      "sain": true
+    },
+    {
+      "t": 28200.4,
+      "memoire_mo": 679.7,
+      "fps": 5.44,
+      "frames": 100397,
+      "evenements": 3884,
+      "sain": true
+    },
+    {
+      "t": 28320.4,
+      "memoire_mo": 682.3,
+      "fps": 5.4,
+      "frames": 100822,
+      "evenements": 3898,
+      "sain": true
+    },
+    {
+      "t": 28440.4,
+      "memoire_mo": 682.3,
+      "fps": 5.48,
+      "frames": 101253,
+      "evenements": 3913,
+      "sain": true
+    },
+    {
+      "t": 28560.4,
+      "memoire_mo": 682.3,
+      "fps": 5.42,
+      "frames": 101684,
+      "evenements": 3927,
+      "sain": true
+    },
+    {
+      "t": 28680.4,
+      "memoire_mo": 682.3,
+      "fps": 5.4,
+      "frames": 102116,
+      "evenements": 3941,
+      "sain": true
+    },
+    {
+      "t": 28800.4,
+      "memoire_mo": 682.3,
+      "fps": 5.45,
+      "frames": 102544,
+      "evenements": 3955,
+      "sain": true
+    },
+    {
+      "t": 28920.4,
+      "memoire_mo": 682.4,
+      "fps": 5.64,
+      "frames": 102974,
+      "evenements": 3969,
+      "sain": true
+    },
+    {
+      "t": 29040.4,
+      "memoire_mo": 682.4,
+      "fps": 5.21,
+      "frames": 103402,
+      "evenements": 3984,
+      "sain": true
+    },
+    {
+      "t": 29160.4,
+      "memoire_mo": 682.4,
+      "fps": 5.21,
+      "frames": 103826,
+      "evenements": 3998,
+      "sain": true
+    },
+    {
+      "t": 29280.4,
+      "memoire_mo": 679.7,
+      "fps": 5.52,
+      "frames": 104258,
+      "evenements": 4013,
+      "sain": true
+    },
+    {
+      "t": 29400.4,
+      "memoire_mo": 679.7,
       "fps": 5.37,
-      "frames": 5707,
-      "evenements": 2744,
+      "frames": 104684,
+      "evenements": 4027,
       "sain": true
     },
     {
-      "t": 1740.2,
-      "memoire_mo": 1138.5,
-      "fps": 5.5,
-      "frames": 5776,
-      "evenements": 2773,
+      "t": 29520.4,
+      "memoire_mo": 679.7,
+      "fps": 5.39,
+      "frames": 105116,
+      "evenements": 4041,
       "sain": true
     },
     {
-      "t": 1760.2,
-      "memoire_mo": 1101.7,
-      "fps": 6.87,
-      "frames": 5849,
-      "evenements": 2799,
+      "t": 29640.4,
+      "memoire_mo": 679.7,
+      "fps": 5.35,
+      "frames": 105544,
+      "evenements": 4055,
       "sain": true
     },
     {
-      "t": 1780.2,
-      "memoire_mo": 1138.2,
-      "fps": 5.99,
-      "frames": 5924,
-      "evenements": 2835,
+      "t": 29760.4,
+      "memoire_mo": 671.8,
+      "fps": 5.25,
+      "frames": 105969,
+      "evenements": 4069,
       "sain": true
     },
     {
-      "t": 1800.2,
-      "memoire_mo": 1131.8,
+      "t": 29880.5,
+      "memoire_mo": 656.0,
+      "fps": 5.98,
+      "frames": 106400,
+      "evenements": 4084,
+      "sain": true
+    },
+    {
+      "t": 30000.5,
+      "memoire_mo": 679.7,
+      "fps": 5.58,
+      "frames": 106823,
+      "evenements": 4098,
+      "sain": true
+    },
+    {
+      "t": 30120.5,
+      "memoire_mo": 682.4,
+      "fps": 5.85,
+      "frames": 107252,
+      "evenements": 4112,
+      "sain": true
+    },
+    {
+      "t": 30240.5,
+      "memoire_mo": 682.4,
+      "fps": 5.54,
+      "frames": 107683,
+      "evenements": 4127,
+      "sain": true
+    },
+    {
+      "t": 30360.5,
+      "memoire_mo": 682.4,
+      "fps": 5.4,
+      "frames": 108110,
+      "evenements": 4141,
+      "sain": true
+    },
+    {
+      "t": 30480.5,
+      "memoire_mo": 679.7,
+      "fps": 5.83,
+      "frames": 108541,
+      "evenements": 4155,
+      "sain": true
+    },
+    {
+      "t": 30600.5,
+      "memoire_mo": 679.7,
+      "fps": 5.47,
+      "frames": 108968,
+      "evenements": 4169,
+      "sain": true
+    },
+    {
+      "t": 30720.5,
+      "memoire_mo": 679.7,
+      "fps": 5.64,
+      "frames": 109397,
+      "evenements": 4184,
+      "sain": true
+    },
+    {
+      "t": 30840.5,
+      "memoire_mo": 679.7,
+      "fps": 5.21,
+      "frames": 109824,
+      "evenements": 4198,
+      "sain": true
+    },
+    {
+      "t": 30960.5,
+      "memoire_mo": 682.4,
+      "fps": 5.43,
+      "frames": 110255,
+      "evenements": 4213,
+      "sain": true
+    },
+    {
+      "t": 31080.5,
+      "memoire_mo": 682.4,
+      "fps": 5.19,
+      "frames": 110685,
+      "evenements": 4227,
+      "sain": true
+    },
+    {
+      "t": 31200.5,
+      "memoire_mo": 679.7,
+      "fps": 5.13,
+      "frames": 111114,
+      "evenements": 4241,
+      "sain": true
+    },
+    {
+      "t": 31320.5,
+      "memoire_mo": 692.9,
+      "fps": 5.42,
+      "frames": 111542,
+      "evenements": 4255,
+      "sain": true
+    },
+    {
+      "t": 31440.5,
+      "memoire_mo": 682.4,
+      "fps": 5.41,
+      "frames": 111969,
+      "evenements": 4269,
+      "sain": true
+    },
+    {
+      "t": 31560.5,
+      "memoire_mo": 679.7,
+      "fps": 5.74,
+      "frames": 112400,
+      "evenements": 4284,
+      "sain": true
+    },
+    {
+      "t": 31680.5,
+      "memoire_mo": 679.8,
+      "fps": 6.01,
+      "frames": 112826,
+      "evenements": 4298,
+      "sain": true
+    },
+    {
+      "t": 31800.5,
+      "memoire_mo": 679.8,
+      "fps": 5.32,
+      "frames": 113258,
+      "evenements": 4313,
+      "sain": true
+    },
+    {
+      "t": 31920.5,
+      "memoire_mo": 679.8,
+      "fps": 5.78,
+      "frames": 113678,
+      "evenements": 4327,
+      "sain": true
+    },
+    {
+      "t": 32040.5,
+      "memoire_mo": 679.8,
+      "fps": 5.11,
+      "frames": 114105,
+      "evenements": 4341,
+      "sain": true
+    },
+    {
+      "t": 32160.5,
+      "memoire_mo": 679.8,
+      "fps": 6.09,
+      "frames": 114539,
+      "evenements": 4355,
+      "sain": true
+    },
+    {
+      "t": 32280.5,
+      "memoire_mo": 679.8,
+      "fps": 5.23,
+      "frames": 114966,
+      "evenements": 4369,
+      "sain": true
+    },
+    {
+      "t": 32400.5,
+      "memoire_mo": 679.8,
+      "fps": 5.7,
+      "frames": 115394,
+      "evenements": 4383,
+      "sain": true
+    },
+    {
+      "t": 32520.5,
+      "memoire_mo": 679.8,
+      "fps": 5.11,
+      "frames": 115825,
+      "evenements": 4398,
+      "sain": true
+    },
+    {
+      "t": 32640.5,
+      "memoire_mo": 679.8,
+      "fps": 5.35,
+      "frames": 116255,
+      "evenements": 4412,
+      "sain": true
+    },
+    {
+      "t": 32760.5,
+      "memoire_mo": 679.8,
+      "fps": 5.71,
+      "frames": 116684,
+      "evenements": 4427,
+      "sain": true
+    },
+    {
+      "t": 32880.5,
+      "memoire_mo": 679.8,
+      "fps": 5.31,
+      "frames": 117110,
+      "evenements": 4441,
+      "sain": true
+    },
+    {
+      "t": 33000.5,
+      "memoire_mo": 679.8,
+      "fps": 4.96,
+      "frames": 117538,
+      "evenements": 4455,
+      "sain": true
+    },
+    {
+      "t": 33120.5,
+      "memoire_mo": 682.4,
+      "fps": 5.09,
+      "frames": 117969,
+      "evenements": 4469,
+      "sain": true
+    },
+    {
+      "t": 33240.5,
+      "memoire_mo": 682.4,
+      "fps": 6.23,
+      "frames": 118399,
+      "evenements": 4484,
+      "sain": true
+    },
+    {
+      "t": 33360.5,
+      "memoire_mo": 682.4,
+      "fps": 5.37,
+      "frames": 118828,
+      "evenements": 4498,
+      "sain": true
+    },
+    {
+      "t": 33480.5,
+      "memoire_mo": 679.8,
+      "fps": 5.65,
+      "frames": 119254,
+      "evenements": 4512,
+      "sain": true
+    },
+    {
+      "t": 33600.5,
+      "memoire_mo": 679.8,
+      "fps": 5.37,
+      "frames": 119678,
+      "evenements": 4527,
+      "sain": true
+    },
+    {
+      "t": 33720.5,
+      "memoire_mo": 679.8,
+      "fps": 5.53,
+      "frames": 120104,
+      "evenements": 4541,
+      "sain": true
+    },
+    {
+      "t": 33840.5,
+      "memoire_mo": 682.4,
+      "fps": 5.7,
+      "frames": 120530,
+      "evenements": 4555,
+      "sain": true
+    },
+    {
+      "t": 33960.5,
+      "memoire_mo": 679.8,
+      "fps": 5.43,
+      "frames": 120954,
+      "evenements": 4569,
+      "sain": true
+    },
+    {
+      "t": 34080.5,
+      "memoire_mo": 679.8,
+      "fps": 5.58,
+      "frames": 121382,
+      "evenements": 4583,
+      "sain": true
+    },
+    {
+      "t": 34200.5,
+      "memoire_mo": 679.8,
+      "fps": 5.12,
+      "frames": 121810,
+      "evenements": 4597,
+      "sain": true
+    },
+    {
+      "t": 34320.5,
+      "memoire_mo": 679.8,
+      "fps": 5.64,
+      "frames": 122234,
+      "evenements": 4611,
+      "sain": true
+    },
+    {
+      "t": 34440.5,
+      "memoire_mo": 679.8,
+      "fps": 5.26,
+      "frames": 122659,
+      "evenements": 4626,
+      "sain": true
+    },
+    {
+      "t": 34560.5,
+      "memoire_mo": 671.9,
+      "fps": 5.26,
+      "frames": 123086,
+      "evenements": 4640,
+      "sain": true
+    },
+    {
+      "t": 34680.5,
+      "memoire_mo": 682.4,
+      "fps": 5.26,
+      "frames": 123515,
+      "evenements": 4655,
+      "sain": true
+    },
+    {
+      "t": 34800.5,
+      "memoire_mo": 679.8,
+      "fps": 5.17,
+      "frames": 123945,
+      "evenements": 4669,
+      "sain": true
+    },
+    {
+      "t": 34920.5,
+      "memoire_mo": 679.8,
+      "fps": 4.78,
+      "frames": 124377,
+      "evenements": 4683,
+      "sain": true
+    },
+    {
+      "t": 35040.5,
+      "memoire_mo": 679.8,
       "fps": 5.46,
-      "frames": 5994,
-      "evenements": 2869,
+      "frames": 124808,
+      "evenements": 4697,
+      "sain": true
+    },
+    {
+      "t": 35160.5,
+      "memoire_mo": 679.8,
+      "fps": 5.04,
+      "frames": 125241,
+      "evenements": 4712,
+      "sain": true
+    },
+    {
+      "t": 35280.5,
+      "memoire_mo": 679.8,
+      "fps": 5.07,
+      "frames": 125670,
+      "evenements": 4726,
+      "sain": true
+    },
+    {
+      "t": 35400.5,
+      "memoire_mo": 679.8,
+      "fps": 5.45,
+      "frames": 126095,
+      "evenements": 4740,
+      "sain": true
+    },
+    {
+      "t": 35520.5,
+      "memoire_mo": 682.4,
+      "fps": 5.54,
+      "frames": 126517,
+      "evenements": 4755,
+      "sain": true
+    },
+    {
+      "t": 35640.5,
+      "memoire_mo": 682.4,
+      "fps": 5.48,
+      "frames": 126944,
+      "evenements": 4769,
+      "sain": true
+    },
+    {
+      "t": 35760.5,
+      "memoire_mo": 682.4,
+      "fps": 5.08,
+      "frames": 127378,
+      "evenements": 4783,
+      "sain": true
+    },
+    {
+      "t": 35880.5,
+      "memoire_mo": 679.8,
+      "fps": 5.25,
+      "frames": 127809,
+      "evenements": 4797,
+      "sain": true
+    },
+    {
+      "t": 36000.5,
+      "memoire_mo": 669.2,
+      "fps": 5.63,
+      "frames": 128239,
+      "evenements": 4812,
+      "sain": true
+    },
+    {
+      "t": 36120.5,
+      "memoire_mo": 679.8,
+      "fps": 5.65,
+      "frames": 128669,
+      "evenements": 4826,
+      "sain": true
+    },
+    {
+      "t": 36240.5,
+      "memoire_mo": 679.8,
+      "fps": 5.45,
+      "frames": 129099,
+      "evenements": 4841,
+      "sain": true
+    },
+    {
+      "t": 36360.5,
+      "memoire_mo": 682.4,
+      "fps": 5.87,
+      "frames": 129527,
+      "evenements": 4855,
+      "sain": true
+    },
+    {
+      "t": 36480.5,
+      "memoire_mo": 682.4,
+      "fps": 5.29,
+      "frames": 129953,
+      "evenements": 4869,
+      "sain": true
+    },
+    {
+      "t": 36600.5,
+      "memoire_mo": 682.4,
+      "fps": 5.3,
+      "frames": 130383,
+      "evenements": 4883,
+      "sain": true
+    },
+    {
+      "t": 36720.5,
+      "memoire_mo": 690.3,
+      "fps": 5.73,
+      "frames": 130808,
+      "evenements": 4897,
+      "sain": true
+    },
+    {
+      "t": 36840.5,
+      "memoire_mo": 682.4,
+      "fps": 5.83,
+      "frames": 131237,
+      "evenements": 4912,
+      "sain": true
+    },
+    {
+      "t": 36960.5,
+      "memoire_mo": 682.4,
+      "fps": 5.11,
+      "frames": 131667,
+      "evenements": 4926,
+      "sain": true
+    },
+    {
+      "t": 37080.5,
+      "memoire_mo": 682.4,
+      "fps": 5.46,
+      "frames": 132095,
+      "evenements": 4940,
+      "sain": true
+    },
+    {
+      "t": 37200.5,
+      "memoire_mo": 682.4,
+      "fps": 5.16,
+      "frames": 132522,
+      "evenements": 4955,
+      "sain": true
+    },
+    {
+      "t": 37320.5,
+      "memoire_mo": 679.8,
+      "fps": 5.37,
+      "frames": 132947,
+      "evenements": 4969,
+      "sain": true
+    },
+    {
+      "t": 37440.5,
+      "memoire_mo": 679.8,
+      "fps": 4.99,
+      "frames": 133375,
+      "evenements": 4983,
+      "sain": true
+    },
+    {
+      "t": 37560.6,
+      "memoire_mo": 679.8,
+      "fps": 4.88,
+      "frames": 133805,
+      "evenements": 4997,
+      "sain": true
+    },
+    {
+      "t": 37680.6,
+      "memoire_mo": 679.8,
+      "fps": 5.28,
+      "frames": 134229,
+      "evenements": 5011,
+      "sain": true
+    },
+    {
+      "t": 37800.6,
+      "memoire_mo": 679.8,
+      "fps": 5.55,
+      "frames": 134660,
+      "evenements": 5026,
+      "sain": true
+    },
+    {
+      "t": 37920.6,
+      "memoire_mo": 682.4,
+      "fps": 5.66,
+      "frames": 135089,
+      "evenements": 5040,
+      "sain": true
+    },
+    {
+      "t": 38040.6,
+      "memoire_mo": 679.8,
+      "fps": 5.05,
+      "frames": 135519,
+      "evenements": 5055,
+      "sain": true
+    },
+    {
+      "t": 38160.6,
+      "memoire_mo": 682.4,
+      "fps": 5.79,
+      "frames": 135949,
+      "evenements": 5069,
+      "sain": true
+    },
+    {
+      "t": 38280.6,
+      "memoire_mo": 682.4,
+      "fps": 5.18,
+      "frames": 136377,
+      "evenements": 5083,
+      "sain": true
+    },
+    {
+      "t": 38400.6,
+      "memoire_mo": 679.8,
+      "fps": 5.37,
+      "frames": 136799,
+      "evenements": 5097,
+      "sain": true
+    },
+    {
+      "t": 38520.6,
+      "memoire_mo": 679.8,
+      "fps": 4.83,
+      "frames": 137225,
+      "evenements": 5111,
+      "sain": true
+    },
+    {
+      "t": 38640.6,
+      "memoire_mo": 679.8,
+      "fps": 5.28,
+      "frames": 137653,
+      "evenements": 5125,
+      "sain": true
+    },
+    {
+      "t": 38760.6,
+      "memoire_mo": 679.8,
+      "fps": 5.28,
+      "frames": 138082,
+      "evenements": 5140,
+      "sain": true
+    },
+    {
+      "t": 38880.6,
+      "memoire_mo": 679.8,
+      "fps": 5.0,
+      "frames": 138508,
+      "evenements": 5154,
+      "sain": true
+    },
+    {
+      "t": 39000.6,
+      "memoire_mo": 679.8,
+      "fps": 5.04,
+      "frames": 138939,
+      "evenements": 5169,
+      "sain": true
+    },
+    {
+      "t": 39120.6,
+      "memoire_mo": 679.8,
+      "fps": 5.31,
+      "frames": 139370,
+      "evenements": 5183,
+      "sain": true
+    },
+    {
+      "t": 39240.6,
+      "memoire_mo": 679.8,
+      "fps": 4.8,
+      "frames": 139798,
+      "evenements": 5197,
+      "sain": true
+    },
+    {
+      "t": 39360.6,
+      "memoire_mo": 679.8,
+      "fps": 5.52,
+      "frames": 140228,
+      "evenements": 5211,
+      "sain": true
+    },
+    {
+      "t": 39480.6,
+      "memoire_mo": 679.8,
+      "fps": 5.51,
+      "frames": 140660,
+      "evenements": 5226,
+      "sain": true
+    },
+    {
+      "t": 39600.6,
+      "memoire_mo": 679.8,
+      "fps": 5.8,
+      "frames": 141089,
+      "evenements": 5240,
+      "sain": true
+    },
+    {
+      "t": 39720.6,
+      "memoire_mo": 679.8,
+      "fps": 5.18,
+      "frames": 141516,
+      "evenements": 5255,
+      "sain": true
+    },
+    {
+      "t": 39840.6,
+      "memoire_mo": 671.9,
+      "fps": 5.85,
+      "frames": 141947,
+      "evenements": 5269,
+      "sain": true
+    },
+    {
+      "t": 39960.6,
+      "memoire_mo": 679.8,
+      "fps": 5.07,
+      "frames": 142379,
+      "evenements": 5283,
+      "sain": true
+    },
+    {
+      "t": 40080.6,
+      "memoire_mo": 679.8,
+      "fps": 5.46,
+      "frames": 142811,
+      "evenements": 5297,
+      "sain": true
+    },
+    {
+      "t": 40200.6,
+      "memoire_mo": 679.8,
+      "fps": 5.36,
+      "frames": 143239,
+      "evenements": 5312,
+      "sain": true
+    },
+    {
+      "t": 40320.6,
+      "memoire_mo": 679.8,
+      "fps": 5.73,
+      "frames": 143663,
+      "evenements": 5326,
+      "sain": true
+    },
+    {
+      "t": 40440.6,
+      "memoire_mo": 679.8,
+      "fps": 5.48,
+      "frames": 144091,
+      "evenements": 5340,
+      "sain": true
+    },
+    {
+      "t": 40560.6,
+      "memoire_mo": 679.8,
+      "fps": 5.39,
+      "frames": 144515,
+      "evenements": 5355,
+      "sain": true
+    },
+    {
+      "t": 40680.6,
+      "memoire_mo": 679.8,
+      "fps": 5.43,
+      "frames": 144947,
+      "evenements": 5369,
+      "sain": true
+    },
+    {
+      "t": 40800.6,
+      "memoire_mo": 679.8,
+      "fps": 4.99,
+      "frames": 145378,
+      "evenements": 5383,
+      "sain": true
+    },
+    {
+      "t": 40920.6,
+      "memoire_mo": 679.8,
+      "fps": 5.27,
+      "frames": 145799,
+      "evenements": 5397,
+      "sain": true
+    },
+    {
+      "t": 41040.6,
+      "memoire_mo": 671.9,
+      "fps": 5.48,
+      "frames": 146228,
+      "evenements": 5411,
+      "sain": true
+    },
+    {
+      "t": 41160.6,
+      "memoire_mo": 682.5,
+      "fps": 5.69,
+      "frames": 146657,
+      "evenements": 5426,
+      "sain": true
+    },
+    {
+      "t": 41280.6,
+      "memoire_mo": 685.1,
+      "fps": 5.31,
+      "frames": 147086,
+      "evenements": 5440,
+      "sain": true
+    },
+    {
+      "t": 41400.6,
+      "memoire_mo": 679.8,
+      "fps": 5.99,
+      "frames": 147515,
+      "evenements": 5454,
+      "sain": true
+    },
+    {
+      "t": 41520.6,
+      "memoire_mo": 679.8,
+      "fps": 5.14,
+      "frames": 147941,
+      "evenements": 5469,
+      "sain": true
+    },
+    {
+      "t": 41640.6,
+      "memoire_mo": 682.5,
+      "fps": 6.05,
+      "frames": 148367,
+      "evenements": 5483,
+      "sain": true
+    },
+    {
+      "t": 41760.6,
+      "memoire_mo": 682.5,
+      "fps": 4.74,
+      "frames": 148795,
+      "evenements": 5497,
+      "sain": true
+    },
+    {
+      "t": 41880.6,
+      "memoire_mo": 682.5,
+      "fps": 5.28,
+      "frames": 149221,
+      "evenements": 5511,
+      "sain": true
+    },
+    {
+      "t": 42000.6,
+      "memoire_mo": 682.5,
+      "fps": 5.62,
+      "frames": 149651,
+      "evenements": 5525,
+      "sain": true
+    },
+    {
+      "t": 42120.6,
+      "memoire_mo": 671.9,
+      "fps": 4.98,
+      "frames": 150082,
+      "evenements": 5540,
+      "sain": true
+    },
+    {
+      "t": 42240.6,
+      "memoire_mo": 679.8,
+      "fps": 5.53,
+      "frames": 150510,
+      "evenements": 5554,
+      "sain": true
+    },
+    {
+      "t": 42360.6,
+      "memoire_mo": 682.5,
+      "fps": 4.92,
+      "frames": 150940,
+      "evenements": 5569,
+      "sain": true
+    },
+    {
+      "t": 42480.6,
+      "memoire_mo": 679.8,
+      "fps": 5.35,
+      "frames": 151369,
+      "evenements": 5583,
+      "sain": true
+    },
+    {
+      "t": 42600.6,
+      "memoire_mo": 682.5,
+      "fps": 5.15,
+      "frames": 151795,
+      "evenements": 5597,
+      "sain": true
+    },
+    {
+      "t": 42720.6,
+      "memoire_mo": 679.8,
+      "fps": 5.39,
+      "frames": 152223,
+      "evenements": 5611,
+      "sain": true
+    },
+    {
+      "t": 42840.6,
+      "memoire_mo": 679.8,
+      "fps": 6.16,
+      "frames": 152651,
+      "evenements": 5625,
+      "sain": true
+    },
+    {
+      "t": 42960.6,
+      "memoire_mo": 679.8,
+      "fps": 5.23,
+      "frames": 153075,
+      "evenements": 5640,
+      "sain": true
+    },
+    {
+      "t": 43080.6,
+      "memoire_mo": 679.8,
+      "fps": 5.83,
+      "frames": 153503,
+      "evenements": 5654,
+      "sain": true
+    },
+    {
+      "t": 43200.6,
+      "memoire_mo": 686.6,
+      "fps": 5.32,
+      "frames": 153934,
+      "evenements": 5669,
+      "sain": true
+    },
+    {
+      "t": 43320.6,
+      "memoire_mo": 673.2,
+      "fps": 5.37,
+      "frames": 154359,
+      "evenements": 5683,
+      "sain": true
+    },
+    {
+      "t": 43440.6,
+      "memoire_mo": 682.5,
+      "fps": 5.44,
+      "frames": 154784,
+      "evenements": 5697,
+      "sain": true
+    },
+    {
+      "t": 43560.6,
+      "memoire_mo": 679.9,
+      "fps": 6.05,
+      "frames": 155209,
+      "evenements": 5711,
+      "sain": true
+    },
+    {
+      "t": 43680.6,
+      "memoire_mo": 679.9,
+      "fps": 4.89,
+      "frames": 155630,
+      "evenements": 5725,
+      "sain": true
+    },
+    {
+      "t": 43800.6,
+      "memoire_mo": 682.5,
+      "fps": 5.09,
+      "frames": 156055,
+      "evenements": 5739,
+      "sain": true
+    },
+    {
+      "t": 43920.6,
+      "memoire_mo": 682.5,
+      "fps": 5.44,
+      "frames": 156475,
+      "evenements": 5753,
+      "sain": true
+    },
+    {
+      "t": 44040.6,
+      "memoire_mo": 679.7,
+      "fps": 5.32,
+      "frames": 156905,
+      "evenements": 5767,
+      "sain": true
+    },
+    {
+      "t": 44160.6,
+      "memoire_mo": 679.7,
+      "fps": 5.39,
+      "frames": 157331,
+      "evenements": 5781,
+      "sain": true
+    },
+    {
+      "t": 44280.7,
+      "memoire_mo": 679.7,
+      "fps": 4.96,
+      "frames": 157748,
+      "evenements": 5795,
+      "sain": true
+    },
+    {
+      "t": 44400.7,
+      "memoire_mo": 679.7,
+      "fps": 5.66,
+      "frames": 158164,
+      "evenements": 5809,
+      "sain": true
+    },
+    {
+      "t": 44520.7,
+      "memoire_mo": 671.8,
+      "fps": 5.37,
+      "frames": 158591,
+      "evenements": 5823,
+      "sain": true
+    },
+    {
+      "t": 44640.7,
+      "memoire_mo": 679.7,
+      "fps": 5.52,
+      "frames": 159004,
+      "evenements": 5837,
+      "sain": true
+    },
+    {
+      "t": 44760.7,
+      "memoire_mo": 679.7,
+      "fps": 5.71,
+      "frames": 159428,
+      "evenements": 5851,
+      "sain": true
+    },
+    {
+      "t": 44880.7,
+      "memoire_mo": 679.7,
+      "fps": 4.55,
+      "frames": 159845,
+      "evenements": 5865,
+      "sain": true
+    },
+    {
+      "t": 45000.7,
+      "memoire_mo": 679.7,
+      "fps": 5.08,
+      "frames": 160250,
+      "evenements": 5879,
+      "sain": true
+    },
+    {
+      "t": 45120.7,
+      "memoire_mo": 682.4,
+      "fps": 5.19,
+      "frames": 160676,
+      "evenements": 5893,
+      "sain": true
+    },
+    {
+      "t": 45240.7,
+      "memoire_mo": 679.7,
+      "fps": 5.27,
+      "frames": 161087,
+      "evenements": 5907,
+      "sain": true
+    },
+    {
+      "t": 45360.7,
+      "memoire_mo": 685.0,
+      "fps": 5.09,
+      "frames": 161498,
+      "evenements": 5921,
+      "sain": true
+    },
+    {
+      "t": 45480.7,
+      "memoire_mo": 679.7,
+      "fps": 4.57,
+      "frames": 161901,
+      "evenements": 5934,
+      "sain": true
+    },
+    {
+      "t": 45600.7,
+      "memoire_mo": 690.3,
+      "fps": 5.49,
+      "frames": 162314,
+      "evenements": 5947,
+      "sain": true
+    },
+    {
+      "t": 45720.7,
+      "memoire_mo": 679.7,
+      "fps": 5.87,
+      "frames": 162734,
+      "evenements": 5961,
+      "sain": true
+    },
+    {
+      "t": 45840.7,
+      "memoire_mo": 679.7,
+      "fps": 4.82,
+      "frames": 163142,
+      "evenements": 5975,
+      "sain": true
+    },
+    {
+      "t": 45960.7,
+      "memoire_mo": 679.7,
+      "fps": 5.58,
+      "frames": 163562,
+      "evenements": 5989,
+      "sain": true
+    },
+    {
+      "t": 46080.7,
+      "memoire_mo": 679.7,
+      "fps": 5.91,
+      "frames": 163988,
+      "evenements": 6003,
+      "sain": true
+    },
+    {
+      "t": 46200.7,
+      "memoire_mo": 679.7,
+      "fps": 5.45,
+      "frames": 164416,
+      "evenements": 6018,
+      "sain": true
+    },
+    {
+      "t": 46320.7,
+      "memoire_mo": 679.7,
+      "fps": 5.47,
+      "frames": 164840,
+      "evenements": 6032,
+      "sain": true
+    },
+    {
+      "t": 46440.7,
+      "memoire_mo": 679.7,
+      "fps": 5.33,
+      "frames": 165273,
+      "evenements": 6047,
+      "sain": true
+    },
+    {
+      "t": 46560.7,
+      "memoire_mo": 679.7,
+      "fps": 5.44,
+      "frames": 165701,
+      "evenements": 6061,
+      "sain": true
+    },
+    {
+      "t": 46680.7,
+      "memoire_mo": 679.7,
+      "fps": 5.13,
+      "frames": 166132,
+      "evenements": 6075,
+      "sain": true
+    },
+    {
+      "t": 46800.7,
+      "memoire_mo": 679.7,
+      "fps": 5.75,
+      "frames": 166565,
+      "evenements": 6089,
+      "sain": true
+    },
+    {
+      "t": 46920.7,
+      "memoire_mo": 679.7,
+      "fps": 5.47,
+      "frames": 166997,
+      "evenements": 6104,
+      "sain": true
+    },
+    {
+      "t": 47040.7,
+      "memoire_mo": 679.7,
+      "fps": 5.29,
+      "frames": 167429,
+      "evenements": 6118,
+      "sain": true
+    },
+    {
+      "t": 47160.7,
+      "memoire_mo": 682.4,
+      "fps": 5.72,
+      "frames": 167864,
+      "evenements": 6133,
+      "sain": true
+    },
+    {
+      "t": 47280.7,
+      "memoire_mo": 656.0,
+      "fps": 5.3,
+      "frames": 168299,
+      "evenements": 6147,
+      "sain": true
+    },
+    {
+      "t": 47400.7,
+      "memoire_mo": 679.7,
+      "fps": 5.05,
+      "frames": 168732,
+      "evenements": 6161,
+      "sain": true
+    },
+    {
+      "t": 47520.7,
+      "memoire_mo": 682.4,
+      "fps": 5.96,
+      "frames": 169163,
+      "evenements": 6176,
+      "sain": true
+    },
+    {
+      "t": 47640.7,
+      "memoire_mo": 669.2,
+      "fps": 5.4,
+      "frames": 169595,
+      "evenements": 6190,
+      "sain": true
+    },
+    {
+      "t": 47760.7,
+      "memoire_mo": 682.4,
+      "fps": 5.77,
+      "frames": 170029,
+      "evenements": 6205,
+      "sain": true
+    },
+    {
+      "t": 47880.7,
+      "memoire_mo": 682.4,
+      "fps": 5.43,
+      "frames": 170457,
+      "evenements": 6219,
+      "sain": true
+    },
+    {
+      "t": 48000.7,
+      "memoire_mo": 682.4,
+      "fps": 5.6,
+      "frames": 170889,
+      "evenements": 6233,
+      "sain": true
+    },
+    {
+      "t": 48120.7,
+      "memoire_mo": 682.4,
+      "fps": 5.51,
+      "frames": 171323,
+      "evenements": 6248,
+      "sain": true
+    },
+    {
+      "t": 48240.7,
+      "memoire_mo": 682.4,
+      "fps": 5.54,
+      "frames": 171758,
+      "evenements": 6263,
+      "sain": true
+    },
+    {
+      "t": 48360.7,
+      "memoire_mo": 682.4,
+      "fps": 5.65,
+      "frames": 172187,
+      "evenements": 6277,
+      "sain": true
+    },
+    {
+      "t": 48480.7,
+      "memoire_mo": 698.2,
+      "fps": 5.67,
+      "frames": 172619,
+      "evenements": 6291,
+      "sain": true
+    },
+    {
+      "t": 48600.7,
+      "memoire_mo": 679.7,
+      "fps": 5.21,
+      "frames": 173045,
+      "evenements": 6305,
+      "sain": true
+    },
+    {
+      "t": 48720.7,
+      "memoire_mo": 679.7,
+      "fps": 5.4,
+      "frames": 173474,
+      "evenements": 6319,
+      "sain": true
+    },
+    {
+      "t": 48840.7,
+      "memoire_mo": 679.7,
+      "fps": 4.9,
+      "frames": 173908,
+      "evenements": 6334,
+      "sain": true
+    },
+    {
+      "t": 48960.7,
+      "memoire_mo": 679.7,
+      "fps": 5.77,
+      "frames": 174344,
+      "evenements": 6349,
+      "sain": true
+    },
+    {
+      "t": 49080.7,
+      "memoire_mo": 679.7,
+      "fps": 5.47,
+      "frames": 174776,
+      "evenements": 6363,
+      "sain": true
+    },
+    {
+      "t": 49200.7,
+      "memoire_mo": 682.4,
+      "fps": 5.55,
+      "frames": 175213,
+      "evenements": 6377,
+      "sain": true
+    },
+    {
+      "t": 49320.7,
+      "memoire_mo": 682.4,
+      "fps": 4.82,
+      "frames": 175647,
+      "evenements": 6392,
+      "sain": true
+    },
+    {
+      "t": 49440.7,
+      "memoire_mo": 682.4,
+      "fps": 5.61,
+      "frames": 176078,
+      "evenements": 6407,
+      "sain": true
+    },
+    {
+      "t": 49560.7,
+      "memoire_mo": 671.8,
+      "fps": 5.39,
+      "frames": 176510,
+      "evenements": 6421,
+      "sain": true
+    },
+    {
+      "t": 49680.7,
+      "memoire_mo": 679.7,
+      "fps": 5.8,
+      "frames": 176942,
+      "evenements": 6435,
+      "sain": true
+    },
+    {
+      "t": 49800.7,
+      "memoire_mo": 679.7,
+      "fps": 5.64,
+      "frames": 177371,
+      "evenements": 6449,
+      "sain": true
+    },
+    {
+      "t": 49920.7,
+      "memoire_mo": 679.7,
+      "fps": 6.0,
+      "frames": 177803,
+      "evenements": 6464,
+      "sain": true
+    },
+    {
+      "t": 50040.7,
+      "memoire_mo": 679.7,
+      "fps": 5.61,
+      "frames": 178232,
+      "evenements": 6478,
+      "sain": true
+    },
+    {
+      "t": 50160.7,
+      "memoire_mo": 682.4,
+      "fps": 5.14,
+      "frames": 178655,
+      "evenements": 6493,
+      "sain": true
+    },
+    {
+      "t": 50280.7,
+      "memoire_mo": 682.4,
+      "fps": 5.88,
+      "frames": 179083,
+      "evenements": 6507,
+      "sain": true
+    },
+    {
+      "t": 50400.7,
+      "memoire_mo": 679.7,
+      "fps": 5.8,
+      "frames": 179509,
+      "evenements": 6521,
+      "sain": true
+    },
+    {
+      "t": 50520.7,
+      "memoire_mo": 682.4,
+      "fps": 5.54,
+      "frames": 179933,
+      "evenements": 6535,
+      "sain": true
+    },
+    {
+      "t": 50640.7,
+      "memoire_mo": 679.7,
+      "fps": 6.03,
+      "frames": 180359,
+      "evenements": 6549,
+      "sain": true
+    },
+    {
+      "t": 50760.7,
+      "memoire_mo": 682.4,
+      "fps": 5.1,
+      "frames": 180784,
+      "evenements": 6563,
+      "sain": true
+    },
+    {
+      "t": 50880.7,
+      "memoire_mo": 682.4,
+      "fps": 5.36,
+      "frames": 181209,
+      "evenements": 6577,
+      "sain": true
+    },
+    {
+      "t": 51000.7,
+      "memoire_mo": 679.7,
+      "fps": 4.88,
+      "frames": 181632,
+      "evenements": 6591,
+      "sain": true
+    },
+    {
+      "t": 51120.8,
+      "memoire_mo": 686.0,
+      "fps": 5.42,
+      "frames": 182059,
+      "evenements": 6606,
+      "sain": true
+    },
+    {
+      "t": 51240.8,
+      "memoire_mo": 679.7,
+      "fps": 5.85,
+      "frames": 182483,
+      "evenements": 6620,
+      "sain": true
+    },
+    {
+      "t": 51360.8,
+      "memoire_mo": 671.8,
+      "fps": 5.05,
+      "frames": 182904,
+      "evenements": 6634,
+      "sain": true
+    },
+    {
+      "t": 51480.8,
+      "memoire_mo": 682.4,
+      "fps": 5.66,
+      "frames": 183332,
+      "evenements": 6648,
+      "sain": true
+    },
+    {
+      "t": 51600.8,
+      "memoire_mo": 682.4,
+      "fps": 5.7,
+      "frames": 183763,
+      "evenements": 6663,
+      "sain": true
+    },
+    {
+      "t": 51720.8,
+      "memoire_mo": 682.4,
+      "fps": 5.36,
+      "frames": 184193,
+      "evenements": 6677,
+      "sain": true
+    },
+    {
+      "t": 51840.8,
+      "memoire_mo": 682.4,
+      "fps": 5.37,
+      "frames": 184620,
+      "evenements": 6691,
+      "sain": true
+    },
+    {
+      "t": 51960.8,
+      "memoire_mo": 679.8,
+      "fps": 5.31,
+      "frames": 185045,
+      "evenements": 6705,
+      "sain": true
+    },
+    {
+      "t": 52080.8,
+      "memoire_mo": 679.8,
+      "fps": 5.38,
+      "frames": 185471,
+      "evenements": 6719,
+      "sain": true
+    },
+    {
+      "t": 52200.8,
+      "memoire_mo": 682.4,
+      "fps": 5.2,
+      "frames": 185896,
+      "evenements": 6734,
+      "sain": true
+    },
+    {
+      "t": 52320.8,
+      "memoire_mo": 682.4,
+      "fps": 6.22,
+      "frames": 186323,
+      "evenements": 6748,
+      "sain": true
+    },
+    {
+      "t": 52440.8,
+      "memoire_mo": 682.4,
+      "fps": 4.93,
+      "frames": 186747,
+      "evenements": 6762,
+      "sain": true
+    },
+    {
+      "t": 52560.8,
+      "memoire_mo": 679.8,
+      "fps": 5.28,
+      "frames": 187175,
+      "evenements": 6777,
+      "sain": true
+    },
+    {
+      "t": 52680.8,
+      "memoire_mo": 679.8,
+      "fps": 4.8,
+      "frames": 187588,
+      "evenements": 6790,
+      "sain": true
+    },
+    {
+      "t": 52800.8,
+      "memoire_mo": 679.7,
+      "fps": 5.62,
+      "frames": 188009,
+      "evenements": 6804,
+      "sain": true
+    },
+    {
+      "t": 52920.8,
+      "memoire_mo": 682.3,
+      "fps": 5.3,
+      "frames": 188438,
+      "evenements": 6819,
+      "sain": true
+    },
+    {
+      "t": 53040.8,
+      "memoire_mo": 679.7,
+      "fps": 5.88,
+      "frames": 188864,
+      "evenements": 6833,
+      "sain": true
+    },
+    {
+      "t": 53160.8,
+      "memoire_mo": 679.7,
+      "fps": 4.77,
+      "frames": 189291,
+      "evenements": 6847,
+      "sain": true
+    },
+    {
+      "t": 53280.8,
+      "memoire_mo": 682.3,
+      "fps": 5.09,
+      "frames": 189715,
+      "evenements": 6861,
+      "sain": true
+    },
+    {
+      "t": 53400.8,
+      "memoire_mo": 682.3,
+      "fps": 5.67,
+      "frames": 190142,
+      "evenements": 6875,
+      "sain": true
+    },
+    {
+      "t": 53520.8,
+      "memoire_mo": 682.3,
+      "fps": 5.31,
+      "frames": 190569,
+      "evenements": 6889,
+      "sain": true
+    },
+    {
+      "t": 53640.8,
+      "memoire_mo": 679.7,
+      "fps": 5.69,
+      "frames": 190997,
+      "evenements": 6904,
+      "sain": true
+    },
+    {
+      "t": 53760.8,
+      "memoire_mo": 679.7,
+      "fps": 5.43,
+      "frames": 191426,
+      "evenements": 6918,
+      "sain": true
+    },
+    {
+      "t": 53880.8,
+      "memoire_mo": 679.7,
+      "fps": 5.42,
+      "frames": 191856,
+      "evenements": 6933,
+      "sain": true
+    },
+    {
+      "t": 54000.8,
+      "memoire_mo": 679.7,
+      "fps": 5.62,
+      "frames": 192285,
+      "evenements": 6947,
+      "sain": true
+    },
+    {
+      "t": 54120.8,
+      "memoire_mo": 679.7,
+      "fps": 5.03,
+      "frames": 192715,
+      "evenements": 6961,
+      "sain": true
+    },
+    {
+      "t": 54240.8,
+      "memoire_mo": 679.7,
+      "fps": 5.34,
+      "frames": 193145,
+      "evenements": 6975,
+      "sain": true
+    },
+    {
+      "t": 54360.8,
+      "memoire_mo": 679.7,
+      "fps": 5.62,
+      "frames": 193568,
+      "evenements": 6989,
+      "sain": true
+    },
+    {
+      "t": 54480.8,
+      "memoire_mo": 679.7,
+      "fps": 5.39,
+      "frames": 193992,
+      "evenements": 7003,
+      "sain": true
+    },
+    {
+      "t": 54600.8,
+      "memoire_mo": 679.7,
+      "fps": 5.68,
+      "frames": 194420,
+      "evenements": 7018,
+      "sain": true
+    },
+    {
+      "t": 54720.8,
+      "memoire_mo": 679.7,
+      "fps": 5.82,
+      "frames": 194851,
+      "evenements": 7032,
+      "sain": true
+    },
+    {
+      "t": 54840.8,
+      "memoire_mo": 679.7,
+      "fps": 5.04,
+      "frames": 195281,
+      "evenements": 7047,
+      "sain": true
+    },
+    {
+      "t": 54960.8,
+      "memoire_mo": 679.7,
+      "fps": 5.17,
+      "frames": 195712,
+      "evenements": 7061,
+      "sain": true
+    },
+    {
+      "t": 55080.8,
+      "memoire_mo": 679.7,
+      "fps": 5.27,
+      "frames": 196141,
+      "evenements": 7075,
+      "sain": true
+    },
+    {
+      "t": 55200.8,
+      "memoire_mo": 679.7,
+      "fps": 5.63,
+      "frames": 196571,
+      "evenements": 7089,
+      "sain": true
+    },
+    {
+      "t": 55320.8,
+      "memoire_mo": 674.4,
+      "fps": 5.77,
+      "frames": 197003,
+      "evenements": 7104,
+      "sain": true
+    },
+    {
+      "t": 55440.8,
+      "memoire_mo": 695.5,
+      "fps": 5.81,
+      "frames": 197435,
+      "evenements": 7119,
+      "sain": true
+    },
+    {
+      "t": 55560.8,
+      "memoire_mo": 674.4,
+      "fps": 5.9,
+      "frames": 197864,
+      "evenements": 7133,
+      "sain": true
+    },
+    {
+      "t": 55680.8,
+      "memoire_mo": 682.3,
+      "fps": 5.7,
+      "frames": 198293,
+      "evenements": 7147,
+      "sain": true
+    },
+    {
+      "t": 55800.8,
+      "memoire_mo": 682.3,
+      "fps": 5.57,
+      "frames": 198722,
+      "evenements": 7161,
+      "sain": true
+    },
+    {
+      "t": 55920.8,
+      "memoire_mo": 655.9,
+      "fps": 5.4,
+      "frames": 199151,
+      "evenements": 7175,
+      "sain": true
+    },
+    {
+      "t": 56040.8,
+      "memoire_mo": 682.3,
+      "fps": 5.17,
+      "frames": 199580,
+      "evenements": 7190,
+      "sain": true
+    },
+    {
+      "t": 56160.8,
+      "memoire_mo": 682.3,
+      "fps": 5.44,
+      "frames": 200011,
+      "evenements": 7204,
+      "sain": true
+    },
+    {
+      "t": 56280.8,
+      "memoire_mo": 682.3,
+      "fps": 5.0,
+      "frames": 200441,
+      "evenements": 7219,
+      "sain": true
+    },
+    {
+      "t": 56400.8,
+      "memoire_mo": 682.3,
+      "fps": 5.45,
+      "frames": 200870,
+      "evenements": 7233,
+      "sain": true
+    },
+    {
+      "t": 56520.8,
+      "memoire_mo": 682.3,
+      "fps": 5.73,
+      "frames": 201302,
+      "evenements": 7247,
+      "sain": true
+    },
+    {
+      "t": 56640.8,
+      "memoire_mo": 682.3,
+      "fps": 5.52,
+      "frames": 201727,
+      "evenements": 7261,
+      "sain": true
+    },
+    {
+      "t": 56760.8,
+      "memoire_mo": 679.7,
+      "fps": 5.87,
+      "frames": 202159,
+      "evenements": 7276,
+      "sain": true
+    },
+    {
+      "t": 56880.8,
+      "memoire_mo": 690.2,
+      "fps": 5.46,
+      "frames": 202592,
+      "evenements": 7290,
+      "sain": true
+    },
+    {
+      "t": 57000.8,
+      "memoire_mo": 679.7,
+      "fps": 5.36,
+      "frames": 203021,
+      "evenements": 7305,
+      "sain": true
+    },
+    {
+      "t": 57120.8,
+      "memoire_mo": 682.3,
+      "fps": 5.62,
+      "frames": 203453,
+      "evenements": 7319,
+      "sain": true
+    },
+    {
+      "t": 57240.8,
+      "memoire_mo": 679.7,
+      "fps": 5.02,
+      "frames": 203874,
+      "evenements": 7333,
+      "sain": true
+    },
+    {
+      "t": 57360.8,
+      "memoire_mo": 682.3,
+      "fps": 5.51,
+      "frames": 204301,
+      "evenements": 7347,
+      "sain": true
+    },
+    {
+      "t": 57480.8,
+      "memoire_mo": 682.3,
+      "fps": 5.61,
+      "frames": 204728,
+      "evenements": 7361,
+      "sain": true
+    },
+    {
+      "t": 57600.8,
+      "memoire_mo": 679.7,
+      "fps": 5.46,
+      "frames": 205154,
+      "evenements": 7375,
+      "sain": true
+    },
+    {
+      "t": 57720.8,
+      "memoire_mo": 679.7,
+      "fps": 5.54,
+      "frames": 205583,
+      "evenements": 7390,
+      "sain": true
+    },
+    {
+      "t": 57840.8,
+      "memoire_mo": 682.3,
+      "fps": 5.55,
+      "frames": 206015,
+      "evenements": 7405,
+      "sain": true
+    },
+    {
+      "t": 57960.8,
+      "memoire_mo": 682.3,
+      "fps": 5.1,
+      "frames": 206441,
+      "evenements": 7419,
+      "sain": true
+    },
+    {
+      "t": 58080.9,
+      "memoire_mo": 679.7,
+      "fps": 5.67,
+      "frames": 206869,
+      "evenements": 7433,
+      "sain": true
+    },
+    {
+      "t": 58200.9,
+      "memoire_mo": 679.7,
+      "fps": 5.19,
+      "frames": 207299,
+      "evenements": 7447,
+      "sain": true
+    },
+    {
+      "t": 58320.9,
+      "memoire_mo": 679.7,
+      "fps": 5.08,
+      "frames": 207732,
+      "evenements": 7461,
+      "sain": true
+    },
+    {
+      "t": 58440.9,
+      "memoire_mo": 682.3,
+      "fps": 5.35,
+      "frames": 208160,
+      "evenements": 7476,
+      "sain": true
+    },
+    {
+      "t": 58560.9,
+      "memoire_mo": 682.3,
+      "fps": 5.23,
+      "frames": 208586,
+      "evenements": 7490,
+      "sain": true
+    },
+    {
+      "t": 58680.9,
+      "memoire_mo": 682.3,
+      "fps": 5.78,
+      "frames": 209012,
+      "evenements": 7504,
+      "sain": true
+    },
+    {
+      "t": 58800.9,
+      "memoire_mo": 682.3,
+      "fps": 5.02,
+      "frames": 209441,
+      "evenements": 7519,
+      "sain": true
+    },
+    {
+      "t": 58920.9,
+      "memoire_mo": 679.7,
+      "fps": 5.14,
+      "frames": 209871,
+      "evenements": 7533,
+      "sain": true
+    },
+    {
+      "t": 59040.9,
+      "memoire_mo": 679.7,
+      "fps": 5.66,
+      "frames": 210302,
+      "evenements": 7547,
+      "sain": true
+    },
+    {
+      "t": 59160.9,
+      "memoire_mo": 679.7,
+      "fps": 5.19,
+      "frames": 210734,
+      "evenements": 7561,
+      "sain": true
+    },
+    {
+      "t": 59280.9,
+      "memoire_mo": 679.7,
+      "fps": 5.38,
+      "frames": 211163,
+      "evenements": 7576,
+      "sain": true
+    },
+    {
+      "t": 59400.9,
+      "memoire_mo": 679.7,
+      "fps": 5.29,
+      "frames": 211599,
+      "evenements": 7591,
+      "sain": true
+    },
+    {
+      "t": 59520.9,
+      "memoire_mo": 679.7,
+      "fps": 6.07,
+      "frames": 212029,
+      "evenements": 7605,
+      "sain": true
+    },
+    {
+      "t": 59640.9,
+      "memoire_mo": 679.7,
+      "fps": 5.31,
+      "frames": 212453,
+      "evenements": 7619,
+      "sain": true
+    },
+    {
+      "t": 59760.9,
+      "memoire_mo": 653.3,
+      "fps": 5.59,
+      "frames": 212882,
+      "evenements": 7633,
+      "sain": true
+    },
+    {
+      "t": 59880.9,
+      "memoire_mo": 679.7,
+      "fps": 5.7,
+      "frames": 213314,
+      "evenements": 7647,
+      "sain": true
+    },
+    {
+      "t": 60000.9,
+      "memoire_mo": 671.8,
+      "fps": 5.35,
+      "frames": 213746,
+      "evenements": 7662,
+      "sain": true
+    },
+    {
+      "t": 60120.9,
+      "memoire_mo": 679.7,
+      "fps": 5.13,
+      "frames": 214176,
+      "evenements": 7677,
+      "sain": true
+    },
+    {
+      "t": 60240.9,
+      "memoire_mo": 682.4,
+      "fps": 5.55,
+      "frames": 214605,
+      "evenements": 7691,
+      "sain": true
+    },
+    {
+      "t": 60360.9,
+      "memoire_mo": 682.4,
+      "fps": 5.58,
+      "frames": 215030,
+      "evenements": 7705,
+      "sain": true
+    },
+    {
+      "t": 60480.9,
+      "memoire_mo": 682.4,
+      "fps": 5.38,
+      "frames": 215459,
+      "evenements": 7719,
+      "sain": true
+    },
+    {
+      "t": 60600.9,
+      "memoire_mo": 682.4,
+      "fps": 5.06,
+      "frames": 215885,
+      "evenements": 7733,
+      "sain": true
+    },
+    {
+      "t": 60720.9,
+      "memoire_mo": 682.4,
+      "fps": 5.06,
+      "frames": 216309,
+      "evenements": 7747,
+      "sain": true
+    },
+    {
+      "t": 60840.9,
+      "memoire_mo": 654.7,
+      "fps": 5.14,
+      "frames": 216737,
+      "evenements": 7762,
+      "sain": true
+    },
+    {
+      "t": 60960.9,
+      "memoire_mo": 682.4,
+      "fps": 5.34,
+      "frames": 217164,
+      "evenements": 7776,
+      "sain": true
+    },
+    {
+      "t": 61080.9,
+      "memoire_mo": 682.4,
+      "fps": 5.63,
+      "frames": 217591,
+      "evenements": 7790,
+      "sain": true
+    },
+    {
+      "t": 61200.9,
+      "memoire_mo": 679.7,
+      "fps": 5.34,
+      "frames": 218021,
+      "evenements": 7805,
+      "sain": true
+    },
+    {
+      "t": 61320.9,
+      "memoire_mo": 679.7,
+      "fps": 5.4,
+      "frames": 218448,
+      "evenements": 7819,
+      "sain": true
+    },
+    {
+      "t": 61440.9,
+      "memoire_mo": 682.4,
+      "fps": 5.57,
+      "frames": 218879,
+      "evenements": 7833,
+      "sain": true
+    },
+    {
+      "t": 61560.9,
+      "memoire_mo": 679.7,
+      "fps": 5.13,
+      "frames": 219305,
+      "evenements": 7847,
+      "sain": true
+    },
+    {
+      "t": 61680.9,
+      "memoire_mo": 679.7,
+      "fps": 5.3,
+      "frames": 219731,
+      "evenements": 7861,
+      "sain": true
+    },
+    {
+      "t": 61800.9,
+      "memoire_mo": 679.7,
+      "fps": 5.47,
+      "frames": 220157,
+      "evenements": 7876,
+      "sain": true
+    },
+    {
+      "t": 61920.9,
+      "memoire_mo": 679.7,
+      "fps": 5.3,
+      "frames": 220586,
+      "evenements": 7890,
+      "sain": true
+    },
+    {
+      "t": 62040.9,
+      "memoire_mo": 671.8,
+      "fps": 5.47,
+      "frames": 221012,
+      "evenements": 7904,
+      "sain": true
+    },
+    {
+      "t": 62160.9,
+      "memoire_mo": 682.4,
+      "fps": 5.45,
+      "frames": 221438,
+      "evenements": 7919,
+      "sain": true
+    },
+    {
+      "t": 62280.9,
+      "memoire_mo": 671.8,
+      "fps": 5.34,
+      "frames": 221861,
+      "evenements": 7933,
+      "sain": true
+    },
+    {
+      "t": 62400.9,
+      "memoire_mo": 679.8,
+      "fps": 6.21,
+      "frames": 222287,
+      "evenements": 7947,
+      "sain": true
+    },
+    {
+      "t": 62520.9,
+      "memoire_mo": 679.8,
+      "fps": 5.5,
+      "frames": 222716,
+      "evenements": 7961,
+      "sain": true
+    },
+    {
+      "t": 62640.9,
+      "memoire_mo": 679.8,
+      "fps": 4.71,
+      "frames": 223137,
+      "evenements": 7975,
+      "sain": true
+    },
+    {
+      "t": 62760.9,
+      "memoire_mo": 682.4,
+      "fps": 5.34,
+      "frames": 223562,
+      "evenements": 7989,
+      "sain": true
+    },
+    {
+      "t": 62880.9,
+      "memoire_mo": 677.1,
+      "fps": 5.28,
+      "frames": 223985,
+      "evenements": 8003,
+      "sain": true
+    },
+    {
+      "t": 63000.9,
+      "memoire_mo": 679.8,
+      "fps": 5.84,
+      "frames": 224414,
+      "evenements": 8017,
+      "sain": true
+    },
+    {
+      "t": 63120.9,
+      "memoire_mo": 682.4,
+      "fps": 5.22,
+      "frames": 224839,
+      "evenements": 8032,
+      "sain": true
+    },
+    {
+      "t": 63240.9,
+      "memoire_mo": 682.4,
+      "fps": 5.68,
+      "frames": 225260,
+      "evenements": 8046,
+      "sain": true
+    },
+    {
+      "t": 63360.9,
+      "memoire_mo": 679.8,
+      "fps": 5.39,
+      "frames": 225683,
+      "evenements": 8060,
+      "sain": true
+    },
+    {
+      "t": 63480.9,
+      "memoire_mo": 671.8,
+      "fps": 5.08,
+      "frames": 226100,
+      "evenements": 8074,
+      "sain": true
+    },
+    {
+      "t": 63600.9,
+      "memoire_mo": 679.8,
+      "fps": 5.08,
+      "frames": 226520,
+      "evenements": 8088,
+      "sain": true
+    },
+    {
+      "t": 63720.9,
+      "memoire_mo": 679.8,
+      "fps": 5.69,
+      "frames": 226940,
+      "evenements": 8102,
+      "sain": true
+    },
+    {
+      "t": 63840.9,
+      "memoire_mo": 679.8,
+      "fps": 5.82,
+      "frames": 227359,
+      "evenements": 8116,
+      "sain": true
+    },
+    {
+      "t": 63960.9,
+      "memoire_mo": 679.8,
+      "fps": 5.18,
+      "frames": 227786,
+      "evenements": 8130,
+      "sain": true
+    },
+    {
+      "t": 64080.9,
+      "memoire_mo": 679.8,
+      "fps": 5.19,
+      "frames": 228215,
+      "evenements": 8144,
+      "sain": true
+    },
+    {
+      "t": 64200.9,
+      "memoire_mo": 679.8,
+      "fps": 5.42,
+      "frames": 228638,
+      "evenements": 8159,
+      "sain": true
+    },
+    {
+      "t": 64320.9,
+      "memoire_mo": 682.4,
+      "fps": 5.62,
+      "frames": 229064,
+      "evenements": 8173,
+      "sain": true
+    },
+    {
+      "t": 64440.9,
+      "memoire_mo": 682.4,
+      "fps": 5.19,
+      "frames": 229488,
+      "evenements": 8187,
+      "sain": true
+    },
+    {
+      "t": 64560.9,
+      "memoire_mo": 679.8,
+      "fps": 5.5,
+      "frames": 229913,
+      "evenements": 8201,
+      "sain": true
+    },
+    {
+      "t": 64680.9,
+      "memoire_mo": 679.8,
+      "fps": 5.65,
+      "frames": 230341,
+      "evenements": 8215,
+      "sain": true
+    },
+    {
+      "t": 64800.9,
+      "memoire_mo": 677.1,
+      "fps": 5.45,
+      "frames": 230771,
+      "evenements": 8229,
+      "sain": true
+    },
+    {
+      "t": 64920.9,
+      "memoire_mo": 679.8,
+      "fps": 5.73,
+      "frames": 231203,
+      "evenements": 8244,
+      "sain": true
+    },
+    {
+      "t": 65040.9,
+      "memoire_mo": 679.8,
+      "fps": 5.61,
+      "frames": 231634,
+      "evenements": 8259,
+      "sain": true
+    },
+    {
+      "t": 65160.9,
+      "memoire_mo": 679.8,
+      "fps": 6.14,
+      "frames": 232069,
+      "evenements": 8273,
+      "sain": true
+    },
+    {
+      "t": 65280.9,
+      "memoire_mo": 679.8,
+      "fps": 5.86,
+      "frames": 232499,
+      "evenements": 8287,
+      "sain": true
+    },
+    {
+      "t": 65400.9,
+      "memoire_mo": 679.8,
+      "fps": 5.12,
+      "frames": 232929,
+      "evenements": 8301,
+      "sain": true
+    },
+    {
+      "t": 65521.0,
+      "memoire_mo": 671.8,
+      "fps": 5.73,
+      "frames": 233360,
+      "evenements": 8316,
+      "sain": true
+    },
+    {
+      "t": 65641.0,
+      "memoire_mo": 679.8,
+      "fps": 5.59,
+      "frames": 233795,
+      "evenements": 8331,
+      "sain": true
+    },
+    {
+      "t": 65761.0,
+      "memoire_mo": 679.8,
+      "fps": 5.45,
+      "frames": 234217,
+      "evenements": 8345,
+      "sain": true
+    },
+    {
+      "t": 65881.0,
+      "memoire_mo": 679.8,
+      "fps": 5.36,
+      "frames": 234644,
+      "evenements": 8359,
+      "sain": true
+    },
+    {
+      "t": 66001.0,
+      "memoire_mo": 679.8,
+      "fps": 4.84,
+      "frames": 235078,
+      "evenements": 8373,
+      "sain": true
+    },
+    {
+      "t": 66121.0,
+      "memoire_mo": 682.4,
+      "fps": 5.3,
+      "frames": 235509,
+      "evenements": 8387,
+      "sain": true
+    },
+    {
+      "t": 66241.0,
+      "memoire_mo": 682.4,
+      "fps": 5.8,
+      "frames": 235939,
+      "evenements": 8402,
+      "sain": true
+    },
+    {
+      "t": 66361.0,
+      "memoire_mo": 679.8,
+      "fps": 5.27,
+      "frames": 236366,
+      "evenements": 8416,
+      "sain": true
+    },
+    {
+      "t": 66481.0,
+      "memoire_mo": 679.8,
+      "fps": 5.05,
+      "frames": 236789,
+      "evenements": 8430,
+      "sain": true
+    },
+    {
+      "t": 66601.0,
+      "memoire_mo": 679.8,
+      "fps": 5.7,
+      "frames": 237212,
+      "evenements": 8444,
+      "sain": true
+    },
+    {
+      "t": 66721.0,
+      "memoire_mo": 679.8,
+      "fps": 5.47,
+      "frames": 237635,
+      "evenements": 8459,
+      "sain": true
+    },
+    {
+      "t": 66841.0,
+      "memoire_mo": 679.8,
+      "fps": 4.9,
+      "frames": 238060,
+      "evenements": 8473,
+      "sain": true
+    },
+    {
+      "t": 66961.0,
+      "memoire_mo": 679.8,
+      "fps": 5.28,
+      "frames": 238484,
+      "evenements": 8487,
+      "sain": true
+    },
+    {
+      "t": 67081.0,
+      "memoire_mo": 679.8,
+      "fps": 5.77,
+      "frames": 238909,
+      "evenements": 8501,
+      "sain": true
+    },
+    {
+      "t": 67201.0,
+      "memoire_mo": 679.8,
+      "fps": 5.11,
+      "frames": 239335,
+      "evenements": 8515,
+      "sain": true
+    },
+    {
+      "t": 67321.0,
+      "memoire_mo": 679.8,
+      "fps": 5.69,
+      "frames": 239762,
+      "evenements": 8529,
+      "sain": true
+    },
+    {
+      "t": 67441.0,
+      "memoire_mo": 682.4,
+      "fps": 5.01,
+      "frames": 240189,
+      "evenements": 8543,
+      "sain": true
+    },
+    {
+      "t": 67561.0,
+      "memoire_mo": 682.4,
+      "fps": 5.67,
+      "frames": 240617,
+      "evenements": 8558,
+      "sain": true
+    },
+    {
+      "t": 67681.0,
+      "memoire_mo": 679.8,
+      "fps": 5.17,
+      "frames": 241046,
+      "evenements": 8572,
+      "sain": true
+    },
+    {
+      "t": 67801.0,
+      "memoire_mo": 679.8,
+      "fps": 5.18,
+      "frames": 241469,
+      "evenements": 8586,
+      "sain": true
+    },
+    {
+      "t": 67921.0,
+      "memoire_mo": 682.4,
+      "fps": 5.75,
+      "frames": 241892,
+      "evenements": 8600,
+      "sain": true
+    },
+    {
+      "t": 68041.0,
+      "memoire_mo": 682.4,
+      "fps": 5.08,
+      "frames": 242315,
+      "evenements": 8615,
+      "sain": true
+    },
+    {
+      "t": 68161.0,
+      "memoire_mo": 682.4,
+      "fps": 5.41,
+      "frames": 242741,
+      "evenements": 8629,
+      "sain": true
+    },
+    {
+      "t": 68281.0,
+      "memoire_mo": 682.4,
+      "fps": 5.61,
+      "frames": 243167,
+      "evenements": 8643,
+      "sain": true
+    },
+    {
+      "t": 68401.0,
+      "memoire_mo": 682.4,
+      "fps": 5.32,
+      "frames": 243594,
+      "evenements": 8657,
+      "sain": true
+    },
+    {
+      "t": 68521.0,
+      "memoire_mo": 682.4,
+      "fps": 5.69,
+      "frames": 244028,
+      "evenements": 8671,
+      "sain": true
+    },
+    {
+      "t": 68641.0,
+      "memoire_mo": 682.4,
+      "fps": 5.82,
+      "frames": 244454,
+      "evenements": 8685,
+      "sain": true
+    },
+    {
+      "t": 68761.0,
+      "memoire_mo": 682.4,
+      "fps": 5.03,
+      "frames": 244883,
+      "evenements": 8700,
+      "sain": true
+    },
+    {
+      "t": 68881.0,
+      "memoire_mo": 682.4,
+      "fps": 5.68,
+      "frames": 245309,
+      "evenements": 8714,
+      "sain": true
+    },
+    {
+      "t": 69001.0,
+      "memoire_mo": 679.8,
+      "fps": 5.27,
+      "frames": 245735,
+      "evenements": 8729,
+      "sain": true
+    },
+    {
+      "t": 69121.0,
+      "memoire_mo": 679.8,
+      "fps": 5.11,
+      "frames": 246166,
+      "evenements": 8743,
+      "sain": true
+    },
+    {
+      "t": 69241.0,
+      "memoire_mo": 682.4,
+      "fps": 5.17,
+      "frames": 246597,
+      "evenements": 8757,
+      "sain": true
+    },
+    {
+      "t": 69361.0,
+      "memoire_mo": 682.4,
+      "fps": 5.54,
+      "frames": 247028,
+      "evenements": 8771,
+      "sain": true
+    },
+    {
+      "t": 69481.0,
+      "memoire_mo": 698.2,
+      "fps": 5.67,
+      "frames": 247448,
+      "evenements": 8785,
+      "sain": true
+    },
+    {
+      "t": 69601.0,
+      "memoire_mo": 679.8,
+      "fps": 5.2,
+      "frames": 247872,
+      "evenements": 8799,
+      "sain": true
+    },
+    {
+      "t": 69721.0,
+      "memoire_mo": 679.8,
+      "fps": 5.53,
+      "frames": 248300,
+      "evenements": 8814,
+      "sain": true
+    },
+    {
+      "t": 69841.0,
+      "memoire_mo": 679.8,
+      "fps": 5.69,
+      "frames": 248729,
+      "evenements": 8828,
+      "sain": true
+    },
+    {
+      "t": 69961.0,
+      "memoire_mo": 679.8,
+      "fps": 5.42,
+      "frames": 249158,
+      "evenements": 8843,
+      "sain": true
+    },
+    {
+      "t": 70081.0,
+      "memoire_mo": 682.4,
+      "fps": 4.61,
+      "frames": 249580,
+      "evenements": 8857,
+      "sain": true
+    },
+    {
+      "t": 70201.0,
+      "memoire_mo": 682.4,
+      "fps": 5.69,
+      "frames": 250007,
+      "evenements": 8871,
+      "sain": true
+    },
+    {
+      "t": 70321.0,
+      "memoire_mo": 679.8,
+      "fps": 5.46,
+      "frames": 250429,
+      "evenements": 8885,
+      "sain": true
+    },
+    {
+      "t": 70441.0,
+      "memoire_mo": 679.8,
+      "fps": 5.2,
+      "frames": 250853,
+      "evenements": 8899,
+      "sain": true
+    },
+    {
+      "t": 70561.0,
+      "memoire_mo": 682.4,
+      "fps": 5.07,
+      "frames": 251278,
+      "evenements": 8913,
+      "sain": true
+    },
+    {
+      "t": 70681.0,
+      "memoire_mo": 679.8,
+      "fps": 5.3,
+      "frames": 251703,
+      "evenements": 8927,
+      "sain": true
+    },
+    {
+      "t": 70801.0,
+      "memoire_mo": 679.8,
+      "fps": 5.42,
+      "frames": 252131,
+      "evenements": 8941,
+      "sain": true
+    },
+    {
+      "t": 70921.0,
+      "memoire_mo": 679.8,
+      "fps": 5.24,
+      "frames": 252552,
+      "evenements": 8955,
+      "sain": true
+    },
+    {
+      "t": 71041.0,
+      "memoire_mo": 674.5,
+      "fps": 5.49,
+      "frames": 252974,
+      "evenements": 8969,
+      "sain": true
+    },
+    {
+      "t": 71161.0,
+      "memoire_mo": 682.4,
+      "fps": 5.92,
+      "frames": 253403,
+      "evenements": 8984,
+      "sain": true
+    },
+    {
+      "t": 71281.0,
+      "memoire_mo": 682.4,
+      "fps": 5.11,
+      "frames": 253822,
+      "evenements": 8998,
+      "sain": true
+    },
+    {
+      "t": 71401.0,
+      "memoire_mo": 679.8,
+      "fps": 5.5,
+      "frames": 254246,
+      "evenements": 9012,
+      "sain": true
+    },
+    {
+      "t": 71521.0,
+      "memoire_mo": 636.6,
+      "fps": 5.63,
+      "frames": 254669,
+      "evenements": 9026,
+      "sain": true
+    },
+    {
+      "t": 71641.0,
+      "memoire_mo": 662.9,
+      "fps": 4.73,
+      "frames": 255090,
+      "evenements": 9040,
+      "sain": true
+    },
+    {
+      "t": 71761.0,
+      "memoire_mo": 662.9,
+      "fps": 5.38,
+      "frames": 255509,
+      "evenements": 9054,
+      "sain": true
+    },
+    {
+      "t": 71881.0,
+      "memoire_mo": 662.9,
+      "fps": 5.59,
+      "frames": 255932,
+      "evenements": 9068,
+      "sain": true
+    },
+    {
+      "t": 72001.0,
+      "memoire_mo": 662.9,
+      "fps": 5.09,
+      "frames": 256358,
+      "evenements": 9083,
+      "sain": true
+    },
+    {
+      "t": 72121.0,
+      "memoire_mo": 662.9,
+      "fps": 5.37,
+      "frames": 256784,
+      "evenements": 9097,
+      "sain": true
+    },
+    {
+      "t": 72241.0,
+      "memoire_mo": 665.6,
+      "fps": 5.68,
+      "frames": 257209,
+      "evenements": 9111,
+      "sain": true
+    },
+    {
+      "t": 72361.1,
+      "memoire_mo": 662.9,
+      "fps": 5.6,
+      "frames": 257639,
+      "evenements": 9125,
+      "sain": true
+    },
+    {
+      "t": 72481.1,
+      "memoire_mo": 662.9,
+      "fps": 5.51,
+      "frames": 258062,
+      "evenements": 9139,
+      "sain": true
+    },
+    {
+      "t": 72601.1,
+      "memoire_mo": 662.9,
+      "fps": 5.86,
+      "frames": 258488,
+      "evenements": 9153,
+      "sain": true
+    },
+    {
+      "t": 72721.1,
+      "memoire_mo": 662.9,
+      "fps": 5.4,
+      "frames": 258914,
+      "evenements": 9167,
+      "sain": true
+    },
+    {
+      "t": 72841.1,
+      "memoire_mo": 662.9,
+      "fps": 5.31,
+      "frames": 259337,
+      "evenements": 9182,
+      "sain": true
+    },
+    {
+      "t": 72961.1,
+      "memoire_mo": 662.9,
+      "fps": 5.74,
+      "frames": 259760,
+      "evenements": 9196,
+      "sain": true
+    },
+    {
+      "t": 73081.1,
+      "memoire_mo": 662.9,
+      "fps": 5.45,
+      "frames": 260189,
+      "evenements": 9210,
+      "sain": true
+    },
+    {
+      "t": 73201.1,
+      "memoire_mo": 662.9,
+      "fps": 5.24,
+      "frames": 260624,
+      "evenements": 9225,
+      "sain": true
+    },
+    {
+      "t": 73321.1,
+      "memoire_mo": 665.6,
+      "fps": 5.31,
+      "frames": 261056,
+      "evenements": 9239,
+      "sain": true
+    },
+    {
+      "t": 73441.1,
+      "memoire_mo": 660.3,
+      "fps": 5.31,
+      "frames": 261487,
+      "evenements": 9253,
+      "sain": true
+    },
+    {
+      "t": 73561.1,
+      "memoire_mo": 662.9,
+      "fps": 5.15,
+      "frames": 261912,
+      "evenements": 9267,
+      "sain": true
+    },
+    {
+      "t": 73681.1,
+      "memoire_mo": 662.9,
+      "fps": 5.35,
+      "frames": 262339,
+      "evenements": 9282,
+      "sain": true
+    },
+    {
+      "t": 73801.1,
+      "memoire_mo": 662.9,
+      "fps": 5.81,
+      "frames": 262769,
+      "evenements": 9296,
+      "sain": true
+    },
+    {
+      "t": 73921.1,
+      "memoire_mo": 662.9,
+      "fps": 5.24,
+      "frames": 263199,
+      "evenements": 9311,
+      "sain": true
+    },
+    {
+      "t": 74041.1,
+      "memoire_mo": 665.6,
+      "fps": 5.36,
+      "frames": 263621,
+      "evenements": 9325,
+      "sain": true
+    },
+    {
+      "t": 74161.1,
+      "memoire_mo": 665.6,
+      "fps": 5.76,
+      "frames": 264047,
+      "evenements": 9339,
+      "sain": true
+    },
+    {
+      "t": 74281.1,
+      "memoire_mo": 665.6,
+      "fps": 5.06,
+      "frames": 264477,
+      "evenements": 9353,
+      "sain": true
+    },
+    {
+      "t": 74401.1,
+      "memoire_mo": 665.6,
+      "fps": 5.61,
+      "frames": 264908,
+      "evenements": 9367,
+      "sain": true
+    },
+    {
+      "t": 74521.1,
+      "memoire_mo": 665.6,
+      "fps": 5.42,
+      "frames": 265337,
+      "evenements": 9382,
+      "sain": true
+    },
+    {
+      "t": 74641.1,
+      "memoire_mo": 662.9,
+      "fps": 5.54,
+      "frames": 265763,
+      "evenements": 9396,
+      "sain": true
+    },
+    {
+      "t": 74761.1,
+      "memoire_mo": 662.9,
+      "fps": 5.58,
+      "frames": 266189,
+      "evenements": 9410,
+      "sain": true
+    },
+    {
+      "t": 74881.1,
+      "memoire_mo": 662.9,
+      "fps": 5.45,
+      "frames": 266612,
+      "evenements": 9424,
+      "sain": true
+    },
+    {
+      "t": 75001.1,
+      "memoire_mo": 636.6,
+      "fps": 5.21,
+      "frames": 267041,
+      "evenements": 9439,
+      "sain": true
+    },
+    {
+      "t": 75121.1,
+      "memoire_mo": 662.9,
+      "fps": 5.33,
+      "frames": 267464,
+      "evenements": 9453,
+      "sain": true
+    },
+    {
+      "t": 75241.1,
+      "memoire_mo": 676.1,
+      "fps": 5.33,
+      "frames": 267881,
+      "evenements": 9467,
+      "sain": true
+    },
+    {
+      "t": 75361.1,
+      "memoire_mo": 662.9,
+      "fps": 5.43,
+      "frames": 268304,
+      "evenements": 9481,
+      "sain": true
+    },
+    {
+      "t": 75481.1,
+      "memoire_mo": 655.0,
+      "fps": 5.4,
+      "frames": 268724,
+      "evenements": 9495,
+      "sain": true
+    },
+    {
+      "t": 75601.1,
+      "memoire_mo": 665.6,
+      "fps": 5.5,
+      "frames": 269150,
+      "evenements": 9509,
+      "sain": true
+    },
+    {
+      "t": 75721.1,
+      "memoire_mo": 655.0,
+      "fps": 5.77,
+      "frames": 269573,
+      "evenements": 9523,
+      "sain": true
+    },
+    {
+      "t": 75841.1,
+      "memoire_mo": 662.9,
+      "fps": 5.12,
+      "frames": 269999,
+      "evenements": 9537,
+      "sain": true
+    },
+    {
+      "t": 75961.1,
+      "memoire_mo": 665.6,
+      "fps": 5.11,
+      "frames": 270425,
+      "evenements": 9551,
+      "sain": true
+    },
+    {
+      "t": 76081.1,
+      "memoire_mo": 662.9,
+      "fps": 5.89,
+      "frames": 270857,
+      "evenements": 9566,
+      "sain": true
+    },
+    {
+      "t": 76201.1,
+      "memoire_mo": 662.9,
+      "fps": 6.02,
+      "frames": 271291,
+      "evenements": 9580,
+      "sain": true
+    },
+    {
+      "t": 76321.1,
+      "memoire_mo": 662.9,
+      "fps": 4.72,
+      "frames": 271720,
+      "evenements": 9595,
+      "sain": true
+    },
+    {
+      "t": 76441.1,
+      "memoire_mo": 662.9,
+      "fps": 4.87,
+      "frames": 272151,
+      "evenements": 9609,
+      "sain": true
+    },
+    {
+      "t": 76561.1,
+      "memoire_mo": 662.9,
+      "fps": 5.84,
+      "frames": 272579,
+      "evenements": 9623,
+      "sain": true
+    },
+    {
+      "t": 76681.1,
+      "memoire_mo": 662.9,
+      "fps": 5.76,
+      "frames": 273002,
+      "evenements": 9637,
+      "sain": true
+    },
+    {
+      "t": 76801.1,
+      "memoire_mo": 665.6,
+      "fps": 5.41,
+      "frames": 273428,
+      "evenements": 9651,
+      "sain": true
+    },
+    {
+      "t": 76921.1,
+      "memoire_mo": 665.6,
+      "fps": 5.85,
+      "frames": 273854,
+      "evenements": 9665,
+      "sain": true
+    },
+    {
+      "t": 77041.1,
+      "memoire_mo": 662.9,
+      "fps": 4.93,
+      "frames": 274281,
+      "evenements": 9680,
+      "sain": true
+    },
+    {
+      "t": 77161.1,
+      "memoire_mo": 662.9,
+      "fps": 5.31,
+      "frames": 274713,
+      "evenements": 9695,
+      "sain": true
+    },
+    {
+      "t": 77281.1,
+      "memoire_mo": 662.9,
+      "fps": 5.86,
+      "frames": 275144,
+      "evenements": 9709,
+      "sain": true
+    },
+    {
+      "t": 77401.1,
+      "memoire_mo": 662.9,
+      "fps": 5.44,
+      "frames": 275576,
+      "evenements": 9723,
+      "sain": true
+    },
+    {
+      "t": 77521.1,
+      "memoire_mo": 662.9,
+      "fps": 5.48,
+      "frames": 276007,
+      "evenements": 9737,
+      "sain": true
+    },
+    {
+      "t": 77641.1,
+      "memoire_mo": 662.9,
+      "fps": 5.73,
+      "frames": 276434,
+      "evenements": 9751,
+      "sain": true
+    },
+    {
+      "t": 77761.1,
+      "memoire_mo": 665.6,
+      "fps": 5.63,
+      "frames": 276863,
+      "evenements": 9766,
+      "sain": true
+    },
+    {
+      "t": 77881.1,
+      "memoire_mo": 665.6,
+      "fps": 5.65,
+      "frames": 277298,
+      "evenements": 9781,
+      "sain": true
+    },
+    {
+      "t": 78001.2,
+      "memoire_mo": 665.6,
+      "fps": 5.51,
+      "frames": 277730,
+      "evenements": 9795,
+      "sain": true
+    },
+    {
+      "t": 78121.2,
+      "memoire_mo": 665.6,
+      "fps": 5.25,
+      "frames": 278159,
+      "evenements": 9809,
+      "sain": true
+    },
+    {
+      "t": 78241.2,
+      "memoire_mo": 665.6,
+      "fps": 5.15,
+      "frames": 278587,
+      "evenements": 9823,
+      "sain": true
+    },
+    {
+      "t": 78361.2,
+      "memoire_mo": 662.9,
+      "fps": 5.3,
+      "frames": 279016,
+      "evenements": 9838,
+      "sain": true
+    },
+    {
+      "t": 78481.2,
+      "memoire_mo": 662.9,
+      "fps": 5.12,
+      "frames": 279444,
+      "evenements": 9852,
+      "sain": true
+    },
+    {
+      "t": 78601.2,
+      "memoire_mo": 662.9,
+      "fps": 5.31,
+      "frames": 279874,
+      "evenements": 9867,
+      "sain": true
+    },
+    {
+      "t": 78721.2,
+      "memoire_mo": 662.9,
+      "fps": 4.95,
+      "frames": 280302,
+      "evenements": 9881,
+      "sain": true
+    },
+    {
+      "t": 78841.2,
+      "memoire_mo": 662.9,
+      "fps": 5.85,
+      "frames": 280730,
+      "evenements": 9895,
+      "sain": true
+    },
+    {
+      "t": 78961.2,
+      "memoire_mo": 653.7,
+      "fps": 5.25,
+      "frames": 281154,
+      "evenements": 9909,
+      "sain": true
+    },
+    {
+      "t": 79081.2,
+      "memoire_mo": 662.9,
+      "fps": 5.51,
+      "frames": 281582,
+      "evenements": 9923,
+      "sain": true
+    },
+    {
+      "t": 79201.2,
+      "memoire_mo": 662.9,
+      "fps": 5.3,
+      "frames": 282016,
+      "evenements": 9938,
+      "sain": true
+    },
+    {
+      "t": 79321.2,
+      "memoire_mo": 662.9,
+      "fps": 4.84,
+      "frames": 282447,
+      "evenements": 9952,
+      "sain": true
+    },
+    {
+      "t": 79441.2,
+      "memoire_mo": 662.9,
+      "fps": 5.33,
+      "frames": 282873,
+      "evenements": 9967,
+      "sain": true
+    },
+    {
+      "t": 79561.2,
+      "memoire_mo": 655.0,
+      "fps": 5.62,
+      "frames": 283295,
+      "evenements": 9980,
+      "sain": true
+    },
+    {
+      "t": 79681.2,
+      "memoire_mo": 662.9,
+      "fps": 5.38,
+      "frames": 283724,
+      "evenements": 9995,
+      "sain": true
+    },
+    {
+      "t": 79801.2,
+      "memoire_mo": 662.9,
+      "fps": 5.01,
+      "frames": 284155,
+      "evenements": 10009,
+      "sain": true
+    },
+    {
+      "t": 79921.2,
+      "memoire_mo": 676.1,
+      "fps": 5.54,
+      "frames": 284585,
+      "evenements": 10023,
+      "sain": true
+    },
+    {
+      "t": 80041.2,
+      "memoire_mo": 662.9,
+      "fps": 5.42,
+      "frames": 285011,
+      "evenements": 10037,
+      "sain": true
+    },
+    {
+      "t": 80161.2,
+      "memoire_mo": 662.9,
+      "fps": 5.9,
+      "frames": 285439,
+      "evenements": 10052,
+      "sain": true
+    },
+    {
+      "t": 80281.2,
+      "memoire_mo": 662.9,
+      "fps": 4.94,
+      "frames": 285865,
+      "evenements": 10066,
+      "sain": true
+    },
+    {
+      "t": 80401.2,
+      "memoire_mo": 662.9,
+      "fps": 6.03,
+      "frames": 286289,
+      "evenements": 10080,
+      "sain": true
+    },
+    {
+      "t": 80521.2,
+      "memoire_mo": 665.6,
+      "fps": 5.17,
+      "frames": 286711,
+      "evenements": 10094,
+      "sain": true
+    },
+    {
+      "t": 80641.2,
+      "memoire_mo": 660.3,
+      "fps": 5.58,
+      "frames": 287135,
+      "evenements": 10108,
+      "sain": true
+    },
+    {
+      "t": 80761.2,
+      "memoire_mo": 662.9,
+      "fps": 5.23,
+      "frames": 287561,
+      "evenements": 10123,
+      "sain": true
+    },
+    {
+      "t": 80881.2,
+      "memoire_mo": 662.9,
+      "fps": 5.25,
+      "frames": 287990,
+      "evenements": 10137,
+      "sain": true
+    },
+    {
+      "t": 81001.2,
+      "memoire_mo": 662.9,
+      "fps": 5.7,
+      "frames": 288423,
+      "evenements": 10151,
+      "sain": true
+    },
+    {
+      "t": 81121.2,
+      "memoire_mo": 662.9,
+      "fps": 4.77,
+      "frames": 288846,
+      "evenements": 10165,
+      "sain": true
+    },
+    {
+      "t": 81241.2,
+      "memoire_mo": 665.6,
+      "fps": 6.02,
+      "frames": 289277,
+      "evenements": 10180,
+      "sain": true
+    },
+    {
+      "t": 81361.2,
+      "memoire_mo": 665.6,
+      "fps": 5.34,
+      "frames": 289715,
+      "evenements": 10195,
+      "sain": true
+    },
+    {
+      "t": 81481.2,
+      "memoire_mo": 665.6,
+      "fps": 5.77,
+      "frames": 290149,
+      "evenements": 10209,
+      "sain": true
+    },
+    {
+      "t": 81601.2,
+      "memoire_mo": 665.6,
+      "fps": 5.13,
+      "frames": 290574,
+      "evenements": 10223,
+      "sain": true
+    },
+    {
+      "t": 81721.2,
+      "memoire_mo": 662.9,
+      "fps": 5.29,
+      "frames": 290996,
+      "evenements": 10237,
+      "sain": true
+    },
+    {
+      "t": 81841.2,
+      "memoire_mo": 662.9,
+      "fps": 4.74,
+      "frames": 291420,
+      "evenements": 10251,
+      "sain": true
+    },
+    {
+      "t": 81961.2,
+      "memoire_mo": 662.9,
+      "fps": 5.39,
+      "frames": 291851,
+      "evenements": 10265,
+      "sain": true
+    },
+    {
+      "t": 82081.2,
+      "memoire_mo": 662.9,
+      "fps": 5.53,
+      "frames": 292276,
+      "evenements": 10280,
+      "sain": true
+    },
+    {
+      "t": 82201.2,
+      "memoire_mo": 662.9,
+      "fps": 5.73,
+      "frames": 292700,
+      "evenements": 10294,
+      "sain": true
+    },
+    {
+      "t": 82321.2,
+      "memoire_mo": 662.9,
+      "fps": 5.45,
+      "frames": 293126,
+      "evenements": 10308,
+      "sain": true
+    },
+    {
+      "t": 82441.2,
+      "memoire_mo": 665.6,
+      "fps": 5.5,
+      "frames": 293555,
+      "evenements": 10323,
+      "sain": true
+    },
+    {
+      "t": 82561.2,
+      "memoire_mo": 662.9,
+      "fps": 4.96,
+      "frames": 293980,
+      "evenements": 10337,
+      "sain": true
+    },
+    {
+      "t": 82681.2,
+      "memoire_mo": 662.9,
+      "fps": 5.03,
+      "frames": 294402,
+      "evenements": 10351,
+      "sain": true
+    },
+    {
+      "t": 82801.2,
+      "memoire_mo": 662.9,
+      "fps": 5.15,
+      "frames": 294826,
+      "evenements": 10365,
+      "sain": true
+    },
+    {
+      "t": 82921.2,
+      "memoire_mo": 662.9,
+      "fps": 5.04,
+      "frames": 295252,
+      "evenements": 10379,
+      "sain": true
+    },
+    {
+      "t": 83041.2,
+      "memoire_mo": 662.9,
+      "fps": 5.44,
+      "frames": 295679,
+      "evenements": 10393,
+      "sain": true
+    },
+    {
+      "t": 83161.2,
+      "memoire_mo": 662.9,
+      "fps": 5.13,
+      "frames": 296112,
+      "evenements": 10407,
+      "sain": true
+    },
+    {
+      "t": 83281.2,
+      "memoire_mo": 662.9,
+      "fps": 6.1,
+      "frames": 296539,
+      "evenements": 10422,
+      "sain": true
+    },
+    {
+      "t": 83401.2,
+      "memoire_mo": 665.6,
+      "fps": 5.03,
+      "frames": 296966,
+      "evenements": 10436,
+      "sain": true
+    },
+    {
+      "t": 83521.2,
+      "memoire_mo": 665.6,
+      "fps": 4.8,
+      "frames": 297388,
+      "evenements": 10450,
+      "sain": true
+    },
+    {
+      "t": 83641.2,
+      "memoire_mo": 662.9,
+      "fps": 5.14,
+      "frames": 297814,
+      "evenements": 10465,
+      "sain": true
+    },
+    {
+      "t": 83761.2,
+      "memoire_mo": 665.6,
+      "fps": 5.17,
+      "frames": 298241,
+      "evenements": 10479,
+      "sain": true
+    },
+    {
+      "t": 83881.2,
+      "memoire_mo": 665.6,
+      "fps": 5.39,
+      "frames": 298664,
+      "evenements": 10493,
+      "sain": true
+    },
+    {
+      "t": 84001.2,
+      "memoire_mo": 665.6,
+      "fps": 6.09,
+      "frames": 299087,
+      "evenements": 10507,
+      "sain": true
+    },
+    {
+      "t": 84121.2,
+      "memoire_mo": 665.6,
+      "fps": 6.08,
+      "frames": 299509,
+      "evenements": 10521,
+      "sain": true
+    },
+    {
+      "t": 84241.2,
+      "memoire_mo": 662.9,
+      "fps": 5.33,
+      "frames": 299933,
+      "evenements": 10535,
+      "sain": true
+    },
+    {
+      "t": 84361.2,
+      "memoire_mo": 662.9,
+      "fps": 5.81,
+      "frames": 300359,
+      "evenements": 10549,
+      "sain": true
+    },
+    {
+      "t": 84481.2,
+      "memoire_mo": 662.9,
+      "fps": 5.87,
+      "frames": 300787,
+      "evenements": 10563,
+      "sain": true
+    },
+    {
+      "t": 84601.2,
+      "memoire_mo": 662.9,
+      "fps": 4.91,
+      "frames": 301209,
+      "evenements": 10577,
+      "sain": true
+    },
+    {
+      "t": 84721.2,
+      "memoire_mo": 662.9,
+      "fps": 5.67,
+      "frames": 301633,
+      "evenements": 10591,
+      "sain": true
+    },
+    {
+      "t": 84841.2,
+      "memoire_mo": 662.9,
+      "fps": 5.72,
+      "frames": 302059,
+      "evenements": 10606,
+      "sain": true
+    },
+    {
+      "t": 84961.2,
+      "memoire_mo": 662.9,
+      "fps": 5.05,
+      "frames": 302482,
+      "evenements": 10620,
+      "sain": true
+    },
+    {
+      "t": 85081.2,
+      "memoire_mo": 665.6,
+      "fps": 5.63,
+      "frames": 302909,
+      "evenements": 10634,
+      "sain": true
+    },
+    {
+      "t": 85201.2,
+      "memoire_mo": 665.6,
+      "fps": 5.04,
+      "frames": 303334,
+      "evenements": 10649,
+      "sain": true
+    },
+    {
+      "t": 85321.2,
+      "memoire_mo": 665.6,
+      "fps": 5.1,
+      "frames": 303755,
+      "evenements": 10663,
+      "sain": true
+    },
+    {
+      "t": 85441.2,
+      "memoire_mo": 655.0,
+      "fps": 5.54,
+      "frames": 304178,
+      "evenements": 10677,
+      "sain": true
+    },
+    {
+      "t": 85561.2,
+      "memoire_mo": 663.0,
+      "fps": 5.62,
+      "frames": 304604,
+      "evenements": 10691,
+      "sain": true
+    },
+    {
+      "t": 85681.3,
+      "memoire_mo": 663.0,
+      "fps": 5.22,
+      "frames": 305033,
+      "evenements": 10705,
+      "sain": true
+    },
+    {
+      "t": 85801.3,
+      "memoire_mo": 663.0,
+      "fps": 5.62,
+      "frames": 305465,
+      "evenements": 10719,
+      "sain": true
+    },
+    {
+      "t": 85921.3,
+      "memoire_mo": 663.0,
+      "fps": 5.56,
+      "frames": 305901,
+      "evenements": 10734,
+      "sain": true
+    },
+    {
+      "t": 86041.3,
+      "memoire_mo": 665.6,
+      "fps": 5.35,
+      "frames": 306334,
+      "evenements": 10749,
+      "sain": true
+    },
+    {
+      "t": 86161.3,
+      "memoire_mo": 665.6,
+      "fps": 5.39,
+      "frames": 306764,
+      "evenements": 10763,
+      "sain": true
+    },
+    {
+      "t": 86281.3,
+      "memoire_mo": 663.0,
+      "fps": 4.94,
+      "frames": 307191,
+      "evenements": 10777,
+      "sain": true
+    },
+    {
+      "t": 86401.3,
+      "memoire_mo": 665.6,
+      "fps": 5.39,
+      "frames": 307622,
+      "evenements": 10791,
       "sain": true
     }
   ],
-  "memoire_debut_mo": 1102.2,
-  "memoire_fin_mo": 1131.8,
-  "croissance_memoire_mo": 29.6,
-  "fps_premier_quart": 4.77,
-  "fps_dernier_quart": 5.88,
-  "baisse_fps_pct": -23.2,
-  "frames_totales": 5994
+  "memoire_debut_mo": 1060.6,
+  "memoire_fin_mo": 665.6,
+  "croissance_memoire_mo": -395.0,
+  "fps_premier_quart": 5.4,
+  "fps_dernier_quart": 5.41,
+  "baisse_fps_pct": -0.2,
+  "frames_totales": 307622
 }

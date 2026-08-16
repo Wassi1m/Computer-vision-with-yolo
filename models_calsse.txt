@@ -1,124 +1,155 @@
-CLASSES DETECTEES PAR LES MODELES
-=================================
-Genere le 2026-08-16, en lisant les fichiers .pt eux-memes.
-Voir docs/catalogue_detections.md pour les performances mesurees.
+CLASSES DÉTECTÉES PAR LES MODÈLES
+==========================================================================
+
+Fichier RÉGÉNÉRÉ — ne pas éditer à la main.
+    python improvements/generer_classes.py
+
+Les noms de classes sont lus dans les fichiers .pt eux-mêmes ; les scores
+viennent de reports/v3_results/scores_par_classe.json, avec leur date et
+le jeu sur lequel ils ont été mesurés.
+
+DEUX INDICATEURS, à ne jamais confondre :
+
+  « détecté »  proportion des scènes où le modèle voit l'objet.
+               C'est l'indicateur d'EXPLOITATION, celui qui décide.
+  « AP »       précision du rectangle (AP@50). Utile pour comparer deux
+               entraînements du même modèle, trompeur pour juger sa valeur.
+
+L'écart peut être énorme : la fumée sort à AP 0.407 et détecte pourtant
+96,7 % des scènes. Ne jamais juger un modèle sur son AP seule.
 
 
-1. ppe_detection/models/ppe_detector.pt  --  EPI, 14 classes
-------------------------------------------------------------
-Modele principal (YOLOv8m). C'est lui qui juge la conformite EPI.
+──────────────────────────────────────────────────────────────────────────
+EPI — modèle principal  —  14 classes
+ppe_detection/models/ppe_detector.pt
 
-   0   Fall-Detected     personne au sol
-   1   Gloves            gants portes
-   2   Goggles           lunettes portees
-   3   Hardhat           casque porte
-   4   Ladder            echelle
-   5   Mask              masque porte
-   6   NO-Gloves         SANS gants
-   7   NO-Goggles        SANS lunettes
-   8   NO-Hardhat        SANS casque
-   9   NO-Mask           SANS masque
-   10  NO-Safety Vest    SANS gilet
-   11  Person            personne
-   12  Safety Cone       cone de signalisation
-   13  Safety Vest       gilet porte
+  mesuré le 2026-08-16 sur ppe_dataset/test (4 423 images) / ppe_dataset/test, 40 images par classe, seuil 0.25
+  mAP@50 global : 0.7689
 
-Les six classes "NO-" sont celles qui signalent une INFRACTION.
+   0  Fall-Detected    personne au sol            AP 0.839
+   1  Gloves           gants portés               AP 0.932
+   2  Goggles          lunettes portées           AP 0.960
+   3  Hardhat          casque porté               65 % détecté  ·  AP 0.834
+   4  Ladder           échelle                    AP 0.961
+   5  Mask             masque porté               95 % détecté  ·  AP 0.551
+   6  NO-Gloves        SANS gants                 AP 0.909
+   7  NO-Goggles       SANS lunettes              AP 0.961
+   8  NO-Hardhat       SANS casque                72 % détecté  ·  AP 0.752
+   9  NO-Mask          SANS masque                78 % détecté  ·  AP 0.603
+  10  NO-Safety Vest   SANS gilet                 70 % détecté  ·  AP 0.173  ·  AP 0.684 (jeu propre)
+  11  Person           personne                   AP 0.956
+  12  Safety Cone      cône de signalisation      98 % détecté  ·  AP 0.751
+  13  Safety Vest      gilet porté                AP 0.580  ·  AP 0.905 (jeu propre)
 
+  C'est lui qui juge la conformité EPI.
+  Les six classes `NO-` signalent une INFRACTION : ce sont les plus critiques, et les plus faibles du parc.
 
-2. ppe_detection/models/ppe_complement.pt  --  EPI complementaire, 6 classes
-----------------------------------------------------------------------------
-Second modele de la cascade (YOLOv8n). Il n'a AUCUNE classe negative :
-il ne peut donc jamais signaler une non-conformite, seulement confirmer
-un equipement present.
-
-   0   Gloves            gants
-   1   Vest              gilet
-   2   goggles           lunettes
-   3   helmet            casque
-   4   mask              masque
-   5   safety_shoe       chaussures de securite
-
-`safety_shoe` est son seul apport unique : les cinq autres existent deja
-dans le modele principal. La correspondance entre les deux taxonomies est
-definie dans improvements/ppe_taxonomy.py.
+  ap50_jeu_propre : mesure sur ppe_vest_clean_14c/val, seul jeu ou le gilet est annote correctement.
+  Les 35 points d'ecart viennent des annotations, pas du modele.
 
 
-3. surveillance_suite/models/fire_smoke.pt  --  feu et fumee, 2 classes
------------------------------------------------------------------------
-   0   fire              flammes visibles
-   1   smoke             fumee, panache
+──────────────────────────────────────────────────────────────────────────
+EPI — modèle complémentaire  —  6 classes
+ppe_detection/models/ppe_complement.pt
+
+  mesuré le 2026-08-13 sur ppe_dataset/test, 15 images par classe, seuil 0.25
+
+   0  Gloves           gants portés               33 % détecté
+   1  Vest             gilet                      non mesurée
+   2  goggles          lunettes                   non mesurée
+   3  helmet           casque                     40 % détecté
+   4  mask             masque                     80 % détecté
+   5  safety_shoe      chaussures de sécurité     non mesurée
+
+  Second modèle de la cascade.
+  Il n'a AUCUNE classe négative : il ne peut donc jamais signaler une non-conformité, seulement confirmer un équipement présent.
+  `safety_shoe` est son seul apport unique.
+
+  Indicatif : ce jeu n'est pas celui d'entrainement de ce modele.
+  Aucune mesure de reference n'existe pour lui.
 
 
-4. surveillance_suite/models/fall_detector.pt  --  chute, 2 classes
--------------------------------------------------------------------
-   0   falling           personne au sol
-   1   stand             personne debout
+──────────────────────────────────────────────────────────────────────────
+Feu et fumée  —  2 classes
+surveillance_suite/models/fire_smoke.pt
 
-ATTENTION : ce modele juge une POSTURE sur une image isolee, pas une chute.
-Une personne accroupie ou assise lui ressemble.
+  mesuré le 2026-08-11 sur fire_smoke_enriched/test / fire_smoke_v9/test (1 165 images), seuil 0.10
+  mAP@50 global : 0.6554
 
+   0  fire             flammes visibles           AP 0.904
+   1  smoke            fumée, panache             97 % détecté  ·  AP 0.407
 
-5. surveillance_suite/models/license_plate.pt  --  plaques, 1 classe
----------------------------------------------------------------------
-   0   plate             plaque d'immatriculation (localisation seule)
-
-La lecture des caracteres est faite ensuite par OCR (module_lpr.py).
+  La fumee est l'exemple type de l'ecart AP/exploitation : 40 % d'AP pour 96,7 % des scenes detectees.
+  La mAP sanctionne la position du rectangle autour d'un panache sans contour.
 
 
-6. surveillance_suite/models/door_classifier.pt  --  porte, 3 classes
-----------------------------------------------------------------------
-Classifieur (pas un detecteur) : il juge toute l'image, sans rectangle.
+──────────────────────────────────────────────────────────────────────────
+Chute  —  2 classes
+surveillance_suite/models/fall_detector.pt
 
-   0   Closed            fermee
-   1   Open              ouverte
-   2   Semi              entrouverte
+  mesuré le 2026-08-10 sur fall_detection_enriched/test
+  mAP@50 global : 0.9901
 
+   0  falling          personne au sol            AP 0.992
+   1  stand            personne debout            AP 0.988
 
-7. yolo26n.pt  --  detection generale, 80 classes COCO
---------------------------------------------------------
-Modele public non re-entraine. Il fournit les personnes et le suivi dont
-dependent tous les autres modules. Classes utilisees explicitement :
-
-   person                          ancrage des EPI, comptage de foule
-   backpack, handbag, suitcase     objet abandonne
-   bicycle, skateboard             objet abandonne
-   car, truck, bus, motorcycle     franchissement de ligne
-
-Les 80 classes COCO restent disponibles, mais seules celles-ci sont
-consommees par le moteur.
+  Mesure une POSTURE sur image isolee, pas une chute.
+  Une personne accroupie ou assise ressemble a une personne au sol.
 
 
-===========================================================================
-CONCEPTS EPI UNIFIES
-===========================================================================
-Les deux modeles EPI ont des noms differents pour les memes objets
-(`Hardhat` / `helmet`, `Safety Vest` / `Vest`). Le moteur les ramene a six
-concepts uniques, definis dans improvements/ppe_taxonomy.py :
+──────────────────────────────────────────────────────────────────────────
+Plaques d'immatriculation  —  1 classes
+surveillance_suite/models/license_plate.pt
 
-   casque       masque       lunettes
-   gilet        gants        chaussures
+  mesuré le 2026-08-10 sur license_plate_unified/test
+  mAP@50 global : 0.8619
+
+   0  plate            plaque d'immatriculation   AP 0.862
+
+  Localisation seule.
+  La lecture des caractères est faite ensuite par OCR (`surveillance_suite/modules/module_lpr.py`).
+
+  S'effondre a 0.486 sous flou de mouvement -- soit une plaque sur deux perdue sur un vehicule en mouvement, le cas d'usage principal.
 
 
-===========================================================================
-EVENEMENTS PRODUITS PAR LE MOTEUR
-===========================================================================
-Ce que la plateforme aval recoit reellement. Ce ne sont PAS les classes des
-modeles : un evenement resulte d'une decision, souvent sur plusieurs images.
+──────────────────────────────────────────────────────────────────────────
+État de porte  —  3 classes
+surveillance_suite/models/door_classifier.pt
 
-   violation_epi       un EPI obligatoire manque a une personne
-   chute               personne au sol
-   fire                depart de feu
-   smoke               fumee
-   objet_abandonne     bagage immobile, sans personne a proximite
-   foule               seuil d'effectif ou de densite franchi
-   foule_terminee      retour sous le seuil
-   franchissement      un objet suivi a franchi la ligne virtuelle
-   plaque              plaque lue
-   porte               changement d'etat de la porte
-   flux_perdu          la camera n'est plus lisible
-   flux_repris         la camera est revenue
+  AUCUNE mesure de référence
 
-Chaque evenement porte camera_id, site_id et event_id, ainsi que son etat
-(suspicion / probable / confirme) et ses elements de preuve.
+   0  Closed           fermée                     non mesurée
+   1  Open             ouverte                    non mesurée
+   2  Semi             entrouverte                non mesurée
+
+  Classifieur et non détecteur : il juge toute l'image, sans rectangle.
+
+  AUCUNE mesure de reference.
+  Non couvert par test_non_regression.py.
+  Sa fiabilite est inconnue et il ne doit pas etre presente comme valide.
+
+
+══════════════════════════════════════════════════════════════════════════
+ÉVÈNEMENTS PRODUITS PAR LE MOTEUR
+══════════════════════════════════════════════════════════════════════════
+
+Ce que la plateforme reçoit réellement. Ce ne sont PAS les classes des
+modèles : un évènement résulte d'une décision, souvent prise sur
+plusieurs images.
+
+  violation_epi        un EPI obligatoire manque à une personne
+  chute                personne au sol
+  fire                 départ de feu
+  smoke                fumée
+  objet_abandonne      bagage immobile, sans personne à proximité
+  foule                seuil d'effectif ou de densité franchi
+  foule_terminee       retour sous le seuil
+  franchissement       un objet suivi a franchi la ligne virtuelle
+  plaque               plaque lue
+  porte                changement d'état de la porte
+  flux_perdu           la caméra n'est plus lisible
+  flux_repris          la caméra est revenue
+
+Chaque évènement porte camera_id, site_id et event_id, ainsi que son état
+(suspicion / probable / confirmé) et ses éléments de preuve.
 Format complet : docs/contrat_api.md

@@ -1,0 +1,135 @@
+{
+  "_documentation": {
+    "genere_par": "improvements/generer_classes.py",
+    "ap50": "AP@50 : precision du rectangle. Ecrasee par les annotations incompletes.",
+    "scene": "Detection de scene : le modele voit-il l'objet, oui ou non. C'est l'indicateur d'exploitation, celui qui decide."
+  },
+  "ppe_detector.pt": {
+    "jeu_ap50": "ppe_dataset/test (4 423 images)",
+    "jeu_scene": "ppe_dataset/test, 40 images par classe, seuil 0.25",
+    "date": "2026-08-16",
+    "classes": {
+      "Fall-Detected": {
+        "ap50": 0.8393
+      },
+      "Gloves": {
+        "ap50": 0.9322
+      },
+      "Goggles": {
+        "ap50": 0.9603
+      },
+      "Hardhat": {
+        "ap50": 0.8339,
+        "scene": 0.65
+      },
+      "Ladder": {
+        "ap50": 0.9614
+      },
+      "Mask": {
+        "ap50": 0.5513,
+        "scene": 0.95
+      },
+      "NO-Gloves": {
+        "ap50": 0.909
+      },
+      "NO-Goggles": {
+        "ap50": 0.9614
+      },
+      "NO-Hardhat": {
+        "ap50": 0.7521,
+        "scene": 0.72
+      },
+      "NO-Mask": {
+        "ap50": 0.6033,
+        "scene": 0.78
+      },
+      "NO-Safety Vest": {
+        "ap50": 0.1734,
+        "scene": 0.7,
+        "ap50_jeu_propre": 0.6839
+      },
+      "Person": {
+        "ap50": 0.9561
+      },
+      "Safety Cone": {
+        "ap50": 0.7513,
+        "scene": 0.98
+      },
+      "Safety Vest": {
+        "ap50": 0.5802,
+        "ap50_jeu_propre": 0.9054
+      }
+    },
+    "mAP50": 0.7689,
+    "note": "ap50_jeu_propre : mesure sur ppe_vest_clean_14c/val, seul jeu ou le gilet est annote correctement. Les 35 points d'ecart viennent des annotations, pas du modele."
+  },
+  "ppe_complement.pt": {
+    "jeu_scene": "ppe_dataset/test, 15 images par classe, seuil 0.25",
+    "date": "2026-08-13",
+    "classes": {
+      "helmet": {
+        "scene": 0.4
+      },
+      "Gloves": {
+        "scene": 0.33
+      },
+      "mask": {
+        "scene": 0.8
+      },
+      "Vest": {},
+      "goggles": {},
+      "safety_shoe": {}
+    },
+    "note": "Indicatif : ce jeu n'est pas celui d'entrainement de ce modele. Aucune mesure de reference n'existe pour lui."
+  },
+  "fire_smoke.pt": {
+    "jeu_ap50": "fire_smoke_enriched/test",
+    "jeu_scene": "fire_smoke_v9/test (1 165 images), seuil 0.10",
+    "date": "2026-08-11",
+    "classes": {
+      "fire": {
+        "ap50": 0.9037
+      },
+      "smoke": {
+        "ap50": 0.4071,
+        "scene": 0.967
+      }
+    },
+    "mAP50": 0.6554,
+    "note": "La fumee est l'exemple type de l'ecart AP/exploitation : 40 % d'AP pour 96,7 % des scenes detectees. La mAP sanctionne la position du rectangle autour d'un panache sans contour."
+  },
+  "fall_detector.pt": {
+    "jeu_ap50": "fall_detection_enriched/test",
+    "date": "2026-08-10",
+    "classes": {
+      "falling": {
+        "ap50": 0.9923
+      },
+      "stand": {
+        "ap50": 0.9879
+      }
+    },
+    "mAP50": 0.9901,
+    "note": "Mesure une POSTURE sur image isolee, pas une chute. Une personne accroupie ou assise ressemble a une personne au sol."
+  },
+  "license_plate.pt": {
+    "jeu_ap50": "license_plate_unified/test",
+    "date": "2026-08-10",
+    "classes": {
+      "plate": {
+        "ap50": 0.8619
+      }
+    },
+    "mAP50": 0.8619,
+    "note": "S'effondre a 0.486 sous flou de mouvement -- soit une plaque sur deux perdue sur un vehicule en mouvement, le cas d'usage principal."
+  },
+  "door_classifier.pt": {
+    "date": null,
+    "classes": {
+      "Closed": {},
+      "Open": {},
+      "Semi": {}
+    },
+    "note": "AUCUNE mesure de reference. Non couvert par test_non_regression.py. Sa fiabilite est inconnue et il ne doit pas etre presente comme valide."
+  }
+}

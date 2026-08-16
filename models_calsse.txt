@@ -1,0 +1,124 @@
+CLASSES DETECTEES PAR LES MODELES
+=================================
+Genere le 2026-08-16, en lisant les fichiers .pt eux-memes.
+Voir docs/catalogue_detections.md pour les performances mesurees.
+
+
+1. ppe_detection/models/ppe_detector.pt  --  EPI, 14 classes
+------------------------------------------------------------
+Modele principal (YOLOv8m). C'est lui qui juge la conformite EPI.
+
+   0   Fall-Detected     personne au sol
+   1   Gloves            gants portes
+   2   Goggles           lunettes portees
+   3   Hardhat           casque porte
+   4   Ladder            echelle
+   5   Mask              masque porte
+   6   NO-Gloves         SANS gants
+   7   NO-Goggles        SANS lunettes
+   8   NO-Hardhat        SANS casque
+   9   NO-Mask           SANS masque
+   10  NO-Safety Vest    SANS gilet
+   11  Person            personne
+   12  Safety Cone       cone de signalisation
+   13  Safety Vest       gilet porte
+
+Les six classes "NO-" sont celles qui signalent une INFRACTION.
+
+
+2. ppe_detection/models/ppe_complement.pt  --  EPI complementaire, 6 classes
+----------------------------------------------------------------------------
+Second modele de la cascade (YOLOv8n). Il n'a AUCUNE classe negative :
+il ne peut donc jamais signaler une non-conformite, seulement confirmer
+un equipement present.
+
+   0   Gloves            gants
+   1   Vest              gilet
+   2   goggles           lunettes
+   3   helmet            casque
+   4   mask              masque
+   5   safety_shoe       chaussures de securite
+
+`safety_shoe` est son seul apport unique : les cinq autres existent deja
+dans le modele principal. La correspondance entre les deux taxonomies est
+definie dans improvements/ppe_taxonomy.py.
+
+
+3. surveillance_suite/models/fire_smoke.pt  --  feu et fumee, 2 classes
+-----------------------------------------------------------------------
+   0   fire              flammes visibles
+   1   smoke             fumee, panache
+
+
+4. surveillance_suite/models/fall_detector.pt  --  chute, 2 classes
+-------------------------------------------------------------------
+   0   falling           personne au sol
+   1   stand             personne debout
+
+ATTENTION : ce modele juge une POSTURE sur une image isolee, pas une chute.
+Une personne accroupie ou assise lui ressemble.
+
+
+5. surveillance_suite/models/license_plate.pt  --  plaques, 1 classe
+---------------------------------------------------------------------
+   0   plate             plaque d'immatriculation (localisation seule)
+
+La lecture des caracteres est faite ensuite par OCR (module_lpr.py).
+
+
+6. surveillance_suite/models/door_classifier.pt  --  porte, 3 classes
+----------------------------------------------------------------------
+Classifieur (pas un detecteur) : il juge toute l'image, sans rectangle.
+
+   0   Closed            fermee
+   1   Open              ouverte
+   2   Semi              entrouverte
+
+
+7. yolo26n.pt  --  detection generale, 80 classes COCO
+--------------------------------------------------------
+Modele public non re-entraine. Il fournit les personnes et le suivi dont
+dependent tous les autres modules. Classes utilisees explicitement :
+
+   person                          ancrage des EPI, comptage de foule
+   backpack, handbag, suitcase     objet abandonne
+   bicycle, skateboard             objet abandonne
+   car, truck, bus, motorcycle     franchissement de ligne
+
+Les 80 classes COCO restent disponibles, mais seules celles-ci sont
+consommees par le moteur.
+
+
+===========================================================================
+CONCEPTS EPI UNIFIES
+===========================================================================
+Les deux modeles EPI ont des noms differents pour les memes objets
+(`Hardhat` / `helmet`, `Safety Vest` / `Vest`). Le moteur les ramene a six
+concepts uniques, definis dans improvements/ppe_taxonomy.py :
+
+   casque       masque       lunettes
+   gilet        gants        chaussures
+
+
+===========================================================================
+EVENEMENTS PRODUITS PAR LE MOTEUR
+===========================================================================
+Ce que la plateforme aval recoit reellement. Ce ne sont PAS les classes des
+modeles : un evenement resulte d'une decision, souvent sur plusieurs images.
+
+   violation_epi       un EPI obligatoire manque a une personne
+   chute               personne au sol
+   fire                depart de feu
+   smoke               fumee
+   objet_abandonne     bagage immobile, sans personne a proximite
+   foule               seuil d'effectif ou de densite franchi
+   foule_terminee      retour sous le seuil
+   franchissement      un objet suivi a franchi la ligne virtuelle
+   plaque              plaque lue
+   porte               changement d'etat de la porte
+   flux_perdu          la camera n'est plus lisible
+   flux_repris         la camera est revenue
+
+Chaque evenement porte camera_id, site_id et event_id, ainsi que son etat
+(suspicion / probable / confirme) et ses elements de preuve.
+Format complet : docs/contrat_api.md

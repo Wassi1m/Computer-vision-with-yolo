@@ -115,6 +115,33 @@ def selectionner(contenu: dict[str, Counter], quota: int,
     return choisis
 
 
+def dupliquer(choisis: list[str], contenu: dict[str, Counter],
+              classes: set[int], facteur: int) -> list[str]:
+    """Répète les images contenant certaines classes, pour les montrer plus souvent.
+
+    Un quota ne suffit pas quand une classe est structurellement rare :
+    `NO-Safety Vest` ne compte que 1 435 instances dans tout le jeu, contre
+    28 996 pour `Hardhat`. Même en prenant *toutes* ses images, elle reste vingt
+    fois moins vue — et elle a reculé à chaque rééquilibrage :
+
+        0.8534  modele d'origine (entraine sur le gilet SEUL)
+        0.7786  apres le re-entrainement 14 classes
+        0.6839  apres le renforcement casque/cone
+
+    Dupliquer ses images rétablit l'équilibre de ce que le réseau *voit*, sans
+    jamais l'entraîner sur elle seule — ce qui effacerait les treize autres
+    classes, exactement le désastre constaté le 2026-08-13.
+
+    La duplication porte sur les images entières : les autres classes qui s'y
+    trouvent sont donc renforcées aussi, ce qui est sans effet notable puisque
+    ces images sont peu nombreuses.
+    """
+    if facteur <= 1 or not classes:
+        return choisis
+    extra = [s for s in choisis if any(i in contenu[s] for i in classes)]
+    return choisis + extra * (facteur - 1)
+
+
 def index_images(split: str) -> dict[str, Path]:
     """{stem: chemin} construit en un seul parcours du dossier.
 
@@ -126,16 +153,28 @@ def index_images(split: str) -> dict[str, Path]:
 
 
 def copier(split: str, stems: list[str], dest: Path, index: dict[str, Path]) -> int:
+    """Copie les images retenues. Une image répétée reçoit un suffixe distinct.
+
+    Sans ce suffixe, les copies s'écraseraient sous le même nom et la
+    duplication n'aurait **aucun effet** — un défaut invisible : le script
+    annoncerait 5 740 instances de `NO-Safety Vest` alors que le disque n'en
+    porterait que 1 435, et l'entraînement de dix heures repartirait sur le
+    déséquilibre qu'on croyait avoir corrigé.
+    """
     octets = 0
     for sous in ("images", "labels"):
         (dest / split / sous).mkdir(parents=True, exist_ok=True)
+    vus: dict[str, int] = {}
     for stem in stems:
         src_img = index.get(stem)
         if src_img is None:
             continue
-        src_lbl = SOURCE / split / "labels" / f"{stem}.txt"
-        shutil.copy2(src_lbl, dest / split / "labels" / src_lbl.name)
-        shutil.copy2(src_img, dest / split / "images" / src_img.name)
+        n = vus.get(stem, 0)
+        vus[stem] = n + 1
+        base = stem if n == 0 else f"{stem}__x{n + 1}"
+        shutil.copy2(SOURCE / split / "labels" / f"{stem}.txt",
+                     dest / split / "labels" / f"{base}.txt")
+        shutil.copy2(src_img, dest / split / "images" / f"{base}{src_img.suffix}")
         octets += src_img.stat().st_size
     return octets
 
@@ -146,6 +185,10 @@ def main() -> int:
                     help="instances visees par classe dans le split train")
     ap.add_argument("--quota-val", type=int, default=400,
                     help="instances visees par classe dans le split val envoye")
+    ap.add_argument("--dupliquer-no-gilet", type=int, default=1,
+                    help="repete les images contenant NO-Safety Vest (1 = pas de "
+                         "duplication). 4 rapproche sa frequence de celle des "
+                         "classes majoritaires")
     ap.add_argument("--sans-test", action="store_true",
                     help="ne pas copier le split test : il reste local, c'est lui "
                          "qui jugera le candidat")
@@ -162,6 +205,8 @@ def main() -> int:
             continue
         if split == "train":
             stems = selectionner(contenu, a.quota, completes={10, 13})
+            # Classe 10 = NO-Safety Vest, la plus fragile du parc.
+            stems = dupliquer(stems, contenu, {10}, a.dupliquer_no_gilet)
         elif split == "val":
             # Le `val` envoye ne sert qu'a suivre l'entrainement : un
             # echantillon equilibre suffit, et le reduire divise le temps

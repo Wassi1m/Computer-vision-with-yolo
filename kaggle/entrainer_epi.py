@@ -58,6 +58,29 @@ from entrainer_kaggle import ENTREE, TRAVAIL, trouver, preparer_reprise, publier
 
 NOM_RUN = "epi_14c"
 
+# Classes a renforcer, choisies sur la DETECTION REELLE mesuree le 2026-08-16 et
+# non sur l'AP : les deux divergent fortement ici, l'AP etant ecrasee par les
+# annotations incompletes de `ppe_dataset` (`Mask` sort a 0.55 d'AP mais 95 % de
+# detection ; `Hardhat` a 0.83 d'AP mais seulement 65 %).
+#
+#   9   NO-Mask         78 %  (1 577 exemples) -- a recule de 95 % a 78 %
+#   10  NO-Safety Vest  70 %  (1 435 exemples) -- a recule deux fois de suite
+#
+# Le critere est la conjonction FAIBLE **et** RARE : dupliquer ne repare que ce
+# que la rarete a cause. Deux classes faibles en sont donc exclues a dessein :
+#
+#   NO-Hardhat (72 %, 9 705 exemples) -- aussi nombreux que Safety Cone qui
+#     sort a 98 %. Sa difficulte tient a la nature de la tache (reconnaitre une
+#     ABSENCE), pas au manque d'exemples. Le dupliquer x4 le porterait a 38 820
+#     instances vues, presque quatre fois Hardhat lui-meme, pour ~14 h
+#     d'entrainement : la coupure serait garantie et le gain nul.
+#   Hardhat (65 %, 28 996 exemples) -- la classe la MIEUX pourvue du jeu.
+#
+# Les deux classes retenues sont des negatives, celles qui signalent
+# l'infraction. Elles sont systematiquement moins bien apprises que leurs
+# positives : c'est le defaut structurel de ce jeu de donnees.
+CLASSES_RARES = {9, 10}
+
 
 def trouver_jeu_epi() -> Path | None:
     """Localise le jeu 14 classes parmi les entrées attachées.
@@ -77,6 +100,74 @@ def trouver_jeu_epi() -> Path | None:
     return None
 
 
+def dupliquer_sur_place(source: Path, classes: set[int], facteur: int) -> Path:
+    """Renforce des classes rares en répétant leurs images, sans rien renvoyer.
+
+    Le jeu monté sur Kaggle contient déjà **toutes** les images des classes
+    rares — leur inclusion intégrale est forcée à la construction. Rééquilibrer
+    ne demande donc aucun nouveau téléversement : il suffit de montrer ces
+    images plus souvent, ce qui se fait ici au démarrage de la session.
+
+    Les copies sont des **liens symboliques** : `/kaggle/input` est en lecture
+    seule mais reste lisible, et `/kaggle/working` est limité (~20 Go). Répéter
+    quatre fois deux mille images coûterait plusieurs gigaoctets en copies
+    réelles, contre quelques kilo-octets en liens.
+
+    Pourquoi c'est nécessaire : `NO-Safety Vest` ne compte que 1 435 instances
+    contre 28 996 pour `Hardhat`. Même en prenant toutes ses images, elle reste
+    vingt fois moins vue — et elle a reculé à chaque rééquilibrage (0.8534 puis
+    0.7786 puis 0.6839). L'entraîner seule effacerait les treize autres classes,
+    exactement le desastre du 2026-08-13 : il faut donc la répéter *dans* le jeu
+    complet, jamais l'isoler.
+    """
+    dest = TRAVAIL / "donnees" / "epi_renforce"
+    if (dest / "data.yaml").exists():
+        print(f"Jeu renforce deja present : {dest}")
+        return dest
+
+    for split in ("train", "val"):
+        for sous in ("images", "labels"):
+            (dest / split / sous).mkdir(parents=True, exist_ok=True)
+
+    # `val` est repris tel quel : le dupliquer fausserait le suivi
+    # d'entrainement sans rien apporter.
+    for sous in ("images", "labels"):
+        for f in (source / "val" / sous).iterdir():
+            (dest / "val" / sous / f.name).symlink_to(f)
+
+    concernees = ajouts = total = 0
+    for lbl in (source / "train" / "labels").iterdir():
+        img = next((source / "train" / "images").glob(lbl.stem + ".*"), None)
+        if img is None:
+            continue
+        total += 1
+        (dest / "train" / "labels" / lbl.name).symlink_to(lbl)
+        (dest / "train" / "images" / img.name).symlink_to(img)
+
+        vise = any(int(l.split()[0]) in classes
+                   for l in lbl.read_text().splitlines() if l.strip())
+        if not vise:
+            continue
+        concernees += 1
+        for k in range(2, facteur + 1):
+            base = f"{lbl.stem}__x{k}"
+            (dest / "train" / "labels" / f"{base}.txt").symlink_to(lbl)
+            (dest / "train" / "images" / f"{base}{img.suffix}").symlink_to(img)
+            ajouts += 1
+
+    src = (source / "data.yaml").read_text(encoding="utf-8").splitlines()
+    (dest / "data.yaml").write_text("\n".join([
+        f"path: {dest}", "train: train/images", "val: val/images", "",
+        next(l for l in src if l.startswith("nc:")),
+        next(l for l in src if l.startswith("names:")),
+    ]) + "\n", encoding="utf-8")
+
+    print(f"Renforcement x{facteur} des classes {sorted(classes)} : "
+          f"{concernees} images concernees sur {total}, {ajouts} repetitions "
+          f"-> {total + ajouts} images d'entrainement")
+    return dest
+
+
 def yaml_absolu(source: Path) -> Path:
     """Réécrit le data.yaml avec le chemin de montage réel.
 
@@ -93,8 +184,9 @@ def yaml_absolu(source: Path) -> Path:
     return dest
 
 
-def entrainer(epochs: int = 80, imgsz: int = 640, batch: int = 16,
-              patience: int = 30, workers: int = 2, lr0: float = 0.001) -> int:
+def entrainer(epochs: int = 60, imgsz: int = 640, batch: int = 16,
+              patience: int = 20, workers: int = 2, lr0: float = 0.001,
+              heures: float = 10.5, dupliquer: int = 1) -> int:
     from ultralytics import YOLO
     import torch
 
@@ -102,7 +194,15 @@ def entrainer(epochs: int = 80, imgsz: int = 640, batch: int = 16,
         print("Aucun GPU : activer l'accelerateur dans les parametres du notebook.",
               file=sys.stderr)
         return 1
-    print(f"GPU : {torch.cuda.get_device_name(0)}")
+
+    # Utiliser TOUTES les cartes disponibles. Le run du 2026-08-15 a tourne sur
+    # une seule alors que la session en offrait deux, et s'est fait couper a
+    # l'epoque 79 sur 80 par la limite de 12 h de Kaggle.
+    n = torch.cuda.device_count()
+    device = list(range(n)) if n > 1 else 0
+    for i in range(n):
+        print(f"GPU {i} : {torch.cuda.get_device_name(i)}")
+    print(f"-> entrainement sur {n} carte(s)")
 
     sorties = TRAVAIL / "sorties"
     dossier_run = sorties / NOM_RUN
@@ -121,11 +221,24 @@ def entrainer(epochs: int = 80, imgsz: int = 640, batch: int = 16,
     print(f"Jeu   : {source}")
     print(f"Poids : {poids}")
 
+    # Renforcement des classes rares sans nouveau televersement : le jeu monte
+    # contient deja toutes leurs images, il suffit de les repeter par liens.
+    if dupliquer > 1:
+        source = dupliquer_sur_place(source, CLASSES_RARES, dupliquer)
+
     modele = YOLO(str(poids))
     modele.train(
-        data=str(yaml_absolu(source)),
+        data=str(source / "data.yaml" if (source / "data.yaml").is_relative_to(TRAVAIL)
+                 else yaml_absolu(source)),
         epochs=epochs, imgsz=imgsz, batch=batch, workers=workers,
-        device=0, patience=patience,
+        device=device, patience=patience,
+        # Budget de temps, et c'est le garde-fou le plus important de ce script.
+        # Kaggle tue la session a 12 h : le run du 2026-08-15 s'est fait couper a
+        # l'epoque 79 sur 80, laissant un best.pt jamais finalise (155 Mo avec
+        # l'optimiseur, `model` vide, poids seulement dans `ema`). Avec `time`,
+        # Ultralytics s'arrete de lui-meme avant la fin du budget et termine
+        # proprement : validation finale, strip_optimizer, resume ecrit.
+        time=heures,
         project=str(sorties), name=NOM_RUN, exist_ok=True, seed=0, plots=True,
         # `optimizer` DOIT etre nomme explicitement. Avec le defaut `auto`,
         # Ultralytics recalcule le taux d'apprentissage et ecrase celui qu'on
@@ -153,11 +266,18 @@ def preparer_reprise_epi(dossier_run: Path) -> bool:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--epochs", type=int, default=80)
+    ap.add_argument("--epochs", type=int, default=60)
     ap.add_argument("--imgsz", type=int, default=640)
     ap.add_argument("--batch", type=int, default=16)
-    ap.add_argument("--patience", type=int, default=30)
+    ap.add_argument("--patience", type=int, default=20)
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--lr0", type=float, default=0.001)
+    ap.add_argument("--heures", type=float, default=10.5,
+                    help="budget de temps ; Kaggle tue la session a 12 h")
+    ap.add_argument("--dupliquer", type=int, default=1,
+                    help="repete les images des classes rares (NO-Safety Vest). "
+                         "4 rapproche leur frequence des classes majoritaires. "
+                         "Fait sur place par liens : aucun televersement")
     a = ap.parse_args()
-    sys.exit(entrainer(a.epochs, a.imgsz, a.batch, a.patience, a.workers, a.lr0))
+    sys.exit(entrainer(a.epochs, a.imgsz, a.batch, a.patience, a.workers,
+                       a.lr0, a.heures, a.dupliquer))

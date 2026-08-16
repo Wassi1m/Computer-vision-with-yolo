@@ -135,6 +135,35 @@ annotée, ce qui compte toute détection correcte comme une fausse alarme.
 `ppe_vest_clean_14c` fait l'inverse. Ne lire qu'un des deux conduit à une
 conclusion fausse, dans un sens ou dans l'autre.
 
+### Ce que ce jeu de données ne permet plus d'améliorer
+
+Mesuré le 2026-08-16 en **détection de scène** — le modèle voit-il l'objet,
+indépendamment de la précision du rectangle :
+
+| Classe | Détection | Exemples | Levier restant |
+|---|---|---|---|
+| `Hardhat` | 65 % | **28 996** | ❌ pas la rareté |
+| `NO-Hardhat` | 72 % | 9 705 | ❌ pas la rareté |
+| `NO-Mask` | 78 % | 1 577 | ✅ duplication |
+| `NO-Safety Vest` | 70 % | 1 435 | ✅ duplication |
+| `Mask` | 95 % | 1 989 | — |
+| `Safety Cone` | 98 % | 9 843 | — |
+
+Les deux dernières colonnes disent l'essentiel. **`Hardhat` est la classe la
+mieux pourvue du jeu et reste la plus faible** : passer de 2 504 à 10 004
+exemples l'a fait progresser de 32 % à 65 %, mais les 18 992 restants ne
+donneront pas autant. Sa limite n'est pas le nombre d'images mais leur
+diversité — le jeu vient de quelques chantiers, sous quelques angles.
+
+**Améliorer le casque demandera d'autres images, pas plus des mêmes** : autres
+sites, autres distances, autres conditions d'éclairage. C'est la seule
+amélioration EPI qui reste, et elle sort du périmètre de ce dépôt.
+
+Même remarque pour `NO-Hardhat` : reconnaître l'*absence* d'un casque est
+intrinsèquement plus difficile que le reconnaître, et ses 9 705 exemples
+suffisent en nombre. Toutes les classes négatives du parc sont en dessous de
+leurs positives — c'est le défaut structurel de ce jeu.
+
 **Limites**
 - **`NO-Safety Vest` a reculé de 7,5 points** lors du ré-entraînement du
   2026-08-15 (0,8534 → 0,7786 sur le jeu gilet). Perte assumée en échange de la

@@ -107,7 +107,7 @@ Objet JSON, encodé en UTF-8.
 
 | `source` | `type` | Signification | `box` |
 |---|---|---|---|
-| `epi` | `violation_epi` | Un EPI obligatoire manque à une personne | Boîte de la personne |
+| `epi` | `violation_epi` | Un EPI manque à une personne (voir §4 bis) | Boîte de la personne |
 | `chute` | `chute` | Personne au sol détectée | Boîte de la personne |
 | `feu` | `fire` | Départ de feu détecté | Boîte de la zone |
 | `feu` | `smoke` | Fumée détectée | Boîte de la zone |
@@ -124,6 +124,50 @@ Objet JSON, encodé en UTF-8.
 permettent de distinguer « aucune alerte parce que le site est calme » de
 « aucune alerte parce que le moteur ne voit plus rien ». Sans les traiter, une
 caméra tombée ressemble à un site parfaitement sûr.
+
+## 4 bis. Les six EPI, et ce qu'on peut en attendre
+
+Un évènement `violation_epi` porte dans son `extra` **de quoi être traité par
+programme**, sans jamais analyser le `libelle` :
+
+```json
+"extra": {
+  "epi": "casque",
+  "motif": "absence_detectee",
+  "obligatoire": true,
+  "track_id": 7,
+  "suivi": true
+}
+```
+
+| Champ | Valeurs | Signification |
+|---|---|---|
+| `epi` | `casque`, `masque`, `lunettes`, `gilet`, `gants`, `chaussures` | L'équipement concerné. **Clé stable**, indépendante de la langue et du modèle qui l'a détecté. |
+| `motif` | `absence_detectee` | Un modèle a **positivement reconnu** l'absence (classe négative). C'est le signal fort. |
+| | `jamais_confirme` | L'équipement n'a **pas été vu** assez souvent sur la fenêtre de lissage. Plus faible : il peut être hors champ ou masqué. |
+| `obligatoire` | booléen | L'absence de cet EPI constitue-t-elle une violation au référentiel configuré. |
+
+**Distinguer les deux `motif` est important côté plateforme.** `absence_detectee`
+signifie qu'un modèle a vu une tête nue ou des mains nues ; `jamais_confirme`
+signifie seulement qu'on n'a rien vu — ce qui arrive aussi quand une personne
+est de dos ou partiellement masquée. Les traiter à l'identique produirait des
+alertes sur des personnes simplement mal cadrées.
+
+### Fiabilité par équipement
+
+Ces chiffres sont mesurés, datés et régénérés (`models_calsse.txt`,
+`reports/v3_results/`). Ils indiquent à quel point chaque signal mérite
+confiance.
+
+| EPI | Fiabilité | À savoir |
+|---|---|---|
+| `casque` | **excellente** | 99,2 % des ports et 98,3 % des absences détectés. |
+| `gants`, `lunettes` | **excellente** | AP 0,93 à 0,97 sur les quatre classes. |
+| `masque`, `gilet` | **bonne** | AP 0,97 / 0,96 pour le masque ; 0,93 / 0,77 pour le gilet, l'absence de gilet restant la plus difficile. |
+| `chaussures` | ⚠️ **limitée** | Couvert depuis le 2026-08-19 seulement. Confond encore chaussure de ville et chaussure de sécurité, et manque environ 4 absences sur 10. **À ne pas présenter comme une fonction de conformité** tant qu'il n'a pas été validé sur des vidéos du site exploité. |
+
+`chaussures` n'est **pas obligatoire** par défaut (`obligatoire: false`) : il
+remonte donc à titre indicatif, sauf configuration contraire.
 
 ## 5. Anti-répétition
 

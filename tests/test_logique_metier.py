@@ -75,6 +75,38 @@ def test_fusion_conserve_les_chaussures_apport_unique_de_m2():
     assert {d.epi for d in fusion} == {"casque", "chaussures"}
 
 
+def test_chaque_concept_est_servi_par_un_modele_charge_par_defaut():
+    """Les six concepts doivent avoir un servant dans la cascade par défaut.
+
+    Sans ce test, retirer un modèle de `construire_analyseurs` laisserait un
+    concept muet : le moteur démarrerait sans erreur et n'émettrait simplement
+    plus jamais d'évènement pour lui. C'est exactement ce qui rend
+    `--sans-chaussures` dangereux, et ce que l'avertissement au démarrage
+    signale à l'exploitant.
+    """
+    par_defaut = {tax.M1_NOM, tax.M3_NOM, tax.M4_NOM, tax.M5_NOM, tax.M6_NOM}
+    for concept in tax.EPI_CANONIQUES:
+        servants = [m for m in tax.PRIORITE_MODELE[concept] if m in par_defaut]
+        assert servants, f"concept '{concept}' sans aucun modele charge par defaut"
+
+
+def test_chaque_concept_sait_signaler_une_absence():
+    """Le modèle prioritaire de chaque concept doit avoir une classe négative.
+
+    Un modèle sans classe `NO-*` ne peut que confirmer un port : il est
+    incapable de signaler une infraction, ce qui est la raison d'être du
+    moteur. `ppe_complement.pt` était dans ce cas — d'où son retrait de la
+    cascade le 2026-08-19.
+    """
+    par_defaut = {tax.M1_NOM, tax.M3_NOM, tax.M4_NOM, tax.M5_NOM, tax.M6_NOM}
+    for concept in tax.EPI_CANONIQUES:
+        servant = next(m for m in tax.PRIORITE_MODELE[concept] if m in par_defaut)
+        negatives = [c for c in tax.TABLES[servant].values()
+                     if c.epi == concept and c.porte is False]
+        assert negatives, (f"'{concept}' est servi par {servant}, qui ne sait pas "
+                           "dire l'absence")
+
+
 def test_fusion_garde_deux_objets_distincts_du_meme_concept():
     """Deux casques éloignés sont deux casques, pas un doublon."""
     a = tax.traduire("ppe_detector.pt", "Hardhat", 0.5, (0, 0, 20, 20))

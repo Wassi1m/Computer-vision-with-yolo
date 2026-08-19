@@ -744,6 +744,24 @@ class AnalyseurEPI(Analyseur):
         if erreurs:
             raise RuntimeError("Taxonomie incohérente avec les modèles chargés :\n  " +
                                "\n  ".join(erreurs))
+
+        # Ce que la cascade sait encore faire, concept par concept. Retirer un
+        # modèle par drapeau ne provoque aucune erreur : le moteur démarre et
+        # se tait, simplement plus aveugle qu'avant. `--sans-chaussures` fait
+        # ainsi disparaître un concept ENTIER, aucun autre modèle chargé par
+        # défaut ne le couvrant. Un exploitant doit l'apprendre au démarrage,
+        # pas en constatant l'absence d'alertes des semaines plus tard.
+        self.couverture = {}
+        for concept in tax.EPI_CANONIQUES:
+            servants = [m for m in tax.PRIORITE_MODELE.get(concept, ())
+                        if m in modeles_charges]
+            self.couverture[concept] = servants[0] if servants else None
+            if not servants:
+                print(f"  /!\\ concept '{concept}' NON COUVERT : aucun modèle chargé "
+                      f"ne le détecte, il ne produira jamais d'évènement.")
+            elif servants[0] != tax.PRIORITE_MODELE[concept][0]:
+                print(f"  /!\\ concept '{concept}' servi par {servants[0]} au lieu de "
+                      f"{tax.PRIORITE_MODELE[concept][0]} : modèle de repli, moins fiable.")
         self.hist_n, self.hist_k = hist_n, hist_k
         # Historique indexé par identifiant de suivi (track_id), jamais par
         # position dans la liste des détections : cette liste est reconstruite à
@@ -846,29 +864,42 @@ class AnalyseurEPI(Analyseur):
         evs = []
         self.violations = {}
         for rang, (cle, pid, box) in enumerate(cles, start=1):
-            v = []
+            # (concept, motif) et non plus le seul libellé français : celui-ci
+            # est destiné à l'affichage, et le contrat d'API interdit de
+            # l'analyser par programme. Sans le concept en clair, la plateforme
+            # consommatrice n'avait pourtant aucun autre moyen de savoir QUEL
+            # équipement manquait -- corrigé le 2026-08-19.
+            manquants: list[tuple[str, str]] = []
             for epi in tax.EPI_CANONIQUES:
                 h = self._histo(cle, epi)
                 h.append(epi in porte[cle])
                 del h[0]
                 stable = sum(h) >= self.hist_k
                 if tax.EPI_OBLIGATOIRES[epi] and not stable:
-                    v.append(tax.LIBELLES_FR[epi][1])
+                    # L'équipement n'a pas été VU assez souvent. Ce n'est pas la
+                    # même chose que d'avoir constaté son absence : il peut être
+                    # hors champ ou masqué.
+                    manquants.append((epi, "jamais_confirme"))
+            deja = {epi for epi, _ in manquants}
             for epi in absent[cle]:
-                lib = tax.LIBELLES_FR[epi][1]
-                if lib not in v:
-                    v.append(lib)
-            if v:
-                self.violations[cle] = v
+                if epi not in deja:
+                    # Une classe négative a été détectée : l'absence est
+                    # positivement constatée, pas seulement supposée.
+                    manquants.append((epi, "absence_detectee"))
+            if manquants:
+                self.violations[cle] = [tax.LIBELLES_FR[e][1] for e, _ in manquants]
                 # Le libellé porte l'identifiant de suivi quand il existe : c'est
                 # lui qui permet à la plateforme de recoller les évènements
                 # successifs à une même personne. Sans suivi, on retombe sur un
                 # numéro d'ordre, valable pour la seule image courante.
                 qui = f"Personne #{pid}" if pid >= 0 else f"Personne {rang}"
-                for lib in v:
-                    evs.append(Evenement(ctx["t"], ctx["frame"], self.nom, "violation_epi",
-                                         f"{qui} — {lib}", box=box,
-                                         extra={"track_id": pid, "suivi": pid >= 0}))
+                for epi, motif in manquants:
+                    evs.append(Evenement(
+                        ctx["t"], ctx["frame"], self.nom, "violation_epi",
+                        f"{qui} — {tax.LIBELLES_FR[epi][1]}", box=box,
+                        extra={"track_id": pid, "suivi": pid >= 0,
+                               "epi": epi, "motif": motif,
+                               "obligatoire": tax.EPI_OBLIGATOIRES[epi]}))
         return evs
 
     def draw(self, frame):
@@ -1415,9 +1446,17 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
             chemin = ROOT / "ppe_detection/models" / nom
             return None if refuse or not chemin.exists() else str(chemin)
 
+        # `ppe_complement.pt` (M2) n'est PLUS charge par defaut depuis le
+        # 2026-08-19. Ses six classes sont desormais toutes devancees dans la
+        # cascade -- casque par M4, gants et lunettes par M5, masque et gilet
+        # par M3, chaussures par M6 -- et il n'a aucune classe negative, donc il
+        # ne peut jamais signaler une infraction. Son seul apport unique etait
+        # `safety_shoe`, que M6 couvre en sachant en plus dire l'absence.
+        # Le garder coutait une passe d'inference par image pour rien. Le plan
+        # v8 §7 prevoyait ce retrait des l'acceptation de M6.
         return AnalyseurEPI(
             str(existant(ROOT / "ppe_detection/models/ppe_detector.pt")),
-            None if args.sans_gants else str(existant(ROOT / "ppe_detection/models/ppe_complement.pt")),
+            dedie("ppe_complement.pt", not args.avec_complement),
             dedie("masque_gilet.pt", args.sans_masque_gilet),
             dedie("epi_casque.pt", args.sans_casque),
             dedie("epi_gants_lunettes.pt", args.sans_gants_lunettes),
@@ -1504,8 +1543,18 @@ def main():
     ap.add_argument("--lpr-retention", choices=AnalyseurPlaque.MODES,
                     default=_env("lpr_retention", "pseudonymise"),
                     help="ce que le moteur transmet des plaques lues (defaut : pseudonymise)")
+    # `--sans-gants` etait un nom herite et trompeur : il ne retirait pas les
+    # gants mais `ppe_complement.pt` en entier. Conserve en alias sans effet
+    # pour ne pas casser les scripts existants, puisque ce modele n'est de
+    # toute facon plus charge par defaut.
     ap.add_argument("--sans-gants", action="store_true",
-                    help="retire ppe_complement.pt de la cascade EPI (seul apport : chaussures)")
+                    help="(obsolete, sans effet) ppe_complement.pt n'est plus charge par "
+                         "defaut depuis le 2026-08-19 ; utiliser --sans-gants-lunettes pour "
+                         "retirer le modele qui sert reellement les gants")
+    ap.add_argument("--avec-complement", action="store_true",
+                    help="recharge ppe_complement.pt (M2) dans la cascade. Il est redondant "
+                         "sur ses six classes et n'a aucune classe negative : a n'utiliser "
+                         "que pour comparer avec l'ancien comportement")
     ap.add_argument("--sans-masque-gilet", action="store_true",
                     help="retire masque_gilet.pt de la cascade EPI (revient a ppe_detector.pt "
                          "seul pour ces deux concepts, moins fiable -- voir ppe_taxonomy.py)")
@@ -1517,8 +1566,8 @@ def main():
                          "ppe_detector.pt seul pour gants et lunettes)")
     ap.add_argument("--sans-chaussures", action="store_true",
                     help="retire epi_chaussures.pt de la cascade EPI ; le concept "
-                         "'chaussures' n'est alors plus couvert que par ppe_complement.pt, "
-                         "qui ne sait pas signaler une absence")
+                         "'chaussures' n'est alors PLUS COUVERT DU TOUT, aucun autre modele "
+                         "charge par defaut ne le detecte")
     ap.add_argument("--disable", default="", help="analyseurs a desactiver, separes par des virgules")
     # Headless par defaut : c'est le mode de production. L'affichage reste
     # disponible a la demande pour les tests, les demonstrations client et le

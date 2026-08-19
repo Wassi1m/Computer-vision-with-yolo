@@ -42,6 +42,58 @@ from typing import Iterable
 # Clé interne stable, indépendante du nom de classe de n'importe quel modèle.
 EPI_CANONIQUES = ("casque", "masque", "lunettes", "gilet", "gants", "chaussures")
 
+# ── Vérité terrain de `ppe_dataset` ─────────────────────────────────────────
+# Ce que chaque NOM de classe du jeu annoté signifie dans le référentiel. La
+# table est indexée par nom, jamais par numéro : les numéros dépendent de
+# l'ordre du `data.yaml`, qui est ALPHABÉTIQUE et n'a aucune raison d'être
+# stable d'une version du jeu à l'autre.
+#
+# Pourquoi cette table est ici plutôt que recopiée dans chaque script
+# -------------------------------------------------------------------
+# Elle l'était : `p11`, `p13`, `p14` et `p19` écrivaient chacun sa propre
+# correspondance en dur, sous forme de numéros. Le 2026-08-19, `p19` a été
+# écrit en extrapolant ces numéros au lieu de les lire -- `5` pris pour le
+# gilet alors que c'est `Mask`, `13` (`Safety Vest`) purement oublié. La mesure
+# a publié 0 % sur `gilet porté` pour un modèle qui tient 0.93 d'AP, sans que
+# rien ne signale l'erreur : des numéros faux produisent des chiffres
+# parfaitement plausibles.
+#
+# `indices_ppe_dataset()` résout ces noms contre le `data.yaml` réel, ce qui
+# rend l'erreur impossible : une classe renommée lève une exception au lieu de
+# décaler silencieusement une mesure.
+VERITE_PPE_DATASET: dict[str, tuple[str, bool]] = {
+    "Hardhat":        ("casque", True),
+    "NO-Hardhat":     ("casque", False),
+    "Mask":           ("masque", True),
+    "NO-Mask":        ("masque", False),
+    "Goggles":        ("lunettes", True),
+    "NO-Goggles":     ("lunettes", False),
+    "Safety Vest":    ("gilet", True),
+    "NO-Safety Vest": ("gilet", False),
+    "Gloves":         ("gants", True),
+    "NO-Gloves":      ("gants", False),
+    # `Fall-Detected`, `Ladder`, `Person` et `Safety Cone` ne décrivent aucun
+    # EPI : leur absence de cette table est voulue, pas un oubli.
+}
+
+
+def indices_ppe_dataset(noms: list[str] | dict[int, str]) -> dict[int, tuple[str, bool]]:
+    """{indice: (concept, porté)} résolu contre les noms réellement présents.
+
+    `noms` est la liste `names:` du `data.yaml` du jeu, ou le `.names` d'un
+    modèle entraîné dessus. Lever plutôt que deviner : si une classe EPI
+    attendue manque, la mesure qui suivrait serait fausse sans le montrer.
+    """
+    table = dict(enumerate(noms)) if isinstance(noms, list) else dict(noms)
+    resolu = {i: VERITE_PPE_DATASET[n] for i, n in table.items()
+              if n in VERITE_PPE_DATASET}
+    manquantes = set(VERITE_PPE_DATASET) - set(table.values())
+    if manquantes:
+        raise KeyError(
+            "classes EPI absentes du jeu : " + ", ".join(sorted(manquantes)) +
+            " -- la taxonomie du jeu a change, la mesure serait faussee")
+    return resolu
+
 LIBELLES_FR = {
     "casque":     ("Casque porte",        "SANS CASQUE !"),
     "masque":     ("Masque porte",        "SANS MASQUE !"),

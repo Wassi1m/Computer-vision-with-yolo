@@ -1,0 +1,48 @@
+{
+  "date": "2026-08-19",
+  "mesure": "250 images de ppe_dataset/test (graine 0), imgsz=480, sortie FUSIONNEE de la cascade",
+  "modeles": [
+    "ppe_detector.pt",
+    "masque_gilet.pt",
+    "epi_casque.pt",
+    "epi_gants_lunettes.pt",
+    "epi_chaussures.pt"
+  ],
+  "cascade": {
+    "casque_porte": 1.0,
+    "casque_absent": 1.0,
+    "masque_porte": 1.0,
+    "masque_absent": 0.8889,
+    "lunettes_porte": 1.0,
+    "lunettes_absent": 1.0,
+    "gilet_porte": 1.0,
+    "gilet_absent": 0.8889,
+    "gants_porte": 1.0,
+    "gants_absent": 1.0
+  },
+  "ppe_detector_seul": {
+    "casque_porte": 0.8039,
+    "casque_absent": 0.7143,
+    "masque_porte": 1.0,
+    "masque_absent": 0.7778,
+    "lunettes_porte": 1.0,
+    "lunettes_absent": 1.0,
+    "gilet_porte": 0.9231,
+    "gilet_absent": 0.8889,
+    "gants_porte": 1.0,
+    "gants_absent": 1.0
+  },
+  "ecart": {
+    "casque_porte": 0.1961,
+    "casque_absent": 0.2857,
+    "masque_porte": 0.0,
+    "masque_absent": 0.1111,
+    "lunettes_porte": 0.0,
+    "lunettes_absent": 0.0,
+    "gilet_porte": 0.0769,
+    "gilet_absent": 0.0,
+    "gants_porte": 0.0,
+    "gants_absent": 0.0
+  },
+  "regressions": {}
+}

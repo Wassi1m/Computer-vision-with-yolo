@@ -61,26 +61,50 @@
       }
     },
     "mAP50": 0.7689,
-    "note": "ap50_jeu_propre : mesure sur ppe_vest_clean_14c/val, seul jeu ou le gilet est annote correctement. Les 35 points d'ecart viennent des annotations, pas du modele."
+    "note": "ap50_jeu_propre : mesure sur ppe_vest_clean_14c/val, seul jeu ou le gilet est annote correctement. Les 35 points d'ecart viennent des annotations, pas du modele. Depuis le 2026-08-17, Mask/NO-Mask/Safety Vest/NO-Safety Vest sont servies en priorite par masque_gilet.pt dans la cascade (improvements/ppe_taxonomy.py) -- les chiffres ci-dessus restent ceux de ce modele seul, filet de secours si masque_gilet.pt est absent."
+  },
+  "masque_gilet.pt": {
+    "jeu_ap50": "ppe_dataset/test filtre+remappe (655 images), jamais entraine dessus",
+    "date": "2026-08-17",
+    "classes": {
+      "Mask": {
+        "ap50": 0.9715
+      },
+      "NO-Mask": {
+        "ap50": 0.9642
+      },
+      "Safety Vest": {
+        "ap50": 0.9321
+      },
+      "NO-Safety Vest": {
+        "ap50": 0.7712
+      }
+    },
+    "mAP50": 0.9098,
+    "note": "Modele dedie, prioritaire sur ppe_detector.pt pour ces 4 classes dans la cascade (improvements/ppe_taxonomy.py, improvements/unified_surveillance.py). Entraine uniquement sur les images de ppe_dataset qui annotent reellement masque ou gilet (improvements/p11_jeu_masque_gilet.py) -- diagnostic et detail complet dans reports/v3_results/masque_gilet_candidat.json."
   },
   "ppe_complement.pt": {
-    "jeu_scene": "ppe_dataset/test, 15 images par classe, seuil 0.25",
-    "date": "2026-08-13",
+    "jeu_scene": "ppe_dataset/test, 15 images par classe, seuil 0.25 (tests/mesure_scene_ppe_complement.py)",
+    "date": "2026-08-16",
     "classes": {
       "helmet": {
-        "scene": 0.4
+        "scene": 0.47
       },
       "Gloves": {
-        "scene": 0.33
+        "scene": 0.13
       },
       "mask": {
+        "scene": 0.67
+      },
+      "Vest": {
         "scene": 0.8
       },
-      "Vest": {},
-      "goggles": {},
+      "goggles": {
+        "scene": 0.0
+      },
       "safety_shoe": {}
     },
-    "note": "Indicatif : ce jeu n'est pas celui d'entrainement de ce modele. Aucune mesure de reference n'existe pour lui."
+    "note": "Indicatif : ce jeu n'est pas celui d'entrainement de ce modele. Mesure unifiee dans un seul script (tests/mesure_scene_ppe_complement.py) le 2026-08-16 -- remplace deux mesures precedentes prises separement (13 aout puis 16 aout), dont les tirages aleatoires n'etaient pas comparables entre eux car obtenus par des appels rng.sample() dans un ordre de classes different. safety_shoe reste non mesurable : aucune image de ppe_dataset n'annote de chaussure (cf. improvements/p2_table_correspondance_epi.py). goggles a 0 % sur cet echantillon alors que le modele detecte bien la classe ailleurs (jusqu'a 0.66 de confiance sur 150 images aleatoires) : ecart de domaine avec les images 'Goggles' de ppe_dataset, pas un modele casse. Cette mesure sert de reference AVANT tout fine-tuning (reports/v3_results/ppe_complement_avant.json)."
   },
   "fire_smoke.pt": {
     "jeu_ap50": "fire_smoke_enriched/test",
@@ -131,5 +155,45 @@
       "Semi": {}
     },
     "note": "AUCUNE mesure de reference. Non couvert par test_non_regression.py. Sa fiabilite est inconnue et il ne doit pas etre presente comme valide."
+  },
+  "epi_casque.pt": {
+    "jeu_ap50": "ppe_dataset/test filtre+remappe (2039 scenes annotees), jamais inclus dans un jeu d'entrainement, conf=0.25",
+    "date": "2026-08-19",
+    "classes": {
+      "Hardhat": {
+        "ap50": 0.9273,
+        "scene": 0.992
+      },
+      "NO-Hardhat": {
+        "ap50": 0.9628,
+        "scene": 0.9831
+      }
+    },
+    "mAP50": 0.945,
+    "note": "Modele dedie, prioritaire sur ppe_detector.pt pour le casque dans la cascade (improvements/ppe_taxonomy.py, M4). Campagne v8 : entraine sur Hard Hat Universe + Construction PPE + 6000 images de ppe_dataset, avec 25 % d'images de fond (improvements/p13_jeux_roboflow.py). Fait passer les deux classes les plus faibles du parc de 65 % / 72 % a 99.2 % / 98.3 % de detection de scene -- detail dans reports/v3_results/casque_candidat.json."
+  },
+  "epi_gants_lunettes.pt": {
+    "jeu_ap50": "ppe_dataset/test filtre+remappe (1179 scenes annotees), jamais inclus dans un jeu d'entrainement, conf=0.25",
+    "date": "2026-08-19",
+    "classes": {
+      "Gloves": {
+        "ap50": 0.9546,
+        "scene": 0.9899
+      },
+      "NO-Gloves": {
+        "ap50": 0.9308,
+        "scene": 0.9778
+      },
+      "Goggles": {
+        "ap50": 0.9658,
+        "scene": 0.9919
+      },
+      "NO-Goggles": {
+        "ap50": 0.965,
+        "scene": 0.9528
+      }
+    },
+    "mAP50": 0.954,
+    "note": "Modele dedie, prioritaire sur ppe_detector.pt pour gants et lunettes dans la cascade (improvements/ppe_taxonomy.py, M5). Il bat ppe_detector.pt sur les QUATRE classes. Un premier candidat du 2026-08-17 avait ete REJETE (il perdait sur trois classes sur quatre) faute de contenir des images de ppe_dataset : il avait appris un seul domaine puis avait ete juge dans un autre. Detail dans reports/v3_results/gants_candidat.json ; le candidat rejete est conserve dans gants_candidat_20260817.json."
   }
 }

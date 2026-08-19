@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-19",
+  "candidat": "casque",
+  "poids": "/tmp/claude-1000/-home-user-Bureau-model-ia-ppe/bd53fb1a-2738-419a-8165-bf2179b105b9/scratchpad/poids/epi_casque_w1.pt",
+  "mesure": "ppe_dataset/test filtre+remappe (2039 scenes annotees), jamais inclus dans un jeu d'entrainement, conf=0.25",
+  "detection_scene": {
+    "Hardhat": 0.992,
+    "NO-Hardhat": 0.9831
+  },
+  "ap50": {
+    "Hardhat": 0.9273,
+    "NO-Hardhat": 0.9628
+  },
+  "mAP50_global": 0.945,
+  "effectifs": {
+    "Hardhat": 1626,
+    "NO-Hardhat": 413
+  },
+  "verdict": [
+    "Hardhat : VALIDE (99.2 % >= 75 %)",
+    "NO-Hardhat : VALIDE (98.3 % >= 80 %)"
+  ]
+}

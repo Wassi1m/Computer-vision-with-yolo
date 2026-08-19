@@ -38,6 +38,20 @@ MODELES = [
     ("ppe_detection/models/ppe_detector.pt", "EPI — modèle principal",
      "C'est lui qui juge la conformité EPI. Les six classes `NO-` signalent une "
      "INFRACTION : ce sont les plus critiques, et les plus faibles du parc."),
+    ("ppe_detection/models/masque_gilet.pt", "EPI — masque et gilet dédiés",
+     "Troisième modèle de la cascade, prioritaire sur `ppe_detector.pt` pour "
+     "CES 4 CLASSES UNIQUEMENT (`improvements/ppe_taxonomy.py`). "
+     "`ppe_detector.pt` reste le filet de secours si ce modèle est absent."),
+    ("ppe_detection/models/epi_casque.pt", "EPI — casque dédié",
+     "Prioritaire sur `ppe_detector.pt` pour CES 2 CLASSES UNIQUEMENT "
+     "(`improvements/ppe_taxonomy.py`, M4). Il corrige le plus gros déficit "
+     "mesuré du parc : `ppe_detector.pt` seul ne voyait le casque que dans 65 % "
+     "des scènes annotées, et son absence dans 72 %."),
+    ("ppe_detection/models/epi_gants_lunettes.pt", "EPI — gants et lunettes dédiés",
+     "Prioritaire sur `ppe_detector.pt` pour CES 4 CLASSES UNIQUEMENT "
+     "(`improvements/ppe_taxonomy.py`, M5). Retenu parce qu'il bat "
+     "`ppe_detector.pt` sur les quatre, qui y était déjà bon : un candidat "
+     "antérieur perdant sur trois classes avait été rejeté."),
     ("ppe_detection/models/ppe_complement.pt", "EPI — modèle complémentaire",
      "Second modèle de la cascade. Il n'a AUCUNE classe négative : il ne peut "
      "donc jamais signaler une non-conformité, seulement confirmer un "

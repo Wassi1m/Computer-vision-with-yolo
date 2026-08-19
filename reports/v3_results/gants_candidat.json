@@ -1,0 +1,47 @@
+{
+  "date": "2026-08-19",
+  "candidat": "gants",
+  "poids": "/tmp/claude-1000/-home-user-Bureau-model-ia-ppe/bd53fb1a-2738-419a-8165-bf2179b105b9/scratchpad/poids/epi_gants_w1.pt",
+  "mesure": "ppe_dataset/test filtre+remappe (1179 scenes annotees), jamais inclus dans un jeu d'entrainement, conf=0.25",
+  "detection_scene": {
+    "Gloves": 0.9899,
+    "NO-Gloves": 0.9778,
+    "Goggles": 0.9919,
+    "NO-Goggles": 0.9528
+  },
+  "ap50": {
+    "Gloves": 0.9546,
+    "NO-Gloves": 0.9308,
+    "Goggles": 0.9658,
+    "NO-Goggles": 0.965
+  },
+  "mAP50_global": 0.954,
+  "effectifs": {
+    "Gloves": 198,
+    "NO-Gloves": 270,
+    "Goggles": 372,
+    "NO-Goggles": 339
+  },
+  "comparaison_ppe_detector": {
+    "Gloves": {
+      "candidat": 0.9546,
+      "ppe_detector": 0.932,
+      "gagne": true
+    },
+    "NO-Gloves": {
+      "candidat": 0.9308,
+      "ppe_detector": 0.909,
+      "gagne": true
+    },
+    "Goggles": {
+      "candidat": 0.9658,
+      "ppe_detector": 0.96,
+      "gagne": true
+    },
+    "NO-Goggles": {
+      "candidat": 0.965,
+      "ppe_detector": 0.961,
+      "gagne": true
+    }
+  }
+}

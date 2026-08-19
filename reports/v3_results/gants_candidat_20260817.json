@@ -1,0 +1,47 @@
+{
+  "date": "2026-08-18",
+  "candidat": "gants",
+  "poids": "/tmp/claude-1000/-home-user-Bureau-model-ia-ppe/626a8962-68f3-4a0f-a327-250330a5485f/scratchpad/sorties/gants-lunettes/sorties/epi_gants_lunettes/weights/best.pt",
+  "mesure": "ppe_dataset/test filtre+remappe (1179 scenes annotees), jamais inclus dans un jeu d'entrainement, conf=0.25",
+  "detection_scene": {
+    "Gloves": 0.9798,
+    "NO-Gloves": 0.9815,
+    "Goggles": 0.9409,
+    "NO-Goggles": 0.9735
+  },
+  "ap50": {
+    "Gloves": 0.9334,
+    "NO-Gloves": 0.8888,
+    "Goggles": 0.9594,
+    "NO-Goggles": 0.9534
+  },
+  "mAP50_global": 0.9337,
+  "effectifs": {
+    "Gloves": 198,
+    "NO-Gloves": 270,
+    "Goggles": 372,
+    "NO-Goggles": 339
+  },
+  "comparaison_ppe_detector": {
+    "Gloves": {
+      "candidat": 0.9334,
+      "ppe_detector": 0.932,
+      "gagne": true
+    },
+    "NO-Gloves": {
+      "candidat": 0.8888,
+      "ppe_detector": 0.909,
+      "gagne": false
+    },
+    "Goggles": {
+      "candidat": 0.9594,
+      "ppe_detector": 0.96,
+      "gagne": false
+    },
+    "NO-Goggles": {
+      "candidat": 0.9534,
+      "ppe_detector": 0.961,
+      "gagne": false
+    }
+  }
+}

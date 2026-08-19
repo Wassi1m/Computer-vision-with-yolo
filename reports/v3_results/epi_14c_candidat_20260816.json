@@ -1,0 +1,40 @@
+{
+  "date": "2026-08-17",
+  "verdict": "REJETE",
+  "candidat": {
+    "kernel_kaggle": "wassimmay/entrainement-epi-14c",
+    "date_run": "2026-08-16",
+    "poids": "sorties/epi_14c/weights/best.pt",
+    "modele_depart": "ppe_detection/models/ppe_detector.pt",
+    "jeu_entrainement": "epi_renforce (sur-echantillonnage NO-Mask, NO-Safety Vest)",
+    "objectif": "ameliorer NO-Mask et NO-Safety Vest, les deux dernieres classes faibles et rares (plan v7)",
+    "hyperparametres": {"epochs_demandes": 60, "patience": 20, "optimizer": "SGD", "lr0": 0.001, "batch": 16, "imgsz": 640},
+    "resultat_brut_kaggle": {
+      "epoques_effectuees": 25,
+      "arret": "EarlyStopping, 20 epoques sans progres",
+      "meilleure_epoque": 5,
+      "fitness_epoque_1": 0.6105,
+      "fitness_meilleure": "quasi identique a l'epoque 1, jamais depassee ensuite",
+      "note": "meme signature que le candidat feu/fumee rejete le 2026-08-12 : pic a l'epoque 1, pas de gain reel ensuite"
+    }
+  },
+  "mesure": "YOLO.val, ppe_dataset/test (4423 images), imgsz 640, device cpu, batch 4 -- protocole identique a la reference en production",
+  "comparaison": {
+    "mAP50_global":    {"production": 0.7689, "candidat": 0.7606, "delta": -0.0083},
+    "Fall-Detected":   {"production": 0.8393, "candidat": 0.8198, "delta": -0.0195},
+    "Gloves":          {"production": 0.9322, "candidat": 0.9319, "delta": -0.0003},
+    "Goggles":         {"production": 0.9603, "candidat": 0.9598, "delta": -0.0005},
+    "Hardhat":         {"production": 0.8339, "candidat": 0.8084, "delta": -0.0255},
+    "Ladder":          {"production": 0.9614, "candidat": 0.9662, "delta": 0.0048},
+    "Mask":            {"production": 0.5513, "candidat": 0.5496, "delta": -0.0017},
+    "NO-Gloves":       {"production": 0.9090, "candidat": 0.9069, "delta": -0.0021},
+    "NO-Goggles":      {"production": 0.9614, "candidat": 0.9619, "delta": 0.0005},
+    "NO-Hardhat":      {"production": 0.7521, "candidat": 0.7263, "delta": -0.0258},
+    "NO-Mask":         {"production": 0.6033, "candidat": 0.5635, "delta": -0.0398, "note": "classe ciblee par ce run -- regression"},
+    "NO-Safety Vest":  {"production": 0.1734, "candidat": 0.1789, "delta": 0.0055, "note": "classe ciblee par ce run -- gain negligeable"},
+    "Person":          {"production": 0.9561, "candidat": 0.9533, "delta": -0.0028},
+    "Safety Cone":     {"production": 0.7513, "candidat": 0.7501, "delta": -0.0012},
+    "Safety Vest":     {"production": 0.5802, "candidat": 0.5711, "delta": -0.0091}
+  },
+  "conclusion": "Rejete : les deux classes visees par le run (NO-Mask, NO-Safety Vest) ne progressent pas -- NO-Mask regresse meme de 4 points, bien au-dela de la tolerance de 0.02 utilisee ailleurs dans le projet. Hardhat et NO-Hardhat, deja les points faibles identifies dans le plan v7, reculent aussi (-2.5 points chacun). mAP50 global en retrait. Le modele en production (ppe_detection/models/ppe_detector.pt) n'est PAS remplace."
+}

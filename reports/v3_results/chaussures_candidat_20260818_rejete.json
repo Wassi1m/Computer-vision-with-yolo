@@ -1,0 +1,102 @@
+{
+  "date": "2026-08-18",
+  "candidat": "chaussures",
+  "poids": "/tmp/claude-1000/-home-user-Bureau-model-ia-ppe/626a8962-68f3-4a0f-a327-250330a5485f/scratchpad/sorties/chaussures/sorties/epi_chaussures/weights/best.pt",
+  "mesure": "taux de declenchement sur 300 images aleatoires de ppe_dataset/test (graine 0)",
+  "avertissement": "ppe_dataset n'annote AUCUNE chaussure mais en contient : un declenchement n'est pas forcement une erreur. Le taux ci-dessous ne conclut pas seul -- regarder l'echantillon.",
+  "taux_declenchement": {
+    "0.25": 0.51,
+    "0.4": 0.3533,
+    "0.5": 0.2633,
+    "0.7": 0.1633
+  },
+  "echantillon_a_inspecter": [
+    {
+      "rang": 1,
+      "confiance": 0.937,
+      "classe": "NO-safety_shoe",
+      "image": "01_NO-safety_shoe_0.94_frame1301_jpg.rf.538c132a559ffa2c63584a44c02e1274.jpg"
+    },
+    {
+      "rang": 2,
+      "confiance": 0.937,
+      "classe": "NO-safety_shoe",
+      "image": "02_NO-safety_shoe_0.94_006075_jpg.rf.b75834d5433b887cf92fcea1ab2e520e.jpg"
+    },
+    {
+      "rang": 3,
+      "confiance": 0.931,
+      "classe": "NO-safety_shoe",
+      "image": "03_NO-safety_shoe_0.93_-4164-_png_jpg.rf.48c89de4fbca965b34db75b389e23db9.jpg"
+    },
+    {
+      "rang": 4,
+      "confiance": 0.914,
+      "classe": "safety_shoe",
+      "image": "04_safety_shoe_0.91_ppe_0624_jpg.rf.ae91747a4050ccb4deabccb5d3acb5f3.jpg"
+    },
+    {
+      "rang": 5,
+      "confiance": 0.898,
+      "classe": "safety_shoe",
+      "image": "05_safety_shoe_0.90_000098_jpg.rf.0f556ddd58b879e2c3d77c622db003ab.jpg"
+    },
+    {
+      "rang": 6,
+      "confiance": 0.895,
+      "classe": "NO-safety_shoe",
+      "image": "06_NO-safety_shoe_0.89_frame2304_jpg.rf.e64f01ea85b90e4ed89d80fd220bf8f0.jpg"
+    },
+    {
+      "rang": 7,
+      "confiance": 0.894,
+      "classe": "safety_shoe",
+      "image": "07_safety_shoe_0.89_-3943-_png_jpg.rf.26677891ea262225d0f6fb92139dd956.jpg"
+    },
+    {
+      "rang": 8,
+      "confiance": 0.889,
+      "classe": "safety_shoe",
+      "image": "08_safety_shoe_0.89_-2391-_png_jpg.rf.160d313d98fe8a21ef010c2109221de3.jpg"
+    },
+    {
+      "rang": 9,
+      "confiance": 0.888,
+      "classe": "safety_shoe",
+      "image": "09_safety_shoe_0.89_people-1800-_jpg.rf.d142154f4b75103d50122f1028743570.jpg"
+    },
+    {
+      "rang": 10,
+      "confiance": 0.884,
+      "classe": "NO-safety_shoe",
+      "image": "10_NO-safety_shoe_0.88_autox6_mp4-270_jpg.rf.188ad4951e2b0b5b5e28acca83a9cd44.jpg"
+    },
+    {
+      "rang": 11,
+      "confiance": 0.879,
+      "classe": "NO-safety_shoe",
+      "image": "11_NO-safety_shoe_0.88_-4730-_png_jpg.rf.ad7cecfc0ef1e3d7402dd900acbf6903.jpg"
+    },
+    {
+      "rang": 12,
+      "confiance": 0.874,
+      "classe": "safety_shoe",
+      "image": "12_safety_shoe_0.87_people-6189-_jpg.rf.9551fbbae1e5122c96101e70c96d5da2.jpg"
+    }
+  ],
+  "dossier_echantillon": "reports/v3_results/chaussures_echantillon",
+  "verdict": "REJETE -- hallucinations massives a haute confiance",
+  "inspection_visuelle": {
+    "date": "2026-08-18",
+    "methode": "lecture directe des 12 images annotees les plus confiantes",
+    "constats": [
+      "01 (NO-safety_shoe 0.94) : boite sur le VISAGE/les lunettes d un operateur, aucune chaussure",
+      "02 (NO-safety_shoe 0.94) : boite sur un talus de NEIGE et de terre, ni personne ni chaussure",
+      "04 (safety_shoe 0.91) : chaussures de ville en cuir marron etiquetees chaussures de securite ; les vraies chaussures du travailleur en tenue orange ne sont PAS detectees",
+      "09 (safety_shoe 0.89) : boite couvrant le TORSE entier d une personne accroupie"
+    ],
+    "conclusion": "Le modele place des boites a 0.89-0.94 de confiance sur des visages, de la neige, du sol et des corps entiers. Ce n est pas un defaut de precision de rectangle, c est une absence de notion du concept."
+  },
+  "pourquoi_la_mAP_ne_l_a_pas_vu": "mAP@50 de 0.9343 sur son propre split val, qui provient du meme lot de 938 images redecoupe 80/20. Les sources Roboflow etant augmentees, des variantes d une meme photo se trouvent des deux cotes : le modele reconnaissait des images quasi identiques a celles vues a l entrainement. C est exactement le risque que le plan v8 anticipait en fixant le critere sur les FAUX POSITIFS et non sur l AP.",
+  "suite": "safety_shoe reste le trou du parc. 750 images d entrainement ne suffisent pas ; c est une donnee a acquerir (corpus video du site), pas a entrainer."
+}

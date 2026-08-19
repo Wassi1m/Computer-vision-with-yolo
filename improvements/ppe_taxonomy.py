@@ -116,7 +116,64 @@ M2 = {
     "safety_shoe": Correspondance("chaussures", True, 0.10),
 }
 
-TABLES = {M1_NOM: M1, M2_NOM: M2}
+# ── M3 : masque_gilet.pt — YOLOv8m, 4 classes dédiées ───────────────────────
+# Entraîné le 2026-08-17 uniquement sur les images de `ppe_dataset` qui
+# annotent réellement masque ou gilet (improvements/p11_jeu_masque_gilet.py).
+# M1 souffre sur ces deux concepts d'un défaut d'ANNOTATION, pas de capacité :
+# mesuré sur le sous-ensemble cohérent (p1_eval_par_concept.py), il atteint
+# déjà 0.96/0.92/0.89/0.67 d'AP50 -- contre 0.55/0.60/0.58/0.17 publiés sur le
+# jeu complet, pollué par les ~29 000 images qui n'annotent ni l'un ni l'autre.
+# M3 va plus loin : entraîné sur les 6 059 images cohérentes disponibles (train
+# + val, le split test restant local pour le jugement), il atteint sur ce test
+# jamais vu 0.97/0.96/0.93/0.77 d'AP50 -- voir
+# reports/v3_results/masque_gilet_candidat.json. Il prend donc le pas sur M1
+# pour `masque` et `gilet` uniquement ; M1 reste inchangé et sert de filet de
+# secours si M3 n'est pas chargé.
+M3_NOM = "masque_gilet.pt"
+M3 = {
+    "Mask":           Correspondance("masque", True,  0.25),
+    "NO-Mask":        Correspondance("masque", False, 0.15),
+    "Safety Vest":    Correspondance("gilet",   True,  0.25),
+    "NO-Safety Vest": Correspondance("gilet",   False, 0.15),
+}
+
+# ── M4 : epi_casque.pt — 2 classes dédiées ──────────────────────────────────
+# Entraîné le 2026-08-18 (campagne v8) sur Hard Hat Universe + Construction PPE
+# + 6 000 images de `ppe_dataset`, avec 25 % d'images de fond. Le casque était
+# le plus gros déficit mesuré du parc : M1 n'en détectait que 65 % (`Hardhat`)
+# et 72 % (`NO-Hardhat`) des scènes annotées. Le plan v7 avait établi que le
+# plafond venait d'un manque de DIVERSITE et non de volume -- 28 996 exemples
+# locaux issus des mêmes chantiers n'avaient pas suffi.
+# Mesuré sur `ppe_dataset/test` (jamais téléversé) : 99.2 % et 98.3 % de
+# détection de scène, AP50 0.927 / 0.963 -- voir
+# reports/v3_results/casque_candidat.json. Il prend donc le pas sur M1 pour le
+# casque uniquement ; M1 reste le filet de secours s'il n'est pas chargé.
+M4_NOM = "epi_casque.pt"
+M4 = {
+    "Hardhat":    Correspondance("casque", True,  0.25),
+    "NO-Hardhat": Correspondance("casque", False, 0.15),
+}
+
+# ── M5 : epi_gants_lunettes.pt — 4 classes dédiées ──────────────────────────
+# Entraîné le 2026-08-18 sur PPEs v8 + Safety Gloves v5 + 6 000 images de
+# `ppe_dataset`, avec 25 % d'images de fond.
+# Un premier candidat, entraîné le 2026-08-17 SANS les images de `ppe_dataset`,
+# avait été REJETE : il perdait sur trois des quatre classes face à M1. La cause
+# n'était pas sa capacité mais un écart de domaine -- il avait appris sur les
+# seules sources Roboflow puis avait été jugé sur le corpus local. Les 6 000
+# images ajoutées lui donnent les deux domaines, et le candidat du 18 bat
+# désormais M1 sur les QUATRE classes : 0.955/0.931/0.966/0.965 contre
+# 0.932/0.909/0.960/0.961 (reports/v3_results/gants_candidat.json). Sa détection
+# de scène, jamais mesurée auparavant sur ces classes, va de 95 % à 99 %.
+M5_NOM = "epi_gants_lunettes.pt"
+M5 = {
+    "Gloves":      Correspondance("gants",    True,  0.25),
+    "NO-Gloves":   Correspondance("gants",    False, 0.15),
+    "Goggles":     Correspondance("lunettes", True,  0.25),
+    "NO-Goggles":  Correspondance("lunettes", False, 0.15),
+}
+
+TABLES = {M1_NOM: M1, M2_NOM: M2, M3_NOM: M3, M4_NOM: M4, M5_NOM: M5}
 
 # Concepts que M2 apporte et que M1 ne couvre pas.
 APPORT_UNIQUE_M2 = sorted(
@@ -126,16 +183,39 @@ APPORT_UNIQUE_M2 = sorted(
 # Concepts pour lesquels M1 fait autorité (il les couvre et sait dire l'absence).
 PRIORITE_M1 = sorted({c.epi for c in M1.values() if c.epi})
 
+# Ordre de priorité PAR CONCEPT, utilisé par `fusionner()`. Chaque modèle dédié
+# n'est prioritaire que sur les concepts qu'il couvre ET sur lesquels il a été
+# mesuré meilleur que M1, sur un split que l'entraînement n'a jamais vu. Partout
+# ailleurs M1 reste la référence, exactement comme avant.
+# Les modèles dédiés étant tous optionnels au chargement, l'ordre décrit une
+# préférence, pas une dépendance : si l'un manque, la cascade retombe sur le
+# suivant.
+PRIORITE_MODELE = {
+    "casque":     (M4_NOM, M1_NOM, M2_NOM),
+    "masque":     (M3_NOM, M1_NOM, M2_NOM),
+    "lunettes":   (M5_NOM, M1_NOM, M2_NOM),
+    "gilet":      (M3_NOM, M1_NOM, M2_NOM),
+    "gants":      (M5_NOM, M1_NOM, M2_NOM),
+    "chaussures": (M2_NOM,),
+}
 
-def verifier_coherence(noms_m1: dict[int, str], noms_m2: dict[int, str]) -> list[str]:
+
+def verifier_coherence(modeles: dict[str, dict[int, str]]) -> list[str]:
     """Contrôle que les tables correspondent aux modèles réellement chargés.
+
+    `modeles` : {nom_modele: {indice: nom_classe}}, un item par modèle
+    effectivement chargé (M2 et M3 sont optionnels dans la cascade).
 
     À appeler au démarrage : si un modèle est ré-entraîné avec une taxonomie
     différente, on veut une erreur explicite au lancement plutôt qu'une fusion
     silencieusement fausse en production.
     """
     erreurs = []
-    for nom_modele, noms, table in ((M1_NOM, noms_m1, M1), (M2_NOM, noms_m2, M2)):
+    for nom_modele, noms in modeles.items():
+        table = TABLES.get(nom_modele)
+        if table is None:
+            erreurs.append(f"{nom_modele}: aucune table de correspondance definie")
+            continue
         presentes = set(noms.values())
         attendues = set(table)
         for c in sorted(presentes - attendues):
@@ -186,18 +266,24 @@ def fusionner(detections: Iterable[DetectionEPI], iou_seuil: float = 0.5) -> lis
     Règle de résolution, dans l'ordre :
       1. deux détections du même concept qui se recouvrent (IoU > seuil) sont le
          même objet physique ;
-      2. M1 l'emporte sur M2 pour tout concept que M1 couvre — lui seul distingue
-         le port de l'absence, et ses scores sont calibrés sur une plage utile ;
+      2. l'ordre de `PRIORITE_MODELE[concept]` tranche entre modèles — M1
+         l'emporte partout sauf là où un modèle dédié a été mesuré meilleur :
+         M3 sur `masque`/`gilet`, M4 sur `casque`, M5 sur `gants`/`lunettes`
+         (voir leurs commentaires respectifs dans ppe_taxonomy.py) ;
       3. à modèle égal, la confiance la plus élevée l'emporte.
 
     Les détections hors EPI (personne, chute, échelle, cône) traversent sans
-    fusion : elles n'ont pas d'équivalent dans M2.
+    fusion : aucun modèle dédié ne les couvre.
     """
     dets = [d for d in detections if d is not None]
     epi_dets = [d for d in dets if d.epi]
     autres = [d for d in dets if not d.epi]
 
-    epi_dets.sort(key=lambda d: (d.modele != M1_NOM, -d.conf))
+    def rang(d: DetectionEPI) -> int:
+        ordre = PRIORITE_MODELE.get(d.epi, (M1_NOM, M2_NOM))
+        return ordre.index(d.modele) if d.modele in ordre else len(ordre)
+
+    epi_dets.sort(key=lambda d: (rang(d), -d.conf))
 
     gardees: list[DetectionEPI] = []
     for d in epi_dets:
@@ -213,8 +299,14 @@ if __name__ == "__main__":
     print("Concepts canoniques :", ", ".join(EPI_CANONIQUES))
     print(f"\n{M1_NOM} : {len(M1)} classes -> concepts {sorted({c.epi for c in M1.values() if c.epi})}")
     print(f"{M2_NOM} : {len(M2)} classes -> concepts {sorted({c.epi for c in M2.values() if c.epi})}")
+    print(f"{M3_NOM} : {len(M3)} classes -> concepts {sorted({c.epi for c in M3.values() if c.epi})}")
+    print(f"{M4_NOM} : {len(M4)} classes -> concepts {sorted({c.epi for c in M4.values() if c.epi})}")
+    print(f"{M5_NOM} : {len(M5)} classes -> concepts {sorted({c.epi for c in M5.values() if c.epi})}")
     print(f"\nApport unique de {M2_NOM} : {APPORT_UNIQUE_M2 or 'aucun'}")
     print(f"Classes negatives dans {M2_NOM} : "
           f"{[c for c, v in M2.items() if v.porte is False] or 'aucune'}")
     print("\n=> Si les chaussures de securite ne sont pas au referentiel, "
           f"{M2_NOM} est entierement redondant et peut sortir de la cascade.")
+    print("\nPriorite par concept :")
+    for concept, ordre in PRIORITE_MODELE.items():
+        print(f"  {concept:<12} {' > '.join(ordre)}")

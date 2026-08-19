@@ -66,6 +66,39 @@ FPS. Si les chaussures de sécurité ne font pas partie du référentiel du clie
 il est purement redondant. La correspondance de classes entre les deux modèles
 est explicitée dans `improvements/ppe_taxonomy.py`.
 
+### `ppe_detection/models/masque_gilet.pt` — masque et gilet dédiés
+
+| | |
+|---|---|
+| **Rôle** | 4 classes : `Mask`, `NO-Mask`, `Safety Vest`, `NO-Safety Vest` — prioritaire sur `ppe_detector.pt` pour ces deux concepts uniquement |
+| **Architecture** | YOLOv8m, transfert depuis `ppe_detector.pt` (tête réinitialisée à 4 classes) |
+| **Version** | Entraînement du 2026-08-17 |
+| **Origine** | `improvements/p11_jeu_masque_gilet.py` — uniquement les images de `ppe_dataset` qui annotent réellement masque ou gilet |
+| **Données** | 4 698 images train + 1 361 val (0 image contradictoire) ; split test (655 images) resté local, jamais entraîné dessus |
+| **Entraînement** | Kaggle T4, 48 époques (arrêt anticipé, meilleure à l'époque 20), `optimizer=SGD`, `lr0=0.001`, 1h17 |
+| **Métriques** (split test local, jamais vu) | `Mask` 97.2% · `NO-Mask` 96.4% · `Safety Vest` 93.2% · `NO-Safety Vest` 77.1% · mAP@50 **91.0 %** |
+
+**Pourquoi ce modèle existe.** Le 2026-08-16, un ré-entraînement de
+`ppe_detector.pt` ciblant `NO-Mask`/`NO-Safety Vest` par duplication d'images a
+été **rejeté** : `NO-Mask` a reculé, `NO-Safety Vest` a stagné (voir
+`reports/v3_results/epi_14c_candidat_20260816.json`). Diagnostic établi par
+`improvements/p1_eval_par_concept.py` : sur un sous-ensemble qui annote
+réellement ces deux concepts, `ppe_detector.pt` atteignait déjà 0.96/0.92/0.89/0.67
+d'AP50 — contre 0.55/0.60/0.58/0.17 publiés sur `ppe_dataset` complet. Ce
+n'était pas un problème de capacité mais de bruit d'annotation : la plupart des
+~29 000 autres images de `ppe_dataset` n'annotent ni le masque ni le gilet, et
+chaque détection correcte y était comptée comme un faux positif pendant
+l'entraînement. Un modèle dédié, entraîné uniquement sur les images cohérentes,
+n'a aucune image contradictoire à apprendre — et rien d'autre à oublier,
+contrairement à un réglage de `ppe_detector.pt`.
+
+**Intégration.** Branché en cascade dans `improvements/unified_surveillance.py`
+(`AnalyseurEPI`, poids M3) avec priorité par concept dans
+`improvements/ppe_taxonomy.py` (`PRIORITE_MODELE`). `ppe_detector.pt` reste
+chargé et inchangé : si `masque_gilet.pt` est absent ou ne détecte rien sur une
+image, `ppe_detector.pt` prend le relais automatiquement. Désactivable via
+`--sans-masque-gilet`.
+
 ### `surveillance_suite/models/fall_detector.pt` — détection de chute
 
 | | |

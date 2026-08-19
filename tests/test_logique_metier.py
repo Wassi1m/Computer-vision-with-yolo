@@ -84,7 +84,10 @@ def test_fusion_garde_deux_objets_distincts_du_meme_concept():
 
 def test_coherence_detecte_une_taxonomie_divergente():
     """Un modèle ré-entraîné avec d'autres classes doit être signalé, pas ignoré."""
-    erreurs = tax.verifier_coherence({0: "ClasseInventee"}, {0: "helmet"})
+    erreurs = tax.verifier_coherence({
+        tax.M1_NOM: {0: "ClasseInventee"},
+        tax.M2_NOM: {0: "helmet"},
+    })
     assert erreurs, "une divergence de taxonomie doit produire une erreur explicite"
 
 

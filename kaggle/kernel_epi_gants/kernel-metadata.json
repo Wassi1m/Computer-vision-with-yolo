@@ -1,0 +1,14 @@
+{
+  "id": "wassimmay/entrainement-epi-gants-lunettes",
+  "title": "entrainement epi gants lunettes",
+  "code_file": "lancer.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["wassimmay/ppe-scripts", "wassimmay/epi-gants-lunettes"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

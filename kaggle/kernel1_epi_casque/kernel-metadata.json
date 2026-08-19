@@ -1,0 +1,14 @@
+{
+  "id": "wassimmay1/entrainement-epi-casque",
+  "title": "entrainement epi casque",
+  "code_file": "lancer.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["wassimmay1/ppe-scripts", "wassimmay1/epi-casque"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

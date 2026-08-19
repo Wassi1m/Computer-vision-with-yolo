@@ -700,7 +700,8 @@ class AnalyseurEPI(Analyseur):
     """
     nom = "epi"
 
-    def __init__(self, poids_m1, poids_m2=None, imgsz=480, every=3,
+    def __init__(self, poids_m1, poids_m2=None, poids_m3=None, poids_m4=None,
+                 poids_m5=None, imgsz=480, every=3,
                  hist_n=12, hist_k=4, ancrage=True):
         from ultralytics import YOLO
         # Derriere un drapeau, comme toute regle de qualification : elle rejette
@@ -712,9 +713,25 @@ class AnalyseurEPI(Analyseur):
         self.imgsz = imgsz
         self.m1 = YOLO(poids_m1)
         self.m2 = YOLO(poids_m2) if poids_m2 else None
-        erreurs = tax.verifier_coherence(
-            self.m1.names, self.m2.names if self.m2 else dict(enumerate(tax.M2)))
-        if self.m2 and erreurs:
+        # M3 : modele dedie masque/gilet (2026-08-17), prioritaire sur M1 pour
+        # ces deux concepts uniquement -- voir le commentaire de M3 dans
+        # ppe_taxonomy.py pour la mesure qui justifie ce choix. M1 reste
+        # charge et sert de filet de secours si M3 est absent.
+        self.m3 = YOLO(poids_m3) if poids_m3 else None
+        # M4 et M5 : modeles dedies casque, puis gants/lunettes (2026-08-18,
+        # campagne v8). Meme principe que M3 -- prioritaires sur M1 pour leurs
+        # seuls concepts, chacun mesure meilleur que lui sur un split que
+        # l'entrainement n'a jamais vu (reports/v3_results/*_candidat.json).
+        # Tous restent optionnels : M1 est le filet de secours de la cascade.
+        self.m4 = YOLO(poids_m4) if poids_m4 else None
+        self.m5 = YOLO(poids_m5) if poids_m5 else None
+        modeles_charges = {tax.M1_NOM: self.m1.names}
+        for nom, modele in ((tax.M2_NOM, self.m2), (tax.M3_NOM, self.m3),
+                            (tax.M4_NOM, self.m4), (tax.M5_NOM, self.m5)):
+            if modele is not None:
+                modeles_charges[nom] = modele.names
+        erreurs = tax.verifier_coherence(modeles_charges)
+        if erreurs:
             raise RuntimeError("Taxonomie incohérente avec les modèles chargés :\n  " +
                                "\n  ".join(erreurs))
         self.hist_n, self.hist_k = hist_n, hist_k
@@ -746,7 +763,9 @@ class AnalyseurEPI(Analyseur):
     def process(self, frame, ctx):
         seuil_bas = min(c.conf_min for t in tax.TABLES.values() for c in t.values())
         brutes = []
-        for nom_modele, model in (("ppe_detector.pt", self.m1), ("ppe_complement.pt", self.m2)):
+        for nom_modele, model in ((tax.M1_NOM, self.m1), (tax.M2_NOM, self.m2),
+                                  (tax.M3_NOM, self.m3), (tax.M4_NOM, self.m4),
+                                  (tax.M5_NOM, self.m5)):
             if model is None:
                 continue
             for b in model.predict(frame, conf=seuil_bas, imgsz=self.imgsz, verbose=False)[0].boxes:
@@ -1378,10 +1397,22 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
         return AnalyseurPorte(clf, args.every_door)
     ajouter("porte", _porte)
 
-    ajouter("epi", lambda: AnalyseurEPI(
-        str(existant(ROOT / "ppe_detection/models/ppe_detector.pt")),
-        None if args.sans_gants else str(existant(ROOT / "ppe_detection/models/ppe_complement.pt")),
-        args.imgsz, args.every_epi, ancrage=not args.sans_ancrage_epi))
+    def _epi():
+        # Les modeles dedies sont charges s'ils sont presents, sauf refus
+        # explicite. Absents, la cascade retombe sur ppe_detector.pt : le moteur
+        # demarre toujours, avec les scores publies pour ce modele seul.
+        def dedie(nom: str, refuse: bool) -> str | None:
+            chemin = ROOT / "ppe_detection/models" / nom
+            return None if refuse or not chemin.exists() else str(chemin)
+
+        return AnalyseurEPI(
+            str(existant(ROOT / "ppe_detection/models/ppe_detector.pt")),
+            None if args.sans_gants else str(existant(ROOT / "ppe_detection/models/ppe_complement.pt")),
+            dedie("masque_gilet.pt", args.sans_masque_gilet),
+            dedie("epi_casque.pt", args.sans_casque),
+            dedie("epi_gants_lunettes.pt", args.sans_gants_lunettes),
+            args.imgsz, args.every_epi, ancrage=not args.sans_ancrage_epi)
+    ajouter("epi", _epi)
 
     return analyseurs
 
@@ -1464,6 +1495,15 @@ def main():
                     help="ce que le moteur transmet des plaques lues (defaut : pseudonymise)")
     ap.add_argument("--sans-gants", action="store_true",
                     help="retire ppe_complement.pt de la cascade EPI (seul apport : chaussures)")
+    ap.add_argument("--sans-masque-gilet", action="store_true",
+                    help="retire masque_gilet.pt de la cascade EPI (revient a ppe_detector.pt "
+                         "seul pour ces deux concepts, moins fiable -- voir ppe_taxonomy.py)")
+    ap.add_argument("--sans-casque", action="store_true",
+                    help="retire epi_casque.pt de la cascade EPI (ppe_detector.pt seul retombe "
+                         "a 65 %% / 72 %% de detection de scene -- voir ppe_taxonomy.py)")
+    ap.add_argument("--sans-gants-lunettes", action="store_true",
+                    help="retire epi_gants_lunettes.pt de la cascade EPI (revient a "
+                         "ppe_detector.pt seul pour gants et lunettes)")
     ap.add_argument("--disable", default="", help="analyseurs a desactiver, separes par des virgules")
     # Headless par defaut : c'est le mode de production. L'affichage reste
     # disponible a la demande pour les tests, les demonstrations client et le

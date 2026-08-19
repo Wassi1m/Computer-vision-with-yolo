@@ -1,0 +1,21 @@
+{
+  "date": "2026-08-17",
+  "verdict": "VALIDE -- candidat pret pour integration en cascade",
+  "modele": "ppe_detection/models/masque_gilet.pt",
+  "role": "4 classes dediees : Mask, NO-Mask, Safety Vest, NO-Safety Vest",
+  "origine": {
+    "kernel_kaggle": "wassimmay/entrainement-masque-gilet",
+    "jeu_entrainement": "masque_gilet_coherent (improvements/p11_jeu_masque_gilet.py) -- 4698 train + 1361 val, uniquement des images qui annotent reellement masque ou gilet",
+    "poids_depart": "ppe_detector.pt (transfert, tete reinitialisee pour 4 classes)",
+    "hyperparametres": {"optimizer": "SGD", "lr0": 0.001, "epochs_effectuees": 48, "meilleure_epoque": 20, "duree": "1.28h", "gpu": "Tesla T4"}
+  },
+  "mesure": "YOLO.val sur le split test LOCAL de ppe_dataset filtre+remappe (655 images, jamais incluses dans train/val de ce modele), imgsz 640, device cpu",
+  "comparaison": {
+    "Mask":           {"ppe_detector_jeu_complet": 0.5513, "masque_gilet_candidat": 0.9715, "delta": 0.4202},
+    "NO-Mask":        {"ppe_detector_jeu_complet": 0.6033, "masque_gilet_candidat": 0.9642, "delta": 0.3609},
+    "Safety Vest":    {"ppe_detector_jeu_complet": 0.5802, "masque_gilet_candidat": 0.9321, "delta": 0.3519},
+    "NO-Safety Vest": {"ppe_detector_jeu_complet": 0.1734, "masque_gilet_candidat": 0.7712, "delta": 0.5978}
+  },
+  "mAP50_global_test_local": 0.9098,
+  "conclusion": "Diagnostic confirme : ppe_detector.pt souffrait d'un bruit d'annotation (ppe_dataset patchwork), pas d'une limite de capacite. Un modele dedie entraine sur les seules images cohérentes resout le probleme sans toucher aux 14 classes du modele principal. Prochaine etape : integration en cascade (priorite a ce modele sur ces 4 classes, ppe_detector.pt inchange et conserve comme filet de secours)."
+}

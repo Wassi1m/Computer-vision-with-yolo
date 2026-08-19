@@ -46,19 +46,78 @@ ppe_detection/models/ppe_detector.pt
 
   ap50_jeu_propre : mesure sur ppe_vest_clean_14c/val, seul jeu ou le gilet est annote correctement.
   Les 35 points d'ecart viennent des annotations, pas du modele.
+  Depuis le 2026-08-17, Mask/NO-Mask/Safety Vest/NO-Safety Vest sont servies en priorite par masque_gilet.pt dans la cascade (improvements/ppe_taxonomy.py) -- les chiffres ci-dessus restent ceux de ce modele seul, filet de secours si masque_gilet.pt est absent.
+
+
+──────────────────────────────────────────────────────────────────────────
+EPI — masque et gilet dédiés  —  4 classes
+ppe_detection/models/masque_gilet.pt
+
+  mesuré le 2026-08-17 sur ppe_dataset/test filtre+remappe (655 images), jamais entraine dessus
+  mAP@50 global : 0.9098
+
+   0  Mask             masque porté               AP 0.972
+   1  NO-Mask          SANS masque                AP 0.964
+   2  Safety Vest      gilet porté                AP 0.932
+   3  NO-Safety Vest   SANS gilet                 AP 0.771
+
+  Troisième modèle de la cascade, prioritaire sur `ppe_detector.pt` pour CES 4 CLASSES UNIQUEMENT (`improvements/ppe_taxonomy.py`).
+  `ppe_detector.pt` reste le filet de secours si ce modèle est absent.
+
+  Modele dedie, prioritaire sur ppe_detector.pt pour ces 4 classes dans la cascade (improvements/ppe_taxonomy.py, improvements/unified_surveillance.py).
+  Entraine uniquement sur les images de ppe_dataset qui annotent reellement masque ou gilet (improvements/p11_jeu_masque_gilet.py) -- diagnostic et detail complet dans reports/v3_results/masque_gilet_candidat.json.
+
+
+──────────────────────────────────────────────────────────────────────────
+EPI — casque dédié  —  2 classes
+ppe_detection/models/epi_casque.pt
+
+  mesuré le 2026-08-19 sur ppe_dataset/test filtre+remappe (2039 scenes annotees), jamais inclus dans un jeu d'entrainement, conf=0.25
+  mAP@50 global : 0.945
+
+   0  Hardhat          casque porté               99 % détecté  ·  AP 0.927
+   1  NO-Hardhat       SANS casque                98 % détecté  ·  AP 0.963
+
+  Prioritaire sur `ppe_detector.pt` pour CES 2 CLASSES UNIQUEMENT (`improvements/ppe_taxonomy.py`, M4).
+  Il corrige le plus gros déficit mesuré du parc : `ppe_detector.pt` seul ne voyait le casque que dans 65 % des scènes annotées, et son absence dans 72 %.
+
+  Modele dedie, prioritaire sur ppe_detector.pt pour le casque dans la cascade (improvements/ppe_taxonomy.py, M4).
+  Campagne v8 : entraine sur Hard Hat Universe + Construction PPE + 6000 images de ppe_dataset, avec 25 % d'images de fond (improvements/p13_jeux_roboflow.py).
+  Fait passer les deux classes les plus faibles du parc de 65 % / 72 % a 99.2 % / 98.3 % de detection de scene -- detail dans reports/v3_results/casque_candidat.json.
+
+
+──────────────────────────────────────────────────────────────────────────
+EPI — gants et lunettes dédiés  —  4 classes
+ppe_detection/models/epi_gants_lunettes.pt
+
+  mesuré le 2026-08-19 sur ppe_dataset/test filtre+remappe (1179 scenes annotees), jamais inclus dans un jeu d'entrainement, conf=0.25
+  mAP@50 global : 0.954
+
+   0  Gloves           gants portés               99 % détecté  ·  AP 0.955
+   1  NO-Gloves        SANS gants                 98 % détecté  ·  AP 0.931
+   2  Goggles          lunettes portées           99 % détecté  ·  AP 0.966
+   3  NO-Goggles       SANS lunettes              95 % détecté  ·  AP 0.965
+
+  Prioritaire sur `ppe_detector.pt` pour CES 4 CLASSES UNIQUEMENT (`improvements/ppe_taxonomy.py`, M5).
+  Retenu parce qu'il bat `ppe_detector.pt` sur les quatre, qui y était déjà bon : un candidat antérieur perdant sur trois classes avait été rejeté.
+
+  Modele dedie, prioritaire sur ppe_detector.pt pour gants et lunettes dans la cascade (improvements/ppe_taxonomy.py, M5).
+  Il bat ppe_detector.pt sur les QUATRE classes.
+  Un premier candidat du 2026-08-17 avait ete REJETE (il perdait sur trois classes sur quatre) faute de contenir des images de ppe_dataset : il avait appris un seul domaine puis avait ete juge dans un autre.
+  Detail dans reports/v3_results/gants_candidat.json ; le candidat rejete est conserve dans gants_candidat_20260817.json.
 
 
 ──────────────────────────────────────────────────────────────────────────
 EPI — modèle complémentaire  —  6 classes
 ppe_detection/models/ppe_complement.pt
 
-  mesuré le 2026-08-13 sur ppe_dataset/test, 15 images par classe, seuil 0.25
+  mesuré le 2026-08-16 sur ppe_dataset/test, 15 images par classe, seuil 0.25 (tests/mesure_scene_ppe_complement.py)
 
-   0  Gloves           gants portés               33 % détecté
-   1  Vest             gilet                      non mesurée
-   2  goggles          lunettes                   non mesurée
-   3  helmet           casque                     40 % détecté
-   4  mask             masque                     80 % détecté
+   0  Gloves           gants portés               13 % détecté
+   1  Vest             gilet                      80 % détecté
+   2  goggles          lunettes                   0 % détecté
+   3  helmet           casque                     47 % détecté
+   4  mask             masque                     67 % détecté
    5  safety_shoe      chaussures de sécurité     non mesurée
 
   Second modèle de la cascade.
@@ -66,7 +125,11 @@ ppe_detection/models/ppe_complement.pt
   `safety_shoe` est son seul apport unique.
 
   Indicatif : ce jeu n'est pas celui d'entrainement de ce modele.
-  Aucune mesure de reference n'existe pour lui.
+  Mesure unifiee dans un seul script (tests/mesure_scene_ppe_complement.py) le 2026-08-16 -- remplace deux mesures precedentes prises separement (13 aout puis 16 aout), dont les tirages aleatoires n'etaient pas comparables entre eux car obtenus par des appels rng.sample() dans un ordre de classes different.
+  safety_shoe reste non mesurable : aucune image de ppe_dataset n'annote de chaussure (cf.
+  improvements/p2_table_correspondance_epi.py).
+  goggles a 0 % sur cet echantillon alors que le modele detecte bien la classe ailleurs (jusqu'a 0.66 de confiance sur 150 images aleatoires) : ecart de domaine avec les images 'Goggles' de ppe_dataset, pas un modele casse.
+  Cette mesure sert de reference AVANT tout fine-tuning (reports/v3_results/ppe_complement_avant.json).
 
 
 ──────────────────────────────────────────────────────────────────────────

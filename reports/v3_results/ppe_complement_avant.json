@@ -1,0 +1,16 @@
+{
+  "date": "2026-08-16",
+  "modele": "ppe_detection/models/ppe_complement.pt",
+  "jeu": "ppe_dataset/test (proxy, pas le jeu d'entrainement de ce modele)",
+  "methode": "detection de scene, 15 images/classe, graine 7, seuil 0.25",
+  "par_classe": {
+    "Gloves": 0.1333,
+    "Vest": 0.8,
+    "goggles": 0.0,
+    "helmet": 0.4667,
+    "mask": 0.6667
+  },
+  "non_mesurable": [
+    "safety_shoe"
+  ]
+}

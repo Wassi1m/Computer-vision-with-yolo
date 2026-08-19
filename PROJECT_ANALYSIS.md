@@ -8,7 +8,8 @@ Date : 2026-08-07
 Le dépôt contient **deux projets Computer Vision indépendants**, non intégrés entre eux, qui partagent la même famille d'outils (Ultralytics YOLO + OpenCV) mais n'ont **aucun code, dataset ni modèle en commun** :
 
 | | `ppe_detection/` | `surveillance_suite/` |
-|---|---|---|
+|---|---|---
+|
 | Objectif métier | Conformité EPI (Équipements de Protection Individuelle) sur un site industriel/chantier | Sécurité générale d'un site (incendie, chute, intrusion, objets abandonnés, plaques, porte) |
 | Modèle(s) cœur | 2 modèles YOLOv8 EPI dédiés | 6+ modèles YOLO26 (génériques + fine-tunés) + heuristiques CV classiques |
 | Statut | Modèles déjà entraînés, prêts à l'emploi | Modèles déjà entraînés pour 2 modules ; 4 modules reposent sur un modèle générique ou une heuristique, pas d'entraînement dédié |

@@ -1,0 +1,107 @@
+{
+  "date": "2026-08-19",
+  "candidat": "chaussures",
+  "poids": "/tmp/claude-1000/-home-user-Bureau-model-ia-ppe/bd53fb1a-2738-419a-8165-bf2179b105b9/scratchpad/poids/epi_chaussures_w1.pt",
+  "mesure": "taux de declenchement sur 300 images aleatoires de ppe_dataset/test (graine 0)",
+  "avertissement": "ppe_dataset n'annote AUCUNE chaussure mais en contient : un declenchement n'est pas forcement une erreur. Le taux ci-dessous ne conclut pas seul -- regarder l'echantillon.",
+  "taux_declenchement": {
+    "0.25": 0.5667,
+    "0.4": 0.4333,
+    "0.5": 0.3633,
+    "0.7": 0.1733
+  },
+  "echantillon_a_inspecter": [
+    {
+      "rang": 1,
+      "confiance": 0.876,
+      "classe": "safety_shoe",
+      "image": "01_safety_shoe_0.88_autox6_mp4-300_jpg.rf.190468ec0091f7377d140d2c40f9cac6.jpg"
+    },
+    {
+      "rang": 2,
+      "confiance": 0.876,
+      "classe": "safety_shoe",
+      "image": "02_safety_shoe_0.88_people-2739-_jpg.rf.7a3097d1b5bb9327ea985d6e7f3d25c7.jpg"
+    },
+    {
+      "rang": 3,
+      "confiance": 0.872,
+      "classe": "safety_shoe",
+      "image": "03_safety_shoe_0.87_people-7450-_jpg.rf.28c1ef5b2989e2b80cedc56b6a986255.jpg"
+    },
+    {
+      "rang": 4,
+      "confiance": 0.871,
+      "classe": "safety_shoe",
+      "image": "04_safety_shoe_0.87_ppe_0624_jpg.rf.ae91747a4050ccb4deabccb5d3acb5f3.jpg"
+    },
+    {
+      "rang": 5,
+      "confiance": 0.871,
+      "classe": "safety_shoe",
+      "image": "05_safety_shoe_0.87_frame94-2-_jpg.rf.5faabdc5d59030dc46e2c44d271c00d1.jpg"
+    },
+    {
+      "rang": 6,
+      "confiance": 0.869,
+      "classe": "safety_shoe",
+      "image": "06_safety_shoe_0.87_PPE_Data_245_jpg.rf.d2e7e45aa16903eef06b058ce9e46e2b.jpg"
+    },
+    {
+      "rang": 7,
+      "confiance": 0.867,
+      "classe": "safety_shoe",
+      "image": "07_safety_shoe_0.87_frame41_jpg.rf.159835be2cba7e2e151e14f061f8e53f.jpg"
+    },
+    {
+      "rang": 8,
+      "confiance": 0.866,
+      "classe": "safety_shoe",
+      "image": "08_safety_shoe_0.87_front_crawling_00913_jpg.rf.5b364fc27f319bc96b001fff3ee9a71d.jpg"
+    },
+    {
+      "rang": 9,
+      "confiance": 0.865,
+      "classe": "safety_shoe",
+      "image": "09_safety_shoe_0.86_Image14_jpg.rf.87246118857df07fe9a9820ab85537e6.jpg"
+    },
+    {
+      "rang": 10,
+      "confiance": 0.862,
+      "classe": "safety_shoe",
+      "image": "10_safety_shoe_0.86_image_98_jpg.rf.0b609562309bd43568bb8949aac85e87.jpg"
+    },
+    {
+      "rang": 11,
+      "confiance": 0.861,
+      "classe": "safety_shoe",
+      "image": "11_safety_shoe_0.86_people-6189-_jpg.rf.9551fbbae1e5122c96101e70c96d5da2.jpg"
+    },
+    {
+      "rang": 12,
+      "confiance": 0.861,
+      "classe": "safety_shoe",
+      "image": "12_safety_shoe_0.86_000058_jpg.rf.2d97b6aa7b701da415c39124f26d6a45.jpg"
+    }
+  ],
+  "dossier_echantillon": "reports/v3_results/chaussures_echantillon",
+  "origine": "kernel wassimmay1/entrainement-epi-chaussures, termine le 2026-08-19 : 130 epoques, meilleure epoque 110, mAP50 de validation 0.9117. Jeu corrige du 2026-08-18 -- corpus triple par ahmed-alqulayti (p16) et 25 % d'images de fond ajoutees (p13).",
+  "verdict": "REJETE -- le modele detecte des CHAUSSURES, pas des chaussures de SECURITE",
+  "inspection_visuelle": {
+    "date": "2026-08-19",
+    "methode": "lecture directe des detections les plus confiantes (12 images annotees)",
+    "progres_reels_par_rapport_au_candidat_precedent": [
+      "les 12 detections les plus confiantes portent toutes la classe positive ; le candidat du 18 en placait sur NO-safety_shoe a 0.94 sur un visage et un talus de neige",
+      "la confiance maximale retombe de 0.937 a 0.876 -- le modele est moins peremptoire",
+      "plusieurs detections sont JUSTES : bottes de chantier (image 09, 0.55-0.86) et chaussures d'un operateur en usine (image 06, 0.87)",
+      "les images de fond ajoutees par p13 ont donc bien produit un effet mesurable"
+    ],
+    "constats_disqualifiants": [
+      "image 01 : des CONES DE SIGNALISATION sont etiquetes safety_shoe (0.29 a 0.68) sur un parking, et une boite a 0.88 couvre les mains du pilote dans un cockpit",
+      "image 11 : des BASKETS DE VILLE BLANCHES et des sandales, dans un hall d'aeroport, sont donnees pour des chaussures de securite a 0.86 et 0.85",
+      "image 02 : deux boites a 0.27 et 0.32 sur la CARROSSERIE d'une camionnette"
+    ],
+    "conclusion": "Le modele a appris a localiser des pieds chausses, pas a reconnaitre un equipement de protection. Sur un moteur de conformite EPI, c'est le pire sens d'erreur possible : une basket certifiee comme chaussure de securite fabrique une FAUSSE CONFORMITE, alors qu'une classe absente ne fait que laisser le concept non couvert. Le critere du plan v8 §7 -- 'une chaussure hallucinee vaut moins que pas de classe du tout' -- s'applique directement."
+  },
+  "suite": "La cause n'est plus le volume : le corpus a triple (1909 images positives) et les images de fond sont en place. Elle est dans la NATURE des sources -- elles annotent la chaussure comme objet, sans jamais opposer chaussure de securite et chaussure ordinaire. Aucune ne contient de contre-exemple 'pied chausse mais non conforme' en nombre. Tant que cette distinction n'est pas annotee, l'entrainement ne peut pas l'apprendre. C'est une donnee a acquerir -- typiquement le corpus video du site, ou les deux cas coexistent -- pas une campagne GPU de plus."
+}

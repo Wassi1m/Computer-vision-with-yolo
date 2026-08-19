@@ -115,7 +115,161 @@ ne justifie pas de prendre le risque avant que le point 1 soit traité.
 
 ---
 
-## 3 — Ce qui reste du plan v6
+## 3 — 🟡 Enrichir `ppe_complement.pt` (gants, lunettes, chaussures)
+
+Même mécanisme que le casque (§2), sur le second modèle de la cascade. Trois
+classes plafonnent, et contrairement au casque, **aucun jeu local** ne peut
+les enrichir : `ppe_dataset` n'a pas de `safety_shoe`, et ses images `Goggles`
+/ `Gloves` sont déjà utilisées à plein par `ppe_detector.pt`.
+
+| Classe | Détection mesurée | Blocage |
+|---|---|---|
+| `Gloves` | 33 % | aucun jeu local dédié à ce modèle |
+| `goggles` | 0 % sur l'échantillon (le modèle détecte la classe ailleurs, cf. `models_calsse.txt`) | idem |
+| `safety_shoe` | non mesurable | `ppe_dataset` n'annote aucune chaussure |
+
+### Jeux candidats (Roboflow Universe, format YOLO)
+
+| Classe visée | Jeu | Volume | Lien |
+|---|---|---|---|
+| Les trois à la fois | **PPEs** — glove/no_glove, goggles/no_goggles, shoes/no_shoes, + helmet/mask/suit | 24 924 images | [universe.roboflow.com/personal-protective-equipment/ppes-kaxsi](https://universe.roboflow.com/personal-protective-equipment/ppes-kaxsi) |
+| Gants | **Safety Gloves** — Gloves / NO-Gloves | ~3 373 images (10 459 en version augmentée ×3) | [universe.roboflow.com/roboflow-universe-projects/safety-gloves-xbnf8](https://universe.roboflow.com/roboflow-universe-projects/safety-gloves-xbnf8) |
+| Gants + chaussures | **Construction PPE** — Gloves, Safety Boot, Helmet, Safety Vest + négatifs | 8 845 images | [universe.roboflow.com/skcet-g4h72/construction-ppe-rdhzo](https://universe.roboflow.com/skcet-g4h72/construction-ppe-rdhzo) |
+| Lunettes | **Safety Goggles v1** — head, Mask, Goggles, eyes_with_goggles, eyes_without_goggles | 1 288 images | [universe.roboflow.com/database-sjrvw/safety-goggles](https://universe.roboflow.com/database-sjrvw/safety-goggles) |
+| Lunettes | **Safety Goggles – PPE** — Coverall, Face_Shield, Gloves, Goggles, Mask (déjà multiclasse) | 411 images | [universe.roboflow.com/database-sjrvw/safety-goggles---ppe](https://universe.roboflow.com/database-sjrvw/safety-goggles---ppe) |
+| Chaussures | **Safety Shoes dataset** — classes `person`, `safety_shoe` | 1 089 images | [universe.roboflow.com/ahmed-alqulayti/safety-shoes-dataset](https://universe.roboflow.com/ahmed-alqulayti/safety-shoes-dataset) |
+
+**PPEs** (24 924 images) couvre les trois manques d'un coup et est déjà
+multiclasse — point de départ naturel. **Safety Shoes dataset** a une
+particularité utile : sa classe s'appelle **exactement** `safety_shoe`, comme
+`ppe_complement.pt` — aucun nom à deviner sur ce point-là, seule la table de
+correspondance formelle reste à écrire pour les autres jeux.
+
+Roboflow bloque la récupération automatique des pages (403) : les volumes et
+classes ci-dessus viennent de la recherche, pas d'une lecture directe des
+pages. **Vérifier chaque jeu à la main avant usage** — contenu réel, split,
+et licence (Roboflow n'impose pas une licence unique à tous ses jeux publics).
+
+### Le même piège qu'au §2, sur un autre modèle
+
+`ppe_complement.pt` n'a que 6 classes et aucune version `NO-`. Le fine-tuner
+sur un jeu mono-concept (que des gants, par exemple) reproduirait le
+mécanisme qui a effacé 12 classes de `ppe_detector.pt` en juillet — ici sur
+les 5 autres classes de ce modèle-ci. Mêmes précautions non négociables
+qu'au §2 : remappage explicite (étendre `p2_table_correspondance_epi.py`),
+plafond d'un tiers d'images mono-concept, mesure des 6 classes après --
+pas seulement celle visée.
+
+Point ouvert, non tranché ici : plusieurs jeux ci-dessus apportent des
+classes négatives (`no_glove`, `no_goggles`, `no_shoes`) que
+`ppe_complement.pt` n'a jamais eues. Les intégrer changerait son rôle : il
+pourrait alors signaler une infraction, pas seulement confirmer un
+équipement présent. C'est une décision de conception à trancher avant
+l'entraînement, pas un simple ajout de données.
+
+### ⚠️ Remarque : fusion des jeux puis entraînement en un seul passage
+
+Décision prise : les jeux ci-dessus seront téléchargés puis **fusionnés en un
+seul jeu**, sur lequel **un seul entraînement** sera lancé -- pas de campagne
+itérative comme les quatre ré-entraînements qui ont sauvé `ppe_detector.pt`
+en cinq jours.
+
+Cela change ce qui doit être vérifié, et quand : sans itération pour rattraper
+une erreur, tout ce qui est normalement corrigé *après coup* doit être
+correct *avant* de lancer le run. Concrètement, avant le seul entraînement :
+
+- la **table de correspondance** (remappage des noms de classe entre les
+  jeux, extension de `p2_table_correspondance_epi.py`) doit être écrite et
+  relue, pas improvisée pendant la fusion ;
+- le **plafond d'un tiers d'images mono-concept** doit être respecté dans le
+  jeu fusionné final, mesuré, pas supposé -- `PPEs` et `Construction PPE`
+  sont déjà multiclasses et abaissent ce risque, mais le mélange avec
+  `Safety Gloves` ou `Safety Shoes dataset` (mono-concept) peut le faire
+  remonter selon les proportions choisies ;
+- la **décision sur les classes négatives** (`no_glove`, `no_goggles`,
+  `no_shoes`) doit être prise avant la fusion, pas découverte dedans -- les
+  garder change la taxonomie du modèle, les exclure change le contenu du jeu.
+
+Si le résultat est mauvais sur une classe précise, il n'y aura pas de second
+essai ciblé : la seule option restante sera de refaire toute la fusion. La
+mesure des 6 classes après entraînement (§ ci-dessus) n'est donc pas une
+formalité de clôture ici -- c'est le seul moment où l'erreur, s'il y en a
+une, sera visible.
+
+### Stratégie retenue pour protéger les 5 autres classes
+
+Six mesures concrètes, dans l'ordre où elles doivent être prises -- toutes
+avant le run unique, sauf la dernière :
+
+**0. Référence AVANT, figée** — fait le 2026-08-16, avant tout téléchargement :
+`reports/v3_results/ppe_complement_avant.json`, produit par
+`tests/mesure_scene_ppe_complement.py --sortie ...`. Seule mesure
+comparable après coup, sur les 5 classes mesurables :
+
+| Classe | Détection (avant) |
+|---|---|
+| `Gloves` | 13 % |
+| `Vest` | 80 % |
+| `goggles` | 0 % |
+| `helmet` | 47 % |
+| `mask` | 67 % |
+| `safety_shoe` | non mesurable (aucun équivalent local) |
+
+**1. Construire le jeu fusionné pour minimiser le piège du fond.**
+`PPEs` et `Construction PPE` (déjà multiclasses) forment le socle : chaque
+image y annote plusieurs des 6 classes ensemble, donc peu de zones que le
+modèle apprendrait à tort comme « fond ». Les jeux mono-concept
+(`Safety Gloves`, `Safety Goggles`, `Safety Shoes dataset`) restent plafonnés
+à un tiers du total, comme déjà décidé plus haut.
+
+**2. Écrire la table de correspondance avant la fusion**, pas pendant --
+étendre `p2_table_correspondance_epi.py` avec le mapping explicite de
+chaque classe de chaque jeu source vers l'une des 6 classes de
+`ppe_complement.pt`, ou vers « ignorée ». La décision sur les classes
+négatives (`no_glove`, `no_goggles`, `no_shoes` -- cf. point ouvert
+ci-dessus) fait partie de cette table, pas un ajout après coup.
+
+**3. Fabriquer un jeu de rappel (rehearsal), puisqu'aucun jeu d'origine
+n'existe localement pour ce modèle.** C'est la pièce qui manque le plus par
+rapport à la réparation de `ppe_detector.pt` en juillet, qui s'est appuyée
+sur `ppe_dataset` (un vrai sur-ensemble local). Ici, à défaut :
+faire tourner `ppe_complement.pt` **actuel** sur un lot d'images neutres
+(ni issues des jeux Roboflow téléchargés, ni sur-représentant une classe --
+par exemple un sous-ensemble de `ppe_dataset/train` non utilisé pour la
+mesure) à seuil de confiance élevé (0.5), et garder les détections comme
+pseudo-labels sur les 6 classes. Injecter ce lot dans le jeu fusionné, en
+proportion suffisante pour peser sur le gradient (au moins autant d'images
+que la plus grosse source mono-concept retenue). C'est un substitut fabriqué
+au sur-ensemble qui a sauvé l'autre modèle -- imparfait, mais c'est la seule
+option en l'absence de données locales.
+
+**4. Reprendre les hyperparamètres déjà validés sur ce projet**, pas en
+redécouvrir de nouveaux sur un run qui ne pourra pas être recommencé :
+`optimizer="SGD"` explicite (leçon du 12 août -- `lr0` seul est sans effet
+sans lui), `lr0=0.001` (leçon du run EPI de fin juillet/début août).
+Envisager de geler les premiers blocs du backbone : un fine-tuning partiel
+limite par construction l'ampleur du remaniement des poids, donc le risque
+d'oubli catastrophique -- au prix d'un gain potentiellement plus faible sur
+les 3 classes ciblées. Peu d'épreuves, arrêt anticipé sur un critère qui
+regarde les 6 classes, pas seulement la perte d'entraînement.
+
+**5. Écrire le critère de rejet MAINTENANT, avant de voir un seul chiffre
+du résultat.** Le 15 août, le critère de rejet du gilet avait été fixé puis
+sciemment outrepassé -- une décision assumée, documentée, pas une
+découverte a posteriori. Sur un run qui ne pourra pas être recommencé, la
+même discipline s'impose : par exemple, rejeter le candidat si une des 5
+classes non ciblées perd plus de 15 points de détection de scène par
+rapport à `ppe_complement_avant.json` -- en gardant à l'esprit que `Gloves`
+est déjà à 13 %, donc avec très peu de marge avant de tomber à zéro.
+
+**6. Mesurer après, avec le même outil, sur les 6 classes** --
+`python tests/mesure_scene_ppe_complement.py --sortie reports/v3_results/ppe_complement_apres.json`
+-- et comparer classe par classe à `ppe_complement_avant.json`, pas se
+limiter à vérifier que les 3 classes ciblées ont progressé.
+
+---
+
+## 4 — Ce qui reste du plan v6
 
 Inchangé, et toujours à faire avant la mise en production :
 
@@ -145,8 +299,10 @@ Docker. Trois jours, aucune dépendance externe.
 
 **3. Régler la couche de qualification** dès les premières vidéos reçues.
 
-**4. Enrichir le casque** en dernier, quand tout le reste est stable et que le
-garde-fou de non-régression peut détecter immédiatement une rechute.
+**4. Enrichir le casque, les gants, les lunettes et les chaussures** en
+dernier, quand tout le reste est stable et que le garde-fou de non-régression
+peut détecter immédiatement une rechute — sur `ppe_detector.pt` (§2) comme sur
+`ppe_complement.pt` (§3).
 
 ## Ce que ce plan ne fait pas
 

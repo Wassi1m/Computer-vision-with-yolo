@@ -12,6 +12,11 @@ surveillance_suite/data/
 /donnees/
 /data/
 
+# Archives Roboflow telechargees a la main (2 Go de .zip, 2026-08-17). Meme
+# raison que ci-dessus : deposees a la racine, elles seraient embarquees par un
+# `git add -A`. Les jeux extraits vont dans ppe_detection/data/, deja ignore.
+/new data set/
+
 # Cache Hugging Face (téléchargements de datasets, régénérable)
 .cache_hf/
 
@@ -46,7 +51,22 @@ surveillance_suite/models/*.pt
 # Poids issus des runs d'entrainement sur la VM (reports/v3_results/<jeu>_robuste/)
 # et sauvegardes des anciens poids avant installation : memes raisons que ci-dessus.
 reports/v3_results/*_robuste/*.pt
+
+# Poids des candidats d'une campagne, conserves hors depot pour pouvoir revenir
+# a un modele DEJA VALIDE si une campagne suivante echoue. Meme raison que
+# ci-dessus : 50 Mo par fichier. Les verdicts, eux, sont versionnes en JSON.
+reports/v3_results/candidats_campagne*/
 reports/v3_results/poids_remplaces/
 
 # Jeu equilibre reconstruit par improvements/p10_sous_ensemble_epi.py
 ppe_detection/data/extracted/ppe_14c_equilibre/
+
+# Images annotees produites par les contre-epreuves (p15) : ce sont des PIECES
+# A CONVICTION, regardees une fois pour trancher un verdict, puis inutiles --
+# le constat, lui, est ecrit en toutes lettres dans le JSON du candidat. Elles
+# se regenerent en relancant le script sur les memes poids.
+reports/v3_results/*_echantillon/
+
+# Archives .zip d'anciens jeux de donnees / experiences abandonnees, conservees
+# pour ne rien perdre mais trop volumineuses pour git (menage du 2026-08-17)
+/archives/

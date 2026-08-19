@@ -1,0 +1,35 @@
+{
+  "date": "2026-08-19",
+  "poids": "/tmp/claude-1000/-home-user-Bureau-model-ia-ppe/bd53fb1a-2738-419a-8165-bf2179b105b9/scratchpad/poids/epi_chaussures_v3.pt",
+  "mesure": "300 images aleatoires de ppe_dataset/test (graine 0), conf=0.25",
+  "taux_modele_nu": 0.5933,
+  "taux_apres_ancrage": 0.01,
+  "reduction": 0.9831,
+  "motifs_de_rejet": {
+    "aucune personne detectee": 360,
+    "hors personne": 1,
+    "hauteur anatomique invraisemblable": 1
+  },
+  "limite": "L'ancrage ne juge que la geometrie. Une chaussure de ville detectee au niveau des pieds est anatomiquement plausible et passe : la distinction chaussure de securite / chaussure ordinaire reste entierement a la charge du modele.",
+  "echantillon_survivant": [
+    {
+      "rang": 1,
+      "confiance": 0.844,
+      "classe": "safety_shoe",
+      "image": "01_safety_shoe_0.84_class1_196_jpg.rf.fb8bd477e7d9e053.jpg"
+    },
+    {
+      "rang": 2,
+      "confiance": 0.771,
+      "classe": "safety_shoe",
+      "image": "02_safety_shoe_0.77_class5_166_jpg.rf.8a63eeac21cac63e.jpg"
+    },
+    {
+      "rang": 3,
+      "confiance": 0.431,
+      "classe": "safety_shoe",
+      "image": "03_safety_shoe_0.43_003631_jpg.rf.f7f6a2b6f21682839be4.jpg"
+    }
+  ],
+  "dossier_echantillon": "reports/v3_results/chaussures_ancrees"
+}

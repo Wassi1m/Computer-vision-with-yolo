@@ -66,6 +66,8 @@ ppe_detection/data/extracted/ppe_14c_equilibre/
 # le constat, lui, est ecrit en toutes lettres dans le JSON du candidat. Elles
 # se regenerent en relancant le script sur les memes poids.
 reports/v3_results/*_echantillon/
+reports/v3_results/chaussures_ancrees/
+reports/v3_results/controle_avant_vol/
 
 # Archives .zip d'anciens jeux de donnees / experiences abandonnees, conservees
 # pour ne rien perdre mais trop volumineuses pour git (menage du 2026-08-17)

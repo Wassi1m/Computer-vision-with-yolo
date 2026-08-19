@@ -52,6 +52,12 @@ MODELES = [
      "(`improvements/ppe_taxonomy.py`, M5). Retenu parce qu'il bat "
      "`ppe_detector.pt` sur les quatre, qui y était déjà bon : un candidat "
      "antérieur perdant sur trois classes avait été rejeté."),
+    ("ppe_detection/models/epi_chaussures.pt", "EPI — chaussures de sécurité dédiées",
+     "Seul modèle du parc couvrant ce concept avec une classe NÉGATIVE, donc "
+     "capable de signaler l'infraction et pas seulement de confirmer le port. "
+     "Ses deux seuils sont volontairement inégaux (`improvements/ppe_taxonomy.py`) : "
+     "affirmer à tort une conformité masque une infraction, alors qu'une fausse "
+     "alerte ne coûte qu'une vérification. Il DÉPEND de l'ancrage à la personne."),
     ("ppe_detection/models/ppe_complement.pt", "EPI — modèle complémentaire",
      "Second modèle de la cascade. Il n'a AUCUNE classe négative : il ne peut "
      "donc jamais signaler une non-conformité, seulement confirmer un "

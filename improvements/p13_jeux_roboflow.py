@@ -121,6 +121,30 @@ JEUX = {
             # la personne etant deja servie par ppe_detector.pt dans la cascade.
             {"jeu": "safety_shoes_alqulayti", "racine": SOURCES,
              "map": {0: 0}, "splits": ("train", "valid", "test")},
+            # AJOUTS du 2026-08-19, apres le rejet du candidat du 19.
+            # Le diagnostic n'etait plus le volume mais l'ANNOTATION : aucune
+            # source n'opposait chaussure de securite et chaussure ordinaire, si
+            # bien que le modele avait appris a localiser des pieds chausses. Il
+            # donnait des baskets de ville pour des chaussures de securite a
+            # 0.86, et des cones de signalisation avec.
+            #
+            # `xszud` est la piece maitresse : 465 images `no_safety-shoe`
+            # contre 380 dans tout le corpus precedent. `Helmet` (0) est
+            # ignoree, servie ailleurs dans la cascade par epi_casque.pt.
+            {"jeu": "safety_shoe_xszud", "racine": SOURCES,
+             "map": {2: 0, 1: 1}, "splits": ("train", "valid", "test")},
+            # `nedrick` n'apporte presque aucun negatif (46 images) mais 1 436
+            # images positives d'un domaine nouveau. C'est la version etendue
+            # du `safety_shoes_detection` deja present ; les doublons eventuels
+            # sont sans gravite, le prefixe de `_ecrire` empechant tout
+            # ecrasement silencieux.
+            {"jeu": "safety_shoes_nedrick", "racine": SOURCES,
+             "map": {1: 0, 0: 1}, "splits": ("train", "valid", "test")},
+            # `vertical_farming` n'a, lui non plus, aucune version exportable :
+            # reconstruit image par image par p16 (--projet vertical_farming).
+            # 712 instances negatives a la source, sans augmentation.
+            {"jeu": "safety_shoe_vertical_farming", "racine": SOURCES,
+             "map": {0: 0, 1: 1}, "splits": ("train", "valid", "test")},
         ],
     },
     "gants": {
@@ -272,47 +296,153 @@ def ajouter_fonds(dest: Path, total: dict, rng: random.Random,
     return ajoutes
 
 
+def grouper_quasi_doublons(entrees: list, seuil: int = 5) -> list[int]:
+    """Regroupe les images quasi identiques, quelle que soit leur source.
+
+    Pourquoi c'est indispensable ici, et pourquoi le nom de fichier ne suffit
+    pas (constat du 2026-08-19)
+    ---------------------------------------------------------------------
+    Deux mecanismes distincts produisent des images quasi identiques dans ce
+    corpus, et AUCUN ne se voit dans les noms de fichiers :
+
+    1. **L'augmentation Roboflow.** Une meme photo ressort en 2 a 3 variantes,
+       sous des empreintes differentes.
+    2. **La video.** Plusieurs sources sont des extractions d'images de
+       videosurveillance. `ppes` et `safety_shoe_vertical_farming` filment la
+       meme installation : 3 124 paires quasi identiques entre elles, parfois a
+       une seconde d'intervalle, sous des identifiants sans rapport.
+
+    Repartir ces images au hasard en met de part et d'autre du decoupage, et la
+    mAP de validation mesure alors de la MEMORISATION. C'est precisement ce qui
+    a produit le 0.912 du candidat rejete le 19 aout, qui dessinait pourtant des
+    boites sur des cones de signalisation.
+
+    On calcule donc une empreinte perceptuelle (dHash 8x8) et on relie toutes
+    les images a distance de Hamming <= `seuil`. Chaque groupe est ensuite
+    affecte ENTIER a un seul split.
+    """
+    import cv2
+    import numpy as np
+
+    empreintes, valides = [], []
+    for idx, (_, img, _) in enumerate(entrees):
+        im = cv2.imread(str(img), cv2.IMREAD_GRAYSCALE)
+        if im is None:
+            continue
+        im = cv2.resize(im, (9, 8))
+        empreintes.append((im[:, 1:] > im[:, :-1]).flatten())
+        valides.append(idx)
+
+    X = np.packbits(np.array(empreintes, dtype=bool), axis=1)
+    pere = list(range(len(entrees)))
+
+    def racine(i: int) -> int:
+        while pere[i] != i:
+            pere[i] = pere[pere[i]]
+            i = pere[i]
+        return i
+
+    popcount = np.unpackbits(np.arange(256, dtype=np.uint8)[:, None], axis=1).sum(1)
+    for debut in range(0, len(X), 512):  # par blocs : la matrice complete ne tient pas
+        bloc = X[debut:debut + 512]
+        d = popcount[(bloc[:, None, :] ^ X[None, :, :])].sum(2)
+        for local, global_ in enumerate(range(debut, min(debut + 512, len(X)))):
+            for autre in np.where(d[local] <= seuil)[0]:
+                if autre > global_:
+                    ra, rb = racine(valides[global_]), racine(valides[int(autre)])
+                    if ra != rb:
+                        pere[rb] = ra
+    return [racine(i) for i in range(len(entrees))]
+
+
 def _construire_repartie(spec: dict, dest: Path, noms: list[str],
                          rng: random.Random, simulation: bool,
                          total: dict, instances: dict) -> int:
-    """Met toutes les sources en commun, puis redécoupe train/val soi-même.
+    """Met toutes les sources en commun, puis redécoupe train/val/test soi-même.
 
     Réservé aux concepts dont les splits d'origine sont inexploitables (voir le
-    commentaire de l'entrée `chaussures`). Le découpage est stratifié sur la
-    présence de la classe positive : sur un jeu de ~1 200 images, un tirage
-    naïf peut vider la validation de sa classe rare et rendre la mesure
-    ininterprétable.
+    commentaire de l'entrée `chaussures`).
+
+    Deux garde-fous, tous deux payés par une campagne perdue :
+
+    - **Le découpage porte sur des GROUPES de quasi-doublons**, jamais sur des
+      images isolées (voir `grouper_quasi_doublons`). Sans cela la validation
+      fuit et son chiffre ne veut rien dire.
+    - **Un split `test` est réservé d'emblée.** Les deux campagnes précédentes
+      n'en avaient aucun : faute d'images jamais vues, le verdict reposait sur
+      un proxy — le taux de déclenchement sur un jeu qui n'annote même pas le
+      concept. Un jeu de test se prévoit avant d'entraîner, pas après.
+
+    La stratification se fait sur la classe la plus rare présente dans le
+    groupe : un tirage naïf peut vider le test de sa classe négative et rendre
+    la mesure ininterprétable.
     """
-    par_classe: dict[int, list] = {i: [] for i in range(len(noms))}
+    entrees = []
     for src in spec["sources"]:
         for split_src in src["splits"]:
             for img, boites in collecter(src, split_src):
-                cle_strate = min(c for c, _ in boites)
-                par_classe[cle_strate].append((src["jeu"], img, boites))
+                entrees.append((src["jeu"], img, boites))
 
-    part = spec["repartition"]
-    for strate, lot in par_classe.items():
-        rng.shuffle(lot)
-        coupe = int(len(lot) * part)
-        print(f"  strate {noms[strate]:<16} {len(lot):>5} images "
-              f"-> train {coupe}, val {len(lot) - coupe}")
-        for i, (jeu, img, boites) in enumerate(lot):
-            split = "train" if i < coupe else "val"
-            total[split] += 1
-            for c, _ in boites:
-                instances[c] += 1
-            if not simulation:
-                _ecrire(dest, split, jeu, img, boites)
+    print(f"  regroupement des quasi-doublons sur {len(entrees)} images ...")
+    groupes = grouper_quasi_doublons(entrees)
+    par_groupe: dict[int, list] = {}
+    for entree, g in zip(entrees, groupes):
+        par_groupe.setdefault(g, []).append(entree)
+    print(f"  {len(par_groupe)} groupes independants "
+          f"({len(entrees) - len(par_groupe)} images redondantes absorbees)")
+
+    # Strate d'un groupe : la classe la plus rare qu'il contient, pour que les
+    # classes minoritaires soient reparties dans les trois splits.
+    strates: dict[int, list] = {i: [] for i in range(len(noms))}
+    for g, lot in par_groupe.items():
+        presentes = {c for _, _, boites in lot for c, _ in boites}
+        strates[max(presentes)].append(lot)
+
+    part_train = spec["repartition"]
+    part_test = spec.get("repartition_test", 0.15)
+    for strate, groupes_strate in strates.items():
+        rng.shuffle(groupes_strate)
+        n_images = sum(len(lot) for lot in groupes_strate)
+
+        # Repartition par VOLUME D'IMAGES, pas par nombre de groupes. Les
+        # groupes sont de tailles tres inegales -- une camera de surveillance
+        # peut en fournir un de plusieurs centaines d'images quasi identiques,
+        # quand une photo isolee en fait un a lui seul. Compter les groupes
+        # donnait 490 images d'entrainement pour 759 de validation sur la classe
+        # negative (constate le 2026-08-19) : un seul gros groupe suffisait a
+        # renverser la proportion.
+        # Les groupes sont donc servis du plus gros au plus petit, chacun au
+        # split le plus en retard sur son quota. Le groupe reste entier -- c'est
+        # la regle qu'on ne negocie pas -- mais les proportions sont tenues.
+        quotas = {"test": n_images * part_test}
+        quotas["train"] = (n_images - quotas["test"]) * part_train
+        quotas["val"] = n_images - quotas["test"] - quotas["train"]
+        compte = {"train": 0, "val": 0, "test": 0}
+        for lot in sorted(groupes_strate, key=len, reverse=True):
+            split = min(compte, key=lambda s: (compte[s] - quotas[s]) / max(quotas[s], 1))
+            for jeu, img, boites in lot:
+                compte[split] += 1
+                total[split] += 1
+                for c, _ in boites:
+                    instances[c] += 1
+                if not simulation:
+                    _ecrire(dest, split, jeu, img, boites)
+        print(f"  strate {noms[strate]:<16} {len(groupes_strate):>5} groupes / "
+              f"{n_images:>5} images -> train {compte['train']}, "
+              f"val {compte['val']}, test {compte['test']}")
 
     fonds = ajouter_fonds(dest, total, rng, simulation)
     print(f"\n  train {total['train'] + fonds['train']:>6}   "
           f"val {total['val'] + fonds['val']:>6}   "
+          f"test {total['test']:>6}   "
           f"(dont {fonds['train'] + fonds['val']} images de fond)")
     print("  " + "   ".join(f"{noms[c]}={v}" for c, v in sorted(instances.items())))
     if simulation:
         return 0
+    # `test` est declare mais n'est PAS utilise a l'entrainement : il ne sert
+    # qu'au jugement, sur des images qu'aucun gradient n'a vues.
     (dest / "data.yaml").write_text(
-        f"path: {dest}\ntrain: train/images\nval: val/images\n\n"
+        f"path: {dest}\ntrain: train/images\nval: val/images\ntest: test/images\n\n"
         f"nc: {len(noms)}\nnames: {noms}\n", encoding="utf-8")
     print(f"\n  -> {dest}")
     return 0
@@ -328,7 +458,7 @@ def construire(cle: str, simulation: bool) -> int:
         print(f"deja present : {dest} -- suppression avant reconstruction")
         shutil.rmtree(dest)
 
-    total = {"train": 0, "val": 0}
+    total = {"train": 0, "val": 0, "test": 0}
     instances = {i: 0 for i in range(len(noms))}
 
     if spec.get("repartition"):

@@ -108,6 +108,27 @@ ppe_detection/models/epi_gants_lunettes.pt
 
 
 ──────────────────────────────────────────────────────────────────────────
+EPI — chaussures de sécurité dédiées  —  2 classes
+ppe_detection/models/epi_chaussures.pt
+
+  mesuré le 2026-08-19 sur epi_chaussures/test -- 851 images reservees AVANT l'entrainement, 1946 objets
+  mAP@50 global : 0.7226
+
+   0  safety_shoe      chaussures de sécurité     AP 0.814
+   1  NO-safety_shoe                              AP 0.632
+
+  Seul modèle du parc couvrant ce concept avec une classe NÉGATIVE, donc capable de signaler l'infraction et pas seulement de confirmer le port.
+  Ses deux seuils sont volontairement inégaux (`improvements/ppe_taxonomy.py`) : affirmer à tort une conformité masque une infraction, alors qu'une fausse alerte ne coûte qu'une vérification.
+  Il DÉPEND de l'ancrage à la personne.
+
+  Seul modele du parc couvrant la chaussure de securite avec une classe NEGATIVE.
+  Troisieme essai : les deux premiers ont ete rejetes pour confusion entre chaussure et chaussure de securite (reports/v3_results/chaussures_candidat_2026081*_rejete.json).
+  SEUILS ASYMETRIQUES DELIBERES (ppe_taxonomy.py M6) : 0.50 sur safety_shoe, 0.35 sur NO-safety_shoe -- affirmer a tort une conformite masque une infraction, se tromper sur une infraction ne coute qu'une fausse alerte.
+  DEPEND DE L'ANCRAGE : mesure nu il declenche sur 59 % des images de ppe_dataset (visages, cones, carrosseries), 1,0 % apres ancrage a la personne (improvements/p18_ancrage_chaussures.py).
+  LIMITE CONNUE : il confond encore basket de ville et chaussure de securite, et son rappel de 0.578 sur NO-safety_shoe lui fait manquer 4 infractions sur 10.
+
+
+──────────────────────────────────────────────────────────────────────────
 EPI — modèle complémentaire  —  6 classes
 ppe_detection/models/ppe_complement.pt
 

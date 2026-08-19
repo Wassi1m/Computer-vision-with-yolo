@@ -173,7 +173,37 @@ M5 = {
     "NO-Goggles":  Correspondance("lunettes", False, 0.15),
 }
 
-TABLES = {M1_NOM: M1, M2_NOM: M2, M3_NOM: M3, M4_NOM: M4, M5_NOM: M5}
+# ── M6 : epi_chaussures.pt — 2 classes dédiées ──────────────────────────────
+# Entraîné le 2026-08-19, au TROISIEME essai. Les deux premiers ont été rejetés
+# et le detail de chaque rejet est conserve dans reports/v3_results/ :
+# le modele confondait chaussure et chaussure DE SECURITE, faute de sources
+# opposant les deux. Trois jeux ajoutes ont corrige cela.
+#
+# Mesure sur un jeu de test de 851 images reservees AVANT l'entrainement --
+# les deux campagnes precedentes n'en avaient aucun et se jugeaient sur un
+# proxy : AP50 0.814 / 0.632, precision 0.841 / 0.906.
+#
+# ⚠️ SEUILS ASYMETRIQUES, ET C'EST DELIBERE.
+# Les deux classes n'ont pas la meme gravite en cas d'erreur. `safety_shoe`
+# affirme une CONFORMITE : s'y tromper -- prendre une basket de ville pour une
+# chaussure de securite, ce que ce modele fait encore -- fabrique une fausse
+# conformite, et masque une infraction reelle. `NO-safety_shoe` ne produit
+# qu'une fausse alerte, genante mais sans danger. D'ou 0.50 sur la premiere et
+# 0.35 sur la seconde : on prefere manquer une conformite que d'en inventer une.
+#
+# ⚠️ Ce modele DEPEND de l'ancrage a la personne pour etre exploitable.
+# Mesure nu, il declenche sur 59 % des images de ppe_dataset (visages, cones,
+# carrosseries) ; apres ancrage, sur 1,0 % (improvements/p18_ancrage_chaussures.py).
+# La regle qui le sauve est PLAGES_ANATOMIQUES["chaussures"] = (0.55, 1.10)
+# dans qualification.py. Lancer le moteur avec --sans-ancrage-epi rendrait ce
+# modele inutilisable.
+M6_NOM = "epi_chaussures.pt"
+M6 = {
+    "safety_shoe":    Correspondance("chaussures", True,  0.50),
+    "NO-safety_shoe": Correspondance("chaussures", False, 0.35),
+}
+
+TABLES = {M1_NOM: M1, M2_NOM: M2, M3_NOM: M3, M4_NOM: M4, M5_NOM: M5, M6_NOM: M6}
 
 # Concepts que M2 apporte et que M1 ne couvre pas.
 APPORT_UNIQUE_M2 = sorted(
@@ -196,7 +226,11 @@ PRIORITE_MODELE = {
     "lunettes":   (M5_NOM, M1_NOM, M2_NOM),
     "gilet":      (M3_NOM, M1_NOM, M2_NOM),
     "gants":      (M5_NOM, M1_NOM, M2_NOM),
-    "chaussures": (M2_NOM,),
+    # M6 est le seul modele du parc qui sache dire l'ABSENCE de chaussure de
+    # securite. M2 reste derriere lui en filet, mais sans classe negative et
+    # sans mesure exploitable : son `safety_shoe` n'a jamais pu etre evalue,
+    # `ppe_dataset` n'annotant aucune chaussure.
+    "chaussures": (M6_NOM, M2_NOM),
 }
 
 
@@ -302,6 +336,7 @@ if __name__ == "__main__":
     print(f"{M3_NOM} : {len(M3)} classes -> concepts {sorted({c.epi for c in M3.values() if c.epi})}")
     print(f"{M4_NOM} : {len(M4)} classes -> concepts {sorted({c.epi for c in M4.values() if c.epi})}")
     print(f"{M5_NOM} : {len(M5)} classes -> concepts {sorted({c.epi for c in M5.values() if c.epi})}")
+    print(f"{M6_NOM} : {len(M6)} classes -> concepts {sorted({c.epi for c in M6.values() if c.epi})}")
     print(f"\nApport unique de {M2_NOM} : {APPORT_UNIQUE_M2 or 'aucun'}")
     print(f"Classes negatives dans {M2_NOM} : "
           f"{[c for c, v in M2.items() if v.porte is False] or 'aucune'}")

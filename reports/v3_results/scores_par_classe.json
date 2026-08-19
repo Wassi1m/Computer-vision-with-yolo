@@ -195,5 +195,23 @@
     },
     "mAP50": 0.954,
     "note": "Modele dedie, prioritaire sur ppe_detector.pt pour gants et lunettes dans la cascade (improvements/ppe_taxonomy.py, M5). Il bat ppe_detector.pt sur les QUATRE classes. Un premier candidat du 2026-08-17 avait ete REJETE (il perdait sur trois classes sur quatre) faute de contenir des images de ppe_dataset : il avait appris un seul domaine puis avait ete juge dans un autre. Detail dans reports/v3_results/gants_candidat.json ; le candidat rejete est conserve dans gants_candidat_20260817.json."
+  },
+  "epi_chaussures.pt": {
+    "jeu_ap50": "epi_chaussures/test -- 851 images reservees AVANT l'entrainement, 1946 objets",
+    "date": "2026-08-19",
+    "classes": {
+      "safety_shoe": {
+        "ap50": 0.8135,
+        "precision": 0.8411,
+        "rappel": 0.7465
+      },
+      "NO-safety_shoe": {
+        "ap50": 0.6316,
+        "precision": 0.9058,
+        "rappel": 0.5781
+      }
+    },
+    "mAP50": 0.7226,
+    "note": "Seul modele du parc couvrant la chaussure de securite avec une classe NEGATIVE. Troisieme essai : les deux premiers ont ete rejetes pour confusion entre chaussure et chaussure de securite (reports/v3_results/chaussures_candidat_2026081*_rejete.json). SEUILS ASYMETRIQUES DELIBERES (ppe_taxonomy.py M6) : 0.50 sur safety_shoe, 0.35 sur NO-safety_shoe -- affirmer a tort une conformite masque une infraction, se tromper sur une infraction ne coute qu'une fausse alerte. DEPEND DE L'ANCRAGE : mesure nu il declenche sur 59 % des images de ppe_dataset (visages, cones, carrosseries), 1,0 % apres ancrage a la personne (improvements/p18_ancrage_chaussures.py). LIMITE CONNUE : il confond encore basket de ville et chaussure de securite, et son rappel de 0.578 sur NO-safety_shoe lui fait manquer 4 infractions sur 10."
   }
 }

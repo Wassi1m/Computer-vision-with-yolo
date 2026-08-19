@@ -43,9 +43,37 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parents[1]
-DEST = RACINE / "ppe_detection/data/extracted/sources_roboflow/safety_shoes_alqulayti"
-ESPACE, PROJET = "ahmed-alqulayti", "safety-shoes-dataset"
-CLASSES = ["safety_shoe", "person"]
+SOURCES = RACINE / "ppe_detection/data/extracted/sources_roboflow"
+
+# Projets sans version exportable rencontres sur ce projet. Le cas n'est pas
+# marginal : deux des jeux les plus utiles pour `safety_shoe` sont dans ce cas,
+# et ce sont justement ceux que personne n'a pris la peine de versionner.
+#
+# `classes` fixe AUSSI l'ordre des indices YOLO du jeu reconstruit : toute
+# classe absente de cette liste est ignoree a l'ecriture, jamais devinee.
+PROJETS = {
+    "alqulayti": {
+        "espace": "ahmed-alqulayti", "projet": "safety-shoes-dataset",
+        "dest": "safety_shoes_alqulayti",
+        # `person` est conservee ici pour des raisons historiques : p13 ne
+        # retient que l'indice 0 de ce jeu.
+        "classes": ["safety_shoe", "person"],
+    },
+    # Ajoute le 2026-08-19. C'est LE jeu qui manquait : 712 instances
+    # `no_safety-shoe` contre 380 dans tout le corpus precedent. Le modele
+    # rejete le 19 aout confondait basket de ville et chaussure de securite
+    # faute d'avoir jamais vu les deux opposees ; ce jeu les oppose.
+    "vertical_farming": {
+        "espace": "vertical-farming-tvyjl", "projet": "safety_shoe-eimup-mn0qq",
+        "dest": "safety_shoe_vertical_farming",
+        "classes": ["safety-shoe", "no_safety-shoe"],
+    },
+}
+
+# Renseignes par main() a partir du projet choisi.
+DEST: Path = SOURCES
+ESPACE = PROJET = ""
+CLASSES: list[str] = []
 
 
 def _json(url: str, payload: dict | None = None, essais: int = 3) -> dict:
@@ -88,6 +116,13 @@ def recuperer_une(iid: str, cle: str) -> str:
     boites, L, H = ann.get("boxes", []), ann.get("width"), ann.get("height")
     if not boites or not L or not H:
         return "sans_annotation"
+    # L'API n'est PAS homogene d'un projet a l'autre : `ahmed-alqulayti` rend
+    # des nombres, `vertical-farming` des chaines ("2088.50"). Sans cette
+    # conversion, la division leve TypeError -- 793 images sur 1310 perdues au
+    # premier passage du 2026-08-19, sans que le compteur d'erreurs dise
+    # pourquoi. On convertit donc systematiquement plutot que de faire
+    # confiance au type recu.
+    L, H = float(L), float(H)
 
     # `valid` est le nom Roboflow, conserve tel quel : p13 le lit sous ce nom.
     split = im.get("split", "train")
@@ -104,8 +139,10 @@ def recuperer_une(iid: str, cle: str) -> str:
         # Pixels centre+dimensions -> YOLO normalise. Bornage a [0,1] : quelques
         # boites Roboflow debordent legerement du cadre et Ultralytics rejette
         # le fichier entier si une valeur sort de l'intervalle.
-        x, y = min(max(b["x"] / L, 0.0), 1.0), min(max(b["y"] / H, 0.0), 1.0)
-        w, h = min(b["width"] / L, 1.0), min(b["height"] / H, 1.0)
+        bx, by = float(b["x"]), float(b["y"])
+        bw, bh = float(b["width"]), float(b["height"])
+        x, y = min(max(bx / L, 0.0), 1.0), min(max(by / H, 0.0), 1.0)
+        w, h = min(bw / L, 1.0), min(bh / H, 1.0)
         if w <= 0 or h <= 0:
             continue
         lignes.append(f"{CLASSES.index(b['label'])} {x:.6f} {y:.6f} {w:.6f} {h:.6f}")
@@ -130,11 +167,19 @@ def recuperer_une(iid: str, cle: str) -> str:
 
 
 def main() -> int:
+    global DEST, ESPACE, PROJET, CLASSES
     ap = argparse.ArgumentParser()
     ap.add_argument("--cle", required=True)
+    ap.add_argument("--projet", choices=list(PROJETS), default="alqulayti",
+                    help="jeu a reconstruire (voir PROJETS en tete de fichier)")
     ap.add_argument("--fils", type=int, default=8,
                     help="telechargements simultanes ; au-dela l'API limite")
     args = ap.parse_args()
+
+    spec = PROJETS[args.projet]
+    ESPACE, PROJET = spec["espace"], spec["projet"]
+    CLASSES = spec["classes"]
+    DEST = SOURCES / spec["dest"]
 
     print(f"enumeration de {ESPACE}/{PROJET} ...")
     ids = enumerer(args.cle)

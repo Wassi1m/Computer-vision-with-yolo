@@ -1,0 +1,376 @@
+{
+  "jeu": "chaussures",
+  "images_par_classe": {
+    "safety_shoe": 4928,
+    "NO-safety_shoe": 1275
+  },
+  "par_source": {
+    "ppes": {
+      "safety_shoe": 420,
+      "NO-safety_shoe": 365
+    },
+    "safety_shoes_detection": {
+      "safety_shoe": 400,
+      "NO-safety_shoe": 15
+    },
+    "safety_shoes_alqulayti": {
+      "safety_shoe": 1089,
+      "NO-safety_shoe": 0
+    },
+    "safety_shoe_xszud": {
+      "safety_shoe": 483,
+      "NO-safety_shoe": 465
+    },
+    "safety_shoes_nedrick": {
+      "safety_shoe": 1436,
+      "NO-safety_shoe": 46
+    },
+    "safety_shoe_vertical_farming": {
+      "safety_shoe": 1100,
+      "NO-safety_shoe": 384
+    }
+  },
+  "photos_origine_par_source": {
+    "ppes": 488,
+    "safety_shoes_detection": 173,
+    "safety_shoes_alqulayti": 1089,
+    "safety_shoe_xszud": 315,
+    "safety_shoes_nedrick": 541,
+    "safety_shoe_vertical_farming": 1240
+  },
+  "alertes": [
+    "4 source(s) augmentee(s) : le decoupage train/val DOIT se faire par photo d'origine, pas par fichier, sinon la mAP de validation mesurera de la memorisation"
+  ],
+  "echantillon": [
+    {
+      "jeu": "ppes",
+      "classe": "safety_shoe",
+      "fichier": "ppes__safety_shoe__frame1170_jpg.rf.78066cde4d2.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "safety_shoe",
+      "fichier": "ppes__safety_shoe__frame1113--2-_jpg.rf.13bdb2c.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "safety_shoe",
+      "fichier": "ppes__safety_shoe__frame1188_jpg.rf.6fd4b9c3fc5.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "safety_shoe",
+      "fichier": "ppes__safety_shoe__frame12_jpg.rf.e2da9bf7410be.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "safety_shoe",
+      "fichier": "ppes__safety_shoe__PPE_Data_549_jpg.rf.6d883f0f.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "safety_shoe",
+      "fichier": "ppes__safety_shoe__frame1234_jpg.rf.f806da794ba.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "NO-safety_shoe",
+      "fichier": "ppes__NO-safety_shoe__frame1269_jpg.rf.035a572bd19.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "NO-safety_shoe",
+      "fichier": "ppes__NO-safety_shoe__frame1228_jpg.rf.f34b22709e6.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "NO-safety_shoe",
+      "fichier": "ppes__NO-safety_shoe__frame1177_jpg.rf.9def2f22f8b.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "NO-safety_shoe",
+      "fichier": "ppes__NO-safety_shoe__frame1265_jpg.rf.71bc69eb432.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "NO-safety_shoe",
+      "fichier": "ppes__NO-safety_shoe__frame1204_jpg.rf.51a6cbe87f8.jpg"
+    },
+    {
+      "jeu": "ppes",
+      "classe": "NO-safety_shoe",
+      "fichier": "ppes__NO-safety_shoe__frame1364_jpg.rf.6d44e5e2cd5.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__safety_shoe__XMZIpggXJP4F2xfNzMMZ.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__safety_shoe__DnVhVjw9EWr0ebs5zzMM.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__safety_shoe__KJjrRmnmhtj2Kl2ztZsc.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__safety_shoe__idQUvEZQBdJ0g0a6TSKQ.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__safety_shoe__KS8snDqQLxLbWcEErvIc.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__safety_shoe__DIWeYYRciK5uXgSLPM2q.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__NO-safety_shoe__Vps634teWVaiuqwmiVja.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__NO-safety_shoe__RCrO1R7xbHn6pqpiTy4L.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__NO-safety_shoe__wEeCQeAylP1i4fux5lQ8.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__NO-safety_shoe__ISxJSY38K2K1Ms6p89SV.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__NO-safety_shoe__NmkP4n2fnd1EcZtfe8Yz.jpg"
+    },
+    {
+      "jeu": "safety_shoe_vertical_farming",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_vertical_farming__NO-safety_shoe__CzuwlJEcRyf4LQ8L2FY3.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_xszud__safety_shoe__S2-N2301M00556_jpg.rf.ec2324.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_xszud__safety_shoe__------24-_png.rf.e7978e6762e.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_xszud__safety_shoe__S2-N2301M33999_jpg.rf.14752a.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_xszud__safety_shoe__------20-_png.rf.1219a86d405.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_xszud__safety_shoe__images--4-_png.rf.7a801bab55.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoe_xszud__safety_shoe__images--24-_png.rf.44276c6d2.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_xszud__NO-safety_shoe__IMG_9386_JPG.rf.5cc5ad056379.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_xszud__NO-safety_shoe__------83-_png.rf.c8981c87fa6.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_xszud__NO-safety_shoe__IMG_9349_JPG.rf.3533c0a5709c.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_xszud__NO-safety_shoe__IMG_9365_JPG.rf.466b8cdeeca2.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_xszud__NO-safety_shoe__------43-_png.rf.7bf727dad15.jpg"
+    },
+    {
+      "jeu": "safety_shoe_xszud",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoe_xszud__NO-safety_shoe__------87-_png.rf.2811e38226e.jpg"
+    },
+    {
+      "jeu": "safety_shoes_alqulayti",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_alqulayti__safety_shoe__C4JSeejLHoxzINqGwrcj.jpg"
+    },
+    {
+      "jeu": "safety_shoes_alqulayti",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_alqulayti__safety_shoe__ijcgUkoN2ufngFKmLnLA.jpg"
+    },
+    {
+      "jeu": "safety_shoes_alqulayti",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_alqulayti__safety_shoe__Sct83XA6Wxlr8WBAByYq.jpg"
+    },
+    {
+      "jeu": "safety_shoes_alqulayti",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_alqulayti__safety_shoe__yYtBVcr4gHe7M3RCdDDJ.jpg"
+    },
+    {
+      "jeu": "safety_shoes_alqulayti",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_alqulayti__safety_shoe__O4xe6SsWmCvvc4qahJN2.jpg"
+    },
+    {
+      "jeu": "safety_shoes_alqulayti",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_alqulayti__safety_shoe__qLKEfgDFgQqUhgZBxS9j.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_detection__safety_shoe__160_jpg.rf.981212d77160ea463.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_detection__safety_shoe__112_jpg.rf.4c670f425e60a84d2.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_detection__safety_shoe__59_jpg.rf.3c7286ee40a4cc5127.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_detection__safety_shoe__102_jpg.rf.a395664c5341aaa81.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_detection__safety_shoe__119_jpg.rf.f2aba5333e57c90cf.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_detection__safety_shoe__179_jpg.rf.076649453b51c2534.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_detection__NO-safety_shoe__152_jpg.rf.6fca42cded5ee664f.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_detection__NO-safety_shoe__171_jpg.rf.647b3c577f0b3d6c8.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_detection__NO-safety_shoe__172_jpg.rf.7ddae6b449dbe565e.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_detection__NO-safety_shoe__172_jpg.rf.58ac200e0eb6f4c85.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_detection__NO-safety_shoe__25_jpg.rf.94e37ca220f3128ff1.jpg"
+    },
+    {
+      "jeu": "safety_shoes_detection",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_detection__NO-safety_shoe__151_jpg.rf.0cd738238a6905d96.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_nedrick__safety_shoe__587_jpg.rf.e762aec30eff02f23.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_nedrick__safety_shoe__453_jpg.rf.dd2d45fd26472c241.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_nedrick__safety_shoe__350_jpg.rf.7714cb4543e1f50f5.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_nedrick__safety_shoe__294_jpg.rf.51e2b2009c9d0af41.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_nedrick__safety_shoe__346_jpg.rf.1a23ade4188b53ed7.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "safety_shoe",
+      "fichier": "safety_shoes_nedrick__safety_shoe__157_jpg.rf.dd1cf24120b96af2c.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_nedrick__NO-safety_shoe__217_jpg.rf.3edb510d5755d5f3c.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_nedrick__NO-safety_shoe__402_jpg.rf.51e0998ee0703295c.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_nedrick__NO-safety_shoe__217_jpg.rf.e94aa362279a29b7a.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_nedrick__NO-safety_shoe__218_jpg.rf.037a578eb936b19bc.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_nedrick__NO-safety_shoe__172_jpg.rf.804584bcb1eb2df10.jpg"
+    },
+    {
+      "jeu": "safety_shoes_nedrick",
+      "classe": "NO-safety_shoe",
+      "fichier": "safety_shoes_nedrick__NO-safety_shoe__401_jpg.rf.70909325e2daefb9c.jpg"
+    }
+  ]
+}

@@ -701,7 +701,7 @@ class AnalyseurEPI(Analyseur):
     nom = "epi"
 
     def __init__(self, poids_m1, poids_m2=None, poids_m3=None, poids_m4=None,
-                 poids_m5=None, imgsz=480, every=3,
+                 poids_m5=None, poids_m6=None, imgsz=480, every=3,
                  hist_n=12, hist_k=4, ancrage=True):
         from ultralytics import YOLO
         # Derriere un drapeau, comme toute regle de qualification : elle rejette
@@ -725,9 +725,19 @@ class AnalyseurEPI(Analyseur):
         # Tous restent optionnels : M1 est le filet de secours de la cascade.
         self.m4 = YOLO(poids_m4) if poids_m4 else None
         self.m5 = YOLO(poids_m5) if poids_m5 else None
+        # M6 : chaussures de securite, seul modele du parc a couvrir ce concept
+        # avec une classe negative. Il DEPEND de l'ancrage pour etre exploitable
+        # (voir son commentaire dans ppe_taxonomy.py) : charge sans ancrage, il
+        # declenche sur 59 % des images au lieu de 1 %.
+        self.m6 = YOLO(poids_m6) if poids_m6 else None
+        if self.m6 is not None and not ancrage:
+            print("  /!\\ epi_chaussures.pt est charge alors que l'ancrage est "
+                  "desactive : ce modele produit alors des detections aberrantes "
+                  "(visages, cones). Voir p18_ancrage_chaussures.py.")
         modeles_charges = {tax.M1_NOM: self.m1.names}
         for nom, modele in ((tax.M2_NOM, self.m2), (tax.M3_NOM, self.m3),
-                            (tax.M4_NOM, self.m4), (tax.M5_NOM, self.m5)):
+                            (tax.M4_NOM, self.m4), (tax.M5_NOM, self.m5),
+                            (tax.M6_NOM, self.m6)):
             if modele is not None:
                 modeles_charges[nom] = modele.names
         erreurs = tax.verifier_coherence(modeles_charges)
@@ -765,7 +775,7 @@ class AnalyseurEPI(Analyseur):
         brutes = []
         for nom_modele, model in ((tax.M1_NOM, self.m1), (tax.M2_NOM, self.m2),
                                   (tax.M3_NOM, self.m3), (tax.M4_NOM, self.m4),
-                                  (tax.M5_NOM, self.m5)):
+                                  (tax.M5_NOM, self.m5), (tax.M6_NOM, self.m6)):
             if model is None:
                 continue
             for b in model.predict(frame, conf=seuil_bas, imgsz=self.imgsz, verbose=False)[0].boxes:
@@ -1411,6 +1421,7 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
             dedie("masque_gilet.pt", args.sans_masque_gilet),
             dedie("epi_casque.pt", args.sans_casque),
             dedie("epi_gants_lunettes.pt", args.sans_gants_lunettes),
+            dedie("epi_chaussures.pt", args.sans_chaussures),
             args.imgsz, args.every_epi, ancrage=not args.sans_ancrage_epi)
     ajouter("epi", _epi)
 
@@ -1504,6 +1515,10 @@ def main():
     ap.add_argument("--sans-gants-lunettes", action="store_true",
                     help="retire epi_gants_lunettes.pt de la cascade EPI (revient a "
                          "ppe_detector.pt seul pour gants et lunettes)")
+    ap.add_argument("--sans-chaussures", action="store_true",
+                    help="retire epi_chaussures.pt de la cascade EPI ; le concept "
+                         "'chaussures' n'est alors plus couvert que par ppe_complement.pt, "
+                         "qui ne sait pas signaler une absence")
     ap.add_argument("--disable", default="", help="analyseurs a desactiver, separes par des virgules")
     # Headless par defaut : c'est le mode de production. L'affichage reste
     # disponible a la demande pour les tests, les demonstrations client et le

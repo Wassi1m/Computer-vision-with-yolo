@@ -92,12 +92,17 @@ MODELES = {
     # sur-apprentissage étant ici le risque principal. Le critère qui décide
     # n'est pas l'AP mais le taux de FAUX POSITIFS : une chaussure hallucinée
     # vaut moins que pas de classe du tout.
+    # Budget revu le 2026-08-19 : le jeu est passe de 938 a 5 142 images
+    # d'entrainement (trois sources ajoutees, cf. son PROVENANCE.txt). A 150
+    # epoques il demanderait une douzaine d'heures et serait coupe par la limite
+    # Kaggle ; 60 epoques suffisent pour un fine-tuning partant de
+    # `ppe_detector.pt`, et `time=` reste le garde-fou.
     "chaussures": {
         "run": "epi_chaussures",
         "nc": 2,
         "marqueur": "NO-safety_shoe",
-        "heures": 2.0,
-        "epochs": 150,
+        "heures": 5.0,
+        "epochs": 60,
     },
 }
 

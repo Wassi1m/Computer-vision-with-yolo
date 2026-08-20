@@ -1,41 +1,66 @@
-# computer-vision-with-yolo
+# Moteur de détection — EPI et sécurité de site
 
-Two YOLO-based computer vision projects.
+Moteur de vision par ordinateur qui analyse **un** flux vidéo et publie des
+évènements : port des EPI, feu et fumée, chute, franchissement de ligne, objet
+abandonné, affluence, plaque d'immatriculation, état de porte.
 
-## ppe_detection/
+Le rôle de ce dépôt s'arrête à la détection. Les alertes, les tableaux de bord
+et l'exploitation métier appartiennent à la plateforme qui consomme ces
+évènements, via le contrat décrit dans `docs/contrat_api.md`.
 
-Personal protective equipment (PPE) detection.
+## Point d'entrée
 
-- `models/` — trained weights (`best.pt`, `best_gloves.pt`, `yolov8n.pt`)
-- `scripts/` — training/inference/validation scripts
-- `docs/` — setup notes and model datasheet
-- `data/` — local-only datasets (gitignored, not pushed)
+Un seul, quel que soit le module :
 
-Setup:
+```bash
+python improvements/unified_surveillance.py --source rtsp://… \
+    --camera-id cam-quai-3 --webhook https://… --health-port 8080
 ```
-cd ppe_detection
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
+
+Les deux applications d'origine (`ppe_detection/` et `surveillance_suite/`)
+ouvraient chacune leur propre caméra. Elles ne sont plus des points d'entrée :
+ce qui subsiste de `surveillance_suite/` est la bibliothèque de modules que le
+moteur unifié charge, et de `ppe_detection/` les poids et les jeux de données.
+
+## Documentation
+
+| Fichier | Contenu |
+|---|---|
+| `docs/contrat_api.md` | Format des évènements, garanties de livraison, `/health` et `/metrics`. **À lire avant toute intégration.** |
+| `docs/exploitation.md` | Déploiement, configuration, surveillance, diagnostic |
+| `docs/catalogue_detections.md` | Ce que chaque module détecte, et ce qu'il vaut |
+| `docs/registre_modeles.md` | Origine, version et métriques de chaque poids |
+| `docs/manifeste_modeles.json` | Empreinte SHA-256 des poids en production |
+
+## Modèles
+
+Les poids `.pt` (142 Mo) ne sont **pas** versionnés dans git. Ce qui fait
+référence, c'est `docs/manifeste_modeles.json` et `tests/reference_modeles.json` :
+empreintes et métriques, committées même quand le binaire ne l'est pas.
+
+```bash
+python outils/verifier_modeles.py --verifier   # les poids en place sont-ils les bons ?
 ```
 
-## surveillance_suite/
+## Vérifications
 
-Multi-module surveillance system: fire/smoke detection, fall detection,
-virtual line crossing, license plate recognition, and door state detection.
-
-- `models/` — trained weights
-- `modules/` — detection modules used by `main.py`
-- `detectors/` — standalone detector entry points (crowd density, abandoned object)
-- `evaluation/` — evaluation scripts
-- `training/` — training scripts
-- `legacy/` — superseded entry points, kept for reference
-- `main.py` — current entry point (threaded, frame-skipping, optimized)
-- `data/` — local-only dataset (gitignored, not pushed)
-
-Setup:
+```bash
+pytest tests/test_logique_metier.py tests/test_integration.py -q   # rapide, sans modèle
+python tests/test_non_regression.py                                # lent, charge les modèles
+python improvements/p19_mesure_cascade.py --n 400                  # mesure de la cascade EPI
 ```
-cd surveillance_suite
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-python main.py
+
+Les deux premiers tournent à chaque poussée (`.github/workflows/tests.yml`).
+Les deux derniers sont manuels : ils ont besoin des poids, absents du dépôt.
+
+## Conteneurs
+
+```bash
+docker build -t moteur-epi:cpu .                         # CPU
+docker build -f Dockerfile.gpu -t moteur-epi:gpu .       # GPU (NVIDIA)
+docker run --gpus all -p 8080:8080 moteur-epi:gpu --source rtsp://…
 ```
+
+L'image CPU épingle `torch+cpu` : sur un serveur GPU elle ignore la carte sans
+rien signaler. C'est la raison d'être de `Dockerfile.gpu` et du drapeau
+`--verifier-gpu`, qui refuse de démarrer si CUDA est indisponible.

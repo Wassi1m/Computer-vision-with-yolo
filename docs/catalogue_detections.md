@@ -230,9 +230,32 @@ aval (`module_lpr.py`).
 **Modèle** : `surveillance_suite/models/door_classifier.pt` — classificateur
 YOLO11n-cls, 3 classes : `Open`, `Closed`, `Semi` (entrouverte).
 
-**Aucune métrique de référence.** Ce modèle n'est pas couvert par
-`test_non_regression.py`. Sa fiabilité est inconnue et il ne devrait pas être
-présenté comme validé.
+**Mesuré le 2026-08-20** sur les 283 images du split `test` du jeu Roboflow,
+jamais vues à l'entraînement (`python tests/mesure_porte.py`) :
+
+| | rappel | images |
+|---|---|---|
+| `open` | 96,8 % | 93 |
+| `closed` | 97,8 % | 90 |
+| `semi` | 97,0 % | 100 |
+| **exactitude globale** | **97,2 %** | 283 |
+
+Le module ne publie pas trois états mais **ouvert / fermé** : une porte
+entrebâillée (`semi`) est publiée comme **fermée**. Sur cette décision-là,
+celle que la plateforme reçoit réellement : 96,8 % des portes ouvertes
+détectées, 1,1 % de fausses ouvertures.
+
+Deux réserves à connaître :
+
+- **Le jeu est public.** La porte du site exploité n'a jamais été mesurée. En
+  production le module recadre une ROI d'une caméra réelle, dont la
+  distribution n'a rien à voir avec ces vignettes déjà cadrées.
+- **Une prédiction sous `min_confidence` (0.6) est ignorée**, et le module
+  conserve alors son état précédent — la plateforme lit un état qui n'a pas été
+  revu. Cela concerne 1,4 % des images mesurées.
+
+Le modèle est désormais couvert par `test_non_regression.py` (entrée
+`door_classifier`) et figé dans `docs/manifeste_modeles.json`.
 
 ---
 

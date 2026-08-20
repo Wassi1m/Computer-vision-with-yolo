@@ -188,7 +188,14 @@ logique de regroupement en « incident » relève de la plateforme.
 
 ## 6. Point de santé
 
-Activé par `--health-port 8899`. Un exploitant peut alors interroger :
+Activé par `--health-port 8899`. Deux points sont alors exposés, `GET /health`
+et `GET /metrics`.
+
+**L'écoute est restreinte à la boucle locale par défaut** (`--health-adresse`,
+`127.0.0.1`) : ces points publient la source du flux, l'identité du site et
+l'état du moteur. Pour un sondage externe, ouvrir l'écoute et exiger un jeton
+(`--health-jeton`), envoyé en `Authorization: Bearer …` — même convention que le
+webhook. Sans jeton valide, la réponse est `401`.
 
 ```
 GET /health
@@ -214,6 +221,7 @@ GET /health
 |---|---|
 | `200` | Moteur sain : flux connecté **et** images analysées |
 | `503` | Moteur dégradé : flux perdu, ou aucune image analysée |
+| `401` | Jeton absent ou invalide (uniquement si `--health-jeton` est configuré) |
 
 Le champ `reconnexions` mérite d'être surveillé : une valeur qui augmente
 régulièrement signale un flux instable, même si le moteur reste « sain » à
@@ -225,6 +233,23 @@ de l'ordre du dixième de seconde sur un flux direct. `images_ignorees` compte l
 images sautées faute de temps de calcul : sa croissance est **attendue** dès que
 la caméra produit plus vite que le moteur n'analyse (voir §8), et c'est
 précisément ce qui empêche `retard_flux_s` de dériver.
+
+### `GET /metrics`
+
+Les mêmes compteurs au format d'exposition Prometheus (`text/plain;
+version=0.0.4`), étiquetés par `camera_id` et `site_id` :
+
+```
+# HELP moteur_retard_flux_secondes Age de la derniere image au moment de son analyse
+# TYPE moteur_retard_flux_secondes gauge
+moteur_retard_flux_secondes{camera_id="cam-quai-3",site_id="site-A"} 0.042
+```
+
+`/health` répond « comment va le moteur maintenant » ; `/metrics` permet de
+répondre « comment allait-il il y a une heure », ce qu'aucun instantané ne peut
+donner. Les métriques exposées couvrent la cadence, le retard du flux, les
+reconnexions, les évènements et l'état de la livraison — liste complète dans
+`docs/exploitation.md` §3.
 
 ## 7. Cycle de vie
 

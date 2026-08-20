@@ -183,7 +183,8 @@ conservé en `license_plate_pre_p8.pt` (hors dépôt, voir `.gitignore`).
 | **Rôle** | Classification `open` / `closed` / `semi` |
 | **Version** | v1 — 2026-08-07 |
 | **Données** | `Door - Open - Closed -.v1i.folder` (6 968 images Roboflow, présentes dans le dépôt mais jamais utilisées auparavant) |
-| **Métriques** | top-1 97.2 % (`test`) |
+| **Métriques** | top-1 97,2 % sur les 283 images du split `test` — **re-mesuré indépendamment le 2026-08-20** (`tests/mesure_porte.py`), le chiffre d'origine venait de la sortie d'entraînement. Rappel par classe : `open` 96,8 %, `closed` 97,8 %, `semi` 97,0 %. Décision publiée (ouvert / fermé, `semi` comptant fermé) : 96,8 % de détection, 1,1 % de fausses ouvertures. |
+| **Non-régression** | Couvert depuis le 2026-08-20 (`tests/test_non_regression.py --modele door_classifier`). Il ne l'était pas auparavant, alors qu'il tournait en production. |
 
 **À savoir** : ce module dispose aussi d'une heuristique SSIM de secours,
 utilisée automatiquement si le modèle est absent. Elle est explicitement moins

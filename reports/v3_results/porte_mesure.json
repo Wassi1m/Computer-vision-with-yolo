@@ -1,0 +1,48 @@
+{
+  "modele": "surveillance_suite/models/door_classifier.pt",
+  "jeu": "surveillance_suite/data/dataset/Door - Open - Closed -.v1i.folder/test",
+  "classes_du_modele": [
+    "Closed",
+    "Open",
+    "Semi"
+  ],
+  "images": 283,
+  "par_classe": {
+    "open": 93,
+    "closed": 90,
+    "semi": 100
+  },
+  "trois_classes": {
+    "exactitude": 0.9717,
+    "rappel": {
+      "open": 0.9677,
+      "closed": 0.9778,
+      "semi": 0.97
+    }
+  },
+  "confusion": {
+    "closed->closed": 88,
+    "closed->semi": 2,
+    "open->open": 90,
+    "open->semi": 3,
+    "semi->closed": 1,
+    "semi->open": 2,
+    "semi->semi": 97
+  },
+  "decision_publiee": {
+    "rappel_ouvert": 0.9677,
+    "fausse_alarme": 0.0105,
+    "exactitude": 0.9823,
+    "vp": 90,
+    "fp": 2,
+    "vn": 188,
+    "fn": 3
+  },
+  "min_confiance": 0.6,
+  "predictions_ignorees": 4,
+  "ignorees_par_classe": {
+    "closed": 1,
+    "semi": 3
+  },
+  "date": "2026-08-20"
+}

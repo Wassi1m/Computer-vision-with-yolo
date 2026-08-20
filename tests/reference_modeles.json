@@ -2,7 +2,7 @@
   "_documentation": {
     "role": "Métriques de référence figées, servant de garde-fou de non-régression.",
     "protocole": "Chaque modèle est mesuré sur le split `test` de son jeu de données (jamais utilisé pendant l'entraînement), à imgsz=640, device=cpu, batch=4.",
-    "usage": "python tests/test_non_regression.py  — échoue si un modèle perd plus de `tolerance_ap50` sur une classe suivie.",
+    "usage": "python tests/test_non_regression.py — échoue si un modèle perd plus de `tolerance_ap50` sur une classe suivie. La même tolérance s'applique au rappel par classe des modèles de classification (`tache: classification`).",
     "quand_mettre_a_jour": "Uniquement après avoir constaté et accepté une amélioration. Ne jamais abaisser une référence pour faire passer un test : c'est précisément la régression que ce fichier existe pour détecter.",
     "mesure_le": "2026-08-08",
     "tolerance_ap50": 0.02
@@ -53,6 +53,22 @@
         "NO-Safety Vest": 0.6839
       },
       "mAP50": 0.7946
+    },
+    "door_classifier": {
+      "poids": "surveillance_suite/models/door_classifier.pt",
+      "data": "surveillance_suite/data/dataset/Door - Open - Closed -.v1i.folder/test",
+      "split": "test",
+      "tache": "classification",
+      "origine": "Entraine le 2026-08-07 sur le jeu Roboflow « Door - Open - Closed » (6 968 images, 3 classes). Ajoute ici le 2026-08-20 : il tournait en production sans mesure de reference ni couverture de non-regression (audit, point I3). Le « top-1 97,2 % » du registre, repris de la sortie d'entrainement, a ete confirme par mesure independante sur le split test.",
+      "mesure_le": "2026-08-20",
+      "min_confiance": 0.6,
+      "classes": {
+        "open": 0.9677,
+        "closed": 0.9778,
+        "semi": 0.97
+      },
+      "top1": 0.9717,
+      "limite": "Jeu public : la porte du site exploite n'a jamais ete mesuree. Le module recadre une ROI d'une camera reelle, distribution differente de ces vignettes deja cadrees."
     }
   }
 }

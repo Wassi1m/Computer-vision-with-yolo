@@ -1030,5 +1030,120 @@ def test_une_position_legitime_est_respectee(tmp_path):
     assert w._lire_position() == milieu
 
 
+# ── Santé, métriques et journaux (audit du 2026-08-20, I5 / I7 / I8) ─────────
+
+import logging  # noqa: E402
+import urllib.error  # noqa: E402
+import urllib.request  # noqa: E402
+from unified_surveillance import EtatSante, FormatJSON, configurer_logs  # noqa: E402
+
+
+class _CapFictif:
+    connecte, reconnexions, retard_s, images_ignorees = True, 2, 0.042, 1873
+
+
+class _BusFictif:
+    total, dernier_t, sorties = 28, 1786209791.3, []
+
+    def __init__(self, camera_id='cam "quai"-3', site_id="site-A"):
+        self.camera_id, self.site_id = camera_id, site_id
+
+
+def _etat_peuple(camera_id='cam "quai"-3'):
+    e = EtatSante(["general", "epi"])
+    e.update(93, 6.234, _BusFictif(camera_id), _CapFictif())
+    return e
+
+
+def _interroger(port, chemin, jeton=None):
+    req = urllib.request.Request(f"http://127.0.0.1:{port}{chemin}")
+    if jeton:
+        req.add_header("Authorization", f"Bearer {jeton}")
+    try:
+        r = urllib.request.urlopen(req, timeout=3)
+        return r.status, r.read().decode(), r.headers.get("Content-Type")
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode(), e.headers.get("Content-Type")
+
+
+def test_le_point_de_sante_exige_son_jeton():
+    """I5 : /health publiait la source du flux et l'identité du site à qui
+    sondait le port. Le jeton doit être exigé quand il est configuré."""
+    e = _etat_peuple()
+    e.demarrer_serveur(8991, "127.0.0.1", "secret-123")
+    try:
+        assert _interroger(8991, "/health")[0] == 401
+        assert _interroger(8991, "/health", "faux")[0] == 401
+        assert _interroger(8991, "/metrics", "faux")[0] == 401
+        assert _interroger(8991, "/health", "secret-123")[0] == 200
+        assert _interroger(8991, "/inconnu", "secret-123")[0] == 404
+    finally:
+        e.arreter_serveur()
+
+
+def test_sans_jeton_configure_le_point_reste_ouvert():
+    """Le comportement d'avant reste accessible : c'est le défaut d'écoute
+    (boucle locale) qui protège, pas un jeton rendu obligatoire."""
+    e = _etat_peuple()
+    e.demarrer_serveur(8992, "127.0.0.1", "")
+    try:
+        code, corps, mime = _interroger(8992, "/health")
+        assert code == 200 and mime == "application/json"
+        assert json.loads(corps)["frames"] == 93
+    finally:
+        e.arreter_serveur()
+
+
+def test_les_metriques_sont_au_format_prometheus():
+    """I8 : /health ne donne qu'un instantané. Une cadence qui s'effondre
+    lentement ne se voit que sur une série temporelle."""
+    texte = _etat_peuple().texte_metrics()
+    lignes = texte.splitlines()
+    for attendu in ("moteur_images_analysees_total", "moteur_retard_flux_secondes",
+                    "moteur_images_ignorees_total", "moteur_sain"):
+        assert f"# TYPE {attendu} " in texte, f"{attendu} absent"
+    echantillons = [l for l in lignes if not l.startswith("#")]
+    assert echantillons and all(len(l.rsplit(" ", 1)) == 2 for l in echantillons)
+    # Chaque echantillon porte son etiquette de camera : sans elle, les series
+    # de plusieurs instances se confondent dans le collecteur.
+    assert all("camera_id=" in l for l in echantillons)
+    assert 'moteur_retard_flux_secondes{camera_id="cam \\"quai\\"-3",site_id="site-A"} 0.042' in texte
+
+
+def test_une_etiquette_a_guillemets_reste_analysable():
+    """Une valeur non échappée casserait l'analyse de TOUTE la page de
+    métriques, pas seulement de la ligne fautive."""
+    texte = _etat_peuple(camera_id='cam "3"\\nord').texte_metrics()
+    for ligne in (l for l in texte.splitlines() if not l.startswith("#")):
+        interieur = ligne[ligne.index("{") + 1:ligne.rindex("}")]
+        # Les seuls guillemets non echappes delimitent les valeurs : il en reste
+        # donc un nombre pair, et aucun ne suit un backslash impair.
+        assert interieur.count('"') % 2 == 0
+        assert "\n" not in interieur
+
+
+def test_les_journaux_json_portent_la_camera():
+    """I7 : avec plusieurs instances, « flux perdu » ne disait pas laquelle."""
+    f = FormatJSON("cam-quai-3", "site-A")
+    enr = logging.LogRecord("moteur", logging.WARNING, __file__, 1,
+                            "Flux vidéo perdu", None, None)
+    d = json.loads(f.format(enr))
+    assert d["camera_id"] == "cam-quai-3" and d["site_id"] == "site-A"
+    assert d["message"] == "Flux vidéo perdu"
+
+
+def test_un_identifiant_a_pourcent_ne_rend_pas_le_moteur_muet(capsys):
+    """Le format console de `logging` est en style % : un `%` non doublé dans
+    l'identifiant ferait échouer le formatage de CHAQUE message."""
+    anciens = logging.getLogger().handlers[:]
+    try:
+        configurer_logs("INFO", False, "cam-100%-quai", "site-A")
+        logging.getLogger("moteur").warning("Flux vidéo perdu")
+        sortie = capsys.readouterr().err
+        assert "cam-100%-quai" in sortie and "Flux vidéo perdu" in sortie
+    finally:
+        logging.getLogger().handlers[:] = anciens
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

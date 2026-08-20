@@ -38,10 +38,25 @@ ENV YOLO_CONFIG_DIR=/tmp/ultralytics \
     MOTEUR_LOG_JSON=1 \
     MOTEUR_HEALTH_PORT=8080
 
+# Utilisateur sans privilège : un moteur qui lit un flux et écrit un journal
+# n'a aucune raison d'être root. `/app/journal` lui appartient, c'est là que la
+# livraison garantie écrit ses évènements en attente. Sans cela, une faille
+# dans le décodage d'un flux — ffmpeg en traite des flux non fiables par
+# nature — s'exécuterait avec tous les droits sur le conteneur.
+RUN useradd --system --create-home --uid 10001 moteur \
+ && mkdir -p /app/journal /tmp/ultralytics \
+ && chown -R moteur:moteur /app /tmp/ultralytics
+USER moteur
+
 EXPOSE 8080
 
 # Le conteneur est déclaré défaillant si le moteur ne voit plus le flux ou
 # n'analyse aucune image — c'est le rôle de /health (503 dans ce cas).
+#
+# Le sondage part de l'INTÉRIEUR du conteneur, donc la boucle locale suffit et
+# c'est le défaut du moteur. Pour un sondage externe (liveness Kubernetes, qui
+# interroge l'IP du pod), il faut ouvrir l'écoute ET l'authentifier :
+#   -e MOTEUR_HEALTH_ADRESSE=0.0.0.0 -e MOTEUR_HEALTH_JETON=...
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=4).status==200 else 1)"
 

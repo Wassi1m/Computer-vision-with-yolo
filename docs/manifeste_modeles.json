@@ -84,6 +84,15 @@
       "classes": [
         "plate"
       ]
+    },
+    "surveillance_suite/models/door_classifier.pt": {
+      "sha256": "e2a16bc10c1cec83085ad9ab6d6301a184f7016b06ae4efbb7d04207133e89ad",
+      "octets": 3188930,
+      "classes": [
+        "Closed",
+        "Open",
+        "Semi"
+      ]
     }
   }
 }

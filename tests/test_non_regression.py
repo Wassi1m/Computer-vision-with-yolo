@@ -33,8 +33,29 @@ ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = Path(__file__).with_name("reference_modeles.json")
 
 
+def mesurer_classification(spec: dict) -> dict:
+    """Re-mesure un classifieur : rappel par classe et exactitude globale.
+
+    Ce harnais ne savait mesurer que de la détection, et c'est exactement ce qui
+    laissait `door_classifier.pt` hors de tout garde-fou alors qu'il tourne en
+    production et décide d'un évènement publié à la plateforme (audit du
+    2026-08-20, point I3). La mesure elle-même vit dans `mesure_porte.py` : la
+    dupliquer ici garantirait qu'un jour les deux divergent.
+    """
+    sys.path.insert(0, str(Path(__file__).parent))
+    from mesure_porte import mesurer as mesurer_porte
+
+    m = mesurer_porte(ROOT / spec["poids"], ROOT / spec["data"],
+                      spec.get("min_confiance", 0.6))
+    return {"classes": m["trois_classes"]["rappel"],
+            "top1": m["trois_classes"]["exactitude"]}
+
+
 def mesurer(spec: dict, imgsz: int = 640) -> dict:
     """Re-mesure un modèle et renvoie {classe: AP@50, ...} + mAP50."""
+    if spec.get("tache") == "classification":
+        return mesurer_classification(spec)
+
     from ultralytics import YOLO
 
     poids = ROOT / spec["poids"]
@@ -61,8 +82,16 @@ def mesurer(spec: dict, imgsz: int = 640) -> dict:
     return {"classes": par_classe, "mAP50": round(float(r.box.map50), 4)}
 
 
+def indicateurs(spec: dict) -> tuple[str, str]:
+    """(clé de la métrique globale, libellé de la métrique par classe)."""
+    if spec.get("tache") == "classification":
+        return "top1", "rappel"
+    return "mAP50", "AP@50"
+
+
 def comparer(nom: str, spec: dict, mesure: dict, tolerance: float) -> list[str]:
     """Renvoie la liste des régressions constatées (vide si tout va bien)."""
+    _, libelle = indicateurs(spec)
     echecs = []
     for classe, attendu in spec["classes"].items():
         obtenu = mesure["classes"].get(classe)
@@ -74,7 +103,7 @@ def comparer(nom: str, spec: dict, mesure: dict, tolerance: float) -> list[str]:
         etat = "OK " if ecart >= -tolerance else "ECHEC"
         print(f"  {etat} {classe:18} attendu {attendu:.4f}  obtenu {obtenu:.4f}  ({ecart:+.4f})")
         if ecart < -tolerance:
-            echecs.append(f"{nom}/{classe} : AP@50 {attendu:.4f} -> {obtenu:.4f} "
+            echecs.append(f"{nom}/{classe} : {libelle} {attendu:.4f} -> {obtenu:.4f} "
                           f"({ecart:+.4f}, tolérance {tolerance})")
     return echecs
 
@@ -98,7 +127,8 @@ def main() -> int:
 
     echecs_globaux, indisponibles = [], []
     for nom, spec in modeles.items():
-        print(f"\n=== {nom} ({spec['poids']}, split {spec['split']}) ===")
+        print(f"\n=== {nom} ({spec['poids']}, split {spec['split']}, "
+              f"{spec.get('tache', 'detection')}) ===")
         try:
             mesure = mesurer(spec, args.imgsz)
         except FileNotFoundError as e:
@@ -108,16 +138,17 @@ def main() -> int:
             indisponibles.append(nom)
             continue
 
+        cle, _ = indicateurs(spec)
         if args.maj:
             spec["classes"] = {c: mesure["classes"][c] for c in spec["classes"]
                                if c in mesure["classes"]}
-            spec["mAP50"] = mesure["mAP50"]
+            spec[cle] = mesure[cle]
             print(f"  reference mise a jour : {spec['classes']}")
             continue
 
         echecs_globaux += comparer(nom, spec, mesure, tolerance)
-        ecart_map = mesure["mAP50"] - spec["mAP50"]
-        print(f"  mAP50 global : attendu {spec['mAP50']:.4f}  obtenu {mesure['mAP50']:.4f}  ({ecart_map:+.4f})")
+        ecart = mesure[cle] - spec[cle]
+        print(f"  {cle} global : attendu {spec[cle]:.4f}  obtenu {mesure[cle]:.4f}  ({ecart:+.4f})")
 
     if args.maj:
         REFERENCE.write_text(json.dumps(ref, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

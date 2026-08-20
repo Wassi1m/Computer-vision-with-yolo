@@ -54,6 +54,10 @@ ATTENDUS = [
     "surveillance_suite/models/fire_smoke.pt",
     "surveillance_suite/models/fall_detector.pt",
     "surveillance_suite/models/license_plate.pt",
+    # Chargé par le moteur unifié (`AnalyseurPorte`) et absent de cette liste
+    # jusqu'au 2026-08-20 : il decidait d'un evenement publie a la plateforme
+    # sans etre rattache a quoi que ce soit (audit, point I3).
+    "surveillance_suite/models/door_classifier.pt",
 ]
 
 

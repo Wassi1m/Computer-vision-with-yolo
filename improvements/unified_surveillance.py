@@ -36,6 +36,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import hmac
 import json
 import logging
 import os
@@ -70,20 +71,43 @@ log = logging.getLogger("moteur")
 
 
 class FormatJSON(logging.Formatter):
+    """Une ligne JSON par message, portant l'identite de la camera.
+
+    Sans `camera_id`, les journaux de plusieurs instances agreges dans un meme
+    collecteur sont indistinguables : « flux perdu » ne dit pas QUELLE camera
+    est tombee. Le bus le fait deja pour les evenements ; les logs, non.
+    """
+
+    def __init__(self, camera_id: str = "", site_id: str = ""):
+        super().__init__()
+        self.contexte = {}
+        if camera_id:
+            self.contexte["camera_id"] = camera_id
+        if site_id:
+            self.contexte["site_id"] = site_id
+
     def format(self, record):
         return json.dumps({
             "t": record.created,
             "niveau": record.levelname,
             "module": record.name,
             "message": record.getMessage(),
+            **self.contexte,
         }, ensure_ascii=False)
 
 
-def configurer_logs(niveau: str, json_mode: bool):
+def configurer_logs(niveau: str, json_mode: bool, camera_id: str = "", site_id: str = ""):
     h = logging.StreamHandler()
-    h.setFormatter(FormatJSON() if json_mode
-                   else logging.Formatter("%(asctime)s %(levelname)-7s %(name)s: %(message)s",
-                                          datefmt="%H:%M:%S"))
+    if json_mode:
+        h.setFormatter(FormatJSON(camera_id, site_id))
+    else:
+        # Le `%` double est indispensable : le format de `logging` est en
+        # style %, et un identifiant de camera contenant un `%` ferait echouer
+        # le formatage de CHAQUE message -- le moteur deviendrait muet.
+        prefixe = f"[{camera_id.replace('%', '%%')}] " if camera_id else ""
+        h.setFormatter(logging.Formatter(
+            f"%(asctime)s %(levelname)-7s {prefixe}%(name)s: %(message)s",
+            datefmt="%H:%M:%S"))
     racine = logging.getLogger()
     racine.handlers[:] = [h]
     racine.setLevel(getattr(logging, niveau.upper(), logging.INFO))
@@ -537,19 +561,110 @@ class EtatSante:
             e["sain"] = False
         return e
 
-    def demarrer_serveur(self, port: int):
+    # ── Exposition Prometheus ────────────────────────────────────────────────
+
+    @staticmethod
+    def _etiquette(valeur: str) -> str:
+        """Échappe une valeur d'étiquette selon le format d'exposition."""
+        return valeur.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+
+    def texte_metrics(self) -> str:
+        """État courant au format d'exposition Prometheus.
+
+        `/health` ne donne qu'un instantané : il dit si le moteur va bien
+        maintenant, jamais s'il allait mieux il y a une heure. Une supervision a
+        besoin de séries — une cadence qui s'effondre lentement, un retard qui
+        dérive, un taux d'abandon qui monte ne se voient que dans la durée. Tous
+        ces compteurs existaient déjà en mémoire ; seule la mise en forme
+        manquait, et elle ne coûte aucune dépendance.
+        """
+        e = self.instantane()
+        etiq = ""
+        paires = [(c, e.get(c)) for c in ("camera_id", "site_id")]
+        retenues = [f'{c}="{self._etiquette(str(v))}"' for c, v in paires if v]
+        if retenues:
+            etiq = "{" + ",".join(retenues) + "}"
+
+        livraison = e.get("livraison", {})
+        mesures = [
+            ("moteur_images_analysees_total", "counter",
+             "Images analysees depuis le demarrage", e["frames"]),
+            ("moteur_images_ignorees_total", "counter",
+             "Images sautees pour ne pas prendre de retard sur le flux",
+             e.get("images_ignorees", 0)),
+            ("moteur_cadence_images_par_seconde", "gauge",
+             "Cadence d'analyse lissee", e["fps"]),
+            ("moteur_retard_flux_secondes", "gauge",
+             "Age de la derniere image au moment de son analyse",
+             e.get("retard_flux_s", 0.0)),
+            ("moteur_evenements_total", "counter",
+             "Evenements publies sur le bus", e["evenements"]),
+            ("moteur_flux_connecte", "gauge",
+             "1 si le flux video est lisible, 0 sinon", int(bool(e["flux_connecte"]))),
+            ("moteur_reconnexions_total", "counter",
+             "Reconnexions au flux video", e["reconnexions"]),
+            ("moteur_sain", "gauge",
+             "1 si le moteur est sain au sens de /health, 0 sinon", int(bool(e["sain"]))),
+            ("moteur_uptime_secondes", "gauge",
+             "Duree depuis le demarrage", e["uptime_s"]),
+            ("moteur_derniere_detection_timestamp", "gauge",
+             "Horodatage Unix du dernier evenement publie, 0 si aucun",
+             e.get("derniere_detection") or 0),
+        ]
+        if livraison:
+            mesures += [
+                ("moteur_livraison_livres_total", "counter",
+                 "Evenements remis au webhook", livraison["livres"]),
+                ("moteur_livraison_echecs_total", "counter",
+                 "Tentatives de livraison en echec", livraison["echecs"]),
+                ("moteur_livraison_abandons_total", "counter",
+                 "Evenements definitivement abandonnes", livraison["abandons"]),
+                ("moteur_livraison_octets_en_attente", "gauge",
+                 "Octets d'evenements pas encore livres", livraison["octets_en_attente"]),
+            ]
+
+        lignes = []
+        for nom, genre, aide, valeur in mesures:
+            lignes += [f"# HELP {nom} {aide}", f"# TYPE {nom} {genre}",
+                       f"{nom}{etiq} {valeur}"]
+        return "\n".join(lignes) + "\n"
+
+    def demarrer_serveur(self, port: int, adresse: str = "127.0.0.1", jeton: str = ""):
         from http.server import BaseHTTPRequestHandler, HTTPServer
 
         etat = self
 
         class Handler(BaseHTTPRequestHandler):
+            def _autorise(self) -> bool:
+                if not jeton:
+                    return True
+                attendu = f"Bearer {jeton}"
+                fourni = self.headers.get("Authorization", "")
+                # Comparaison a temps constant : une comparaison naive laisse
+                # deviner le jeton caractere par caractere en mesurant le temps
+                # de reponse.
+                return hmac.compare_digest(fourni, attendu)
+
             def do_GET(self):
-                if self.path.rstrip("/") not in ("/health", ""):
+                chemin = self.path.split("?", 1)[0].rstrip("/")
+                if chemin not in ("/health", "/metrics", ""):
                     self.send_error(404)
                     return
-                corps = json.dumps(etat.instantane(), ensure_ascii=False).encode()
-                self.send_response(200 if etat.instantane()["sain"] else 503)
-                self.send_header("Content-Type", "application/json")
+                if not self._autorise():
+                    self.send_response(401)
+                    self.send_header("WWW-Authenticate", 'Bearer realm="moteur"')
+                    self.send_header("Content-Length", "0")
+                    self.end_headers()
+                    return
+                if chemin == "/metrics":
+                    corps = etat.texte_metrics().encode()
+                    code, mime = 200, "text/plain; version=0.0.4; charset=utf-8"
+                else:
+                    instantane = etat.instantane()
+                    corps = json.dumps(instantane, ensure_ascii=False).encode()
+                    code, mime = (200 if instantane["sain"] else 503), "application/json"
+                self.send_response(code)
+                self.send_header("Content-Type", mime)
                 self.send_header("Content-Length", str(len(corps)))
                 self.end_headers()
                 self.wfile.write(corps)
@@ -557,9 +672,15 @@ class EtatSante:
             def log_message(self, *a):
                 pass  # pas de log par requête : le sondage est périodique
 
-        self._serveur = HTTPServer(("0.0.0.0", port), Handler)
+        self._serveur = HTTPServer((adresse, port), Handler)
         threading.Thread(target=self._serveur.serve_forever, daemon=True).start()
-        log.info("Sante exposee sur http://0.0.0.0:%d/health", port)
+        log.info("Sante exposee sur http://%s:%d/health (et /metrics)", adresse, port)
+        if adresse not in ("127.0.0.1", "localhost", "::1") and not jeton:
+            # Ces points ne sont pas anodins : ils publient la source du flux,
+            # l'identite du site et l'etat du moteur. Ouverts au reseau sans
+            # jeton, ils renseignent gratuitement quiconque sonde le port.
+            log.warning("/health et /metrics sont exposes sur %s SANS authentification : "
+                        "utiliser --health-jeton, ou restreindre --health-adresse", adresse)
 
     def arreter_serveur(self):
         if self._serveur is not None:
@@ -1795,15 +1916,24 @@ def main():
     ap.add_argument("--max-frames", type=int, default=_env("max_frames", 0, int), help="0 = illimite")
     ap.add_argument("--workers", type=int, default=_env("workers", 4, int))
     ap.add_argument("--health-port", type=int, default=_env("health_port", 0, int),
-                    help="expose GET /health sur ce port (0 = desactive)")
+                    help="expose GET /health et GET /metrics sur ce port (0 = desactive)")
+    ap.add_argument("--health-adresse", default=_env("health_adresse", "127.0.0.1", str),
+                    help="interface d'ecoute de /health et /metrics. Boucle locale par "
+                         "defaut : ces points publient la source du flux, l'identite du "
+                         "site et l'etat du moteur. Mettre 0.0.0.0 pour un sondage "
+                         "externe (conteneur, Kubernetes), avec --health-jeton")
+    ap.add_argument("--health-jeton", default=_env("health_jeton", "", str),
+                    help="exige un en-tete Authorization: Bearer <jeton> sur /health "
+                         "et /metrics")
     args = ap.parse_args()
 
-    configurer_logs(args.log_level, args.log_json)
+    configurer_logs(args.log_level, args.log_json, args.camera_id, args.site_id)
 
     # Un moteur qui retombe sur le CPU ne produit aucune erreur : il tourne, il
-    # detecte, il est simplement dix fois trop lent -- et le retard ne se voit
-    # nulle part, l'horodatage des evenements etant pris au traitement. La seule
-    # facon de ne pas decouvrir cela apres coup est de refuser de demarrer.
+    # detecte, il est simplement dix fois trop lent. Le retard se voit maintenant
+    # (`retard_flux_s` sur /health, horodatage pris a la capture), mais encore
+    # faut-il regarder : refuser de demarrer reste la seule facon de ne pas
+    # decouvrir la meprise apres coup.
     # Mesure du 2026-08-19 : la cascade complete tient 0,91 image/s sur CPU.
     if args.verifier_gpu:
         try:
@@ -1891,7 +2021,8 @@ def main():
 
     etat_sante = EtatSante([a.nom for a in analyseurs])
     if args.health_port:
-        etat_sante.demarrer_serveur(args.health_port)
+        etat_sante.demarrer_serveur(args.health_port, args.health_adresse,
+                                    args.health_jeton)
 
     # `general` alimente le contexte des autres : il est exécuté avant eux, pas
     # en parallèle, sinon `ligne` et `epi` travailleraient sur le suivi de la

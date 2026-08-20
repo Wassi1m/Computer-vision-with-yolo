@@ -1,0 +1,98 @@
+# Garde-fous automatiques.
+#
+# Le dépôt contenait déjà 73 tests et un harnais de non-régression, mais rien ne
+# les exécutait : ils ne tournaient que si quelqu'un y pensait. L'audit du
+# 2026-08-20 a classé ce point comme bloquant, pour une raison éprouvée sur ce
+# projet — en juillet 2026, douze classes du modèle EPI sont tombées à zéro
+# pendant que la mAP globale restait à 0,88. Une régression de modèle ne produit
+# ni erreur, ni log, ni changement visible.
+#
+# Ce que cette action couvre, et ce qu'elle ne peut pas couvrir
+# -------------------------------------------------------------
+# Elle exécute les tests qui ne demandent AUCUN poids : logique de fusion,
+# tables de correspondance, seuils, machine à états, format des évènements. Ce
+# sont eux qui attrapent une taxonomie incohérente ou un concept laissé sans
+# modèle.
+#
+# Elle ne peut PAS exécuter la non-régression des modèles ni la mesure de
+# cascade : les `.pt` pèsent 142 Mo et ne sont pas dans le dépôt. Ces deux
+# vérifications restent manuelles, avant chaque remplacement de modèle :
+#
+#     python outils/verifier_modeles.py --verifier
+#     python tests/test_non_regression.py
+#     python improvements/p19_mesure_cascade.py --n 400 --comparer-m1
+#
+# C'est une limite assumée, pas un oubli : la couvrir demanderait de publier les
+# poids sur un stockage accessible depuis l'action (cf. docs/manifeste_modeles.json).
+
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  logique:
+    name: Logique métier et intégration
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          # Même version que l'environnement de mesure : une différence de
+          # version mineure suffit à faire diverger numpy ou torch.
+          python-version: "3.12"
+          cache: pip
+
+      - name: Dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-service.txt
+          # `ultralytics` tire `opencv-python` (variante graphique), qui écrase
+          # le module `cv2` de la headless. On rétablit la variante attendue,
+          # exactement comme le fait l'image de production.
+          pip install --force-reinstall --no-deps opencv-python-headless==4.10.0.84
+          pip uninstall -y opencv-python || true
+          pip install pytest
+
+      - name: La variante d'OpenCV chargée est bien la headless
+        run: |
+          python - <<'PY'
+          import cv2, sys
+          print("cv2", cv2.__version__)
+          sys.exit(0 if cv2.__version__.startswith("4.10") else 1)
+          PY
+
+      - name: Tests de logique métier
+        run: pytest tests/test_logique_metier.py -q
+
+      - name: Tests d'intégration
+        # Ils lancent le moteur bout en bout sur une courte vidéo. Certains
+        # exigent des poids : ils se sautent seuls quand ceux-ci sont absents.
+        run: pytest tests/test_integration.py -q
+
+      - name: Cohérence du manifeste de modèles
+        # Ne vérifie pas les empreintes (les poids sont absents), seulement que
+        # le manifeste reste lisible et couvre les modèles attendus par le
+        # moteur — une entrée oubliée à l'ajout d'un modèle se voit ici.
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          sys.path.insert(0, "outils")
+          import verifier_modeles as vm
+          m = json.loads(Path("docs/manifeste_modeles.json").read_text(encoding="utf-8"))
+          manquants = [r for r in vm.ATTENDUS if r not in m["modeles"]]
+          if manquants:
+              print("modeles attendus par le moteur, absents du manifeste :")
+              for r in manquants:
+                  print("  " + r)
+              sys.exit(1)
+          print(f"{len(m['modeles'])} modeles au manifeste, fige le {m['fige_le']}")
+          PY

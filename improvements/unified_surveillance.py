@@ -1564,6 +1564,12 @@ def main():
     ap.add_argument("--sans-gants-lunettes", action="store_true",
                     help="retire epi_gants_lunettes.pt de la cascade EPI (revient a "
                          "ppe_detector.pt seul pour gants et lunettes)")
+    ap.add_argument("--verifier-gpu", action="store_true",
+                    default=_env("verifier_gpu", False, lambda v: str(v).lower()
+                                 in ("1", "true", "oui", "yes")),
+                    help="refuse de demarrer si CUDA est indisponible. A activer en "
+                         "production GPU : sans cela un repli silencieux sur CPU divise "
+                         "la cadence par dix sans qu'aucun signal ne l'indique")
     ap.add_argument("--sans-chaussures", action="store_true",
                     help="retire epi_chaussures.pt de la cascade EPI ; le concept "
                          "'chaussures' n'est alors PLUS COUVERT DU TOUT, aucun autre modele "
@@ -1617,6 +1623,27 @@ def main():
     args = ap.parse_args()
 
     configurer_logs(args.log_level, args.log_json)
+
+    # Un moteur qui retombe sur le CPU ne produit aucune erreur : il tourne, il
+    # detecte, il est simplement dix fois trop lent -- et le retard ne se voit
+    # nulle part, l'horodatage des evenements etant pris au traitement. La seule
+    # facon de ne pas decouvrir cela apres coup est de refuser de demarrer.
+    # Mesure du 2026-08-19 : la cascade complete tient 0,91 image/s sur CPU.
+    if args.verifier_gpu:
+        try:
+            import torch
+            dispo = torch.cuda.is_available()
+            nom = torch.cuda.get_device_name(0) if dispo else "aucun"
+        except Exception as e:                       # torch absent ou casse
+            log.error("verification GPU impossible : %s: %s", type(e).__name__, e)
+            return 2
+        if not dispo:
+            log.error("GPU demande (--verifier-gpu) mais CUDA indisponible. "
+                      "Causes usuelles : conteneur lance sans `--gpus all`, ou "
+                      "image construite avec les roues torch '+cpu' "
+                      "(voir requirements-service-gpu.txt). Arret.")
+            return 2
+        log.info("GPU actif : %s", nom)
 
     import config
     # Le seuil global reste dans config.py (valeur de reference documentee),
@@ -1778,4 +1805,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # `sys.exit(main())` et non `main()` : la valeur de retour est le code de
+    # sortie du processus, et c'est le seul signal qu'un orchestrateur sait
+    # lire. Appeler `main()` sans le propager faisait sortir en 0 meme sur
+    # refus de demarrage -- un conteneur en echec de configuration etait alors
+    # rapporte comme s'etant termine normalement, et jamais relance.
+    sys.exit(main())

@@ -1,0 +1,90 @@
+# Moteur de détection — image de production GPU.
+#
+# Variante de `Dockerfile` pour un serveur équipé d'une carte NVIDIA. La seule
+# différence de fond est la base et les roues PyTorch ; tout le reste est
+# volontairement identique, pour que les deux images ne divergent pas.
+#
+# ⚠️ L'image CPU (`Dockerfile`) épingle `torch==2.13.0+cpu` : sur un serveur GPU
+# elle IGNORE la carte, sans erreur ni avertissement, et plafonne à 0,91
+# image/s. C'est le motif d'existence de ce fichier.
+#
+#     docker build -f Dockerfile.gpu -t moteur-epi:gpu .
+#     docker run --gpus all -p 8080:8080 moteur-epi:gpu --source rtsp://...
+#
+# Sans `--gpus all`, le conteneur démarre mais retombe sur le CPU. Le contrôle
+# ci-dessous (`torch.cuda.is_available()`) ne s'exécute qu'au build, où aucun
+# GPU n'est visible : c'est donc à l'exécution qu'il faut vérifier, ce que
+# `--verifier-gpu` fait au démarrage du moteur.
+#
+# IMPORTANT : les .pt ne sont PAS dans le dépôt git (142 Mo). Les mettre en
+# place avant le build -- `outils/recuperer_modeles.py --verifier` contrôle
+# qu'ils sont présents et conformes au manifeste.
+
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+# python3.12 n'est pas dans les dépôts d'Ubuntu 22.04 : on passe par deadsnakes
+# pour rester sur la MÊME version que l'image CPU et l'environnement de mesure.
+# libgl / libglib : requis par opencv même en variante headless.
+# ffmpeg : décodage des flux RTSP.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        software-properties-common ca-certificates \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        python3.12 python3.12-venv python3.12-dev \
+        libgl1 libglib2.0-0 ffmpeg curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python3.12 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir --upgrade pip
+
+WORKDIR /app
+
+COPY requirements-service-gpu.txt .
+RUN pip install --no-cache-dir -r requirements-service-gpu.txt \
+ && pip install --no-cache-dir --force-reinstall --no-deps \
+        opencv-python-headless==4.10.0.84 \
+ && pip uninstall -y opencv-python || true
+
+# Contrôle au build : la variante d'OpenCV qui se charge doit être la headless.
+# `ultralytics` tire `opencv-python`, qui écrase le module `cv2` -- sans cette
+# vérification, l'image embarquerait une version différente de celle sur
+# laquelle les modèles ont été mesurés.
+RUN python -c "import cv2, sys; \
+    v = cv2.__version__; \
+    print('cv2', v); \
+    sys.exit(0 if v.startswith('4.10') else 1)"
+
+COPY improvements/ ./improvements/
+COPY surveillance_suite/ ./surveillance_suite/
+COPY ppe_detection/models/ ./ppe_detection/models/
+COPY tests/ ./tests/
+COPY docs/ ./docs/
+
+ENV YOLO_CONFIG_DIR=/tmp/ultralytics \
+    PYTHONUNBUFFERED=1 \
+    MOTEUR_LOG_JSON=1 \
+    MOTEUR_HEALTH_PORT=8080 \
+    NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+# Utilisateur sans privilège : un moteur qui lit un flux et écrit un journal
+# n'a aucune raison d'être root. `/app/journal` lui appartient, c'est là que la
+# livraison garantie écrit ses évènements en attente.
+RUN useradd --system --create-home --uid 10001 moteur \
+ && mkdir -p /app/journal /tmp/ultralytics \
+ && chown -R moteur:moteur /app /tmp/ultralytics
+USER moteur
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=4).status==200 else 1)"
+
+WORKDIR /app/improvements
+
+# `--verifier-gpu` arrête le moteur au démarrage si CUDA n'est pas disponible,
+# plutôt que de le laisser tourner au ralenti sur CPU sans que personne ne s'en
+# aperçoive avant de constater le retard des évènements.
+ENTRYPOINT ["python", "unified_surveillance.py", "--verifier-gpu"]
+CMD ["--source", "0"]

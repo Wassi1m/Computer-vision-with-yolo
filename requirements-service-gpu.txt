@@ -1,0 +1,45 @@
+# Dépendances du moteur — variante GPU (CUDA 12.1).
+#
+# Identique à `requirements-service.txt` à une exception près : les roues de
+# PyTorch. Tout le reste doit rester strictement aligné, sinon les deux cibles
+# divergent et les mesures de l'une cessent de valoir pour l'autre.
+#
+# Pourquoi cette variante existe
+# ------------------------------
+# La cascade EPI charge cinq modèles YOLOv8m et les fait tourner sur chaque
+# image analysée. Mesuré le 2026-08-19 sur CPU (Intel Core i7-1355U, imgsz=480,
+# 40 images) :
+#
+#   ppe_detector 213 ms · masque_gilet 213 ms · epi_casque 213 ms
+#   epi_gants_lunettes 200 ms · epi_chaussures 227 ms
+#   -> cascade complète 1 094 ms/image, soit 0,91 image/s
+#
+# Un flux temps réel est donc hors de portée sans GPU : le moteur accumulerait
+# un retard qu'il ne rattraperait jamais.
+#
+# ⚠️ La cadence attendue sur GPU (~25 images/s) est une EXTRAPOLATION, pas un
+# relevé. Elle doit être confirmée sur le serveur cible avant mise en service :
+#
+#     python improvements/unified_surveillance.py --source <rtsp> --max-frames 300
+#     # le journal imprime le FPS moyen et le coût par module en fin d'exécution
+#
+# Adapter l'index ci-dessous à la version de CUDA du serveur (cu121, cu124...) :
+# une roue compilée pour une CUDA plus récente que le pilote installé ne se
+# charge pas, et l'erreur est peu explicite.
+
+--extra-index-url https://download.pytorch.org/whl/cu121
+
+ultralytics==8.4.115
+torch==2.13.0
+torchvision==0.28.0
+opencv-python-headless==4.10.0.84
+numpy==2.3.5
+easyocr==1.7.2
+scikit-image==0.26.0
+lap==0.5.13
+
+# Même piège OpenCV que sur la variante CPU : `ultralytics` tire
+# `opencv-python`, qui écrase le module `cv2` de la variante headless. Après
+# installation, vérifier :
+#     python -c "import cv2; print(cv2.__version__)"   # 4.10.0
+#     python -c "import torch; print(torch.cuda.is_available())"   # True

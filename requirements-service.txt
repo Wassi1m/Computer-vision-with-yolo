@@ -1,22 +1,51 @@
 # Dépendances du moteur de détection, versions figées.
 #
-# Les deux fichiers historiques (ppe_detection/requirements.txt et
-# surveillance_suite/requirements.txt) divergeaient sur torch et numpy et
-# n'épinglaient que des minima : deux installations à deux dates pouvaient donc
-# produire deux comportements différents. Ce fichier est la référence unique du
-# service ; les versions sont celles effectivement validées le 2026-08-08.
+# RÉFÉRENCE : ce fichier décrit l'environnement dans lequel TOUTES les mesures
+# publiées du projet ont été obtenues (models_calsse.txt, reports/v3_results/).
+# Une installation qui s'en écarte invalide ces chiffres.
 #
-# Variante CPU de torch : le moteur cible un déploiement sans GPU (cf. plan v3,
-# priorité 8). Pour une machine équipée, retirer l'index ci-dessous et installer
-# la variante CUDA correspondante.
+# Corrigé le 2026-08-20 : les versions précédentes étaient déclaratives et non
+# vérifiées. `numpy` y était épinglé 2.4.4 pour un 2.3.5 réellement installé, et
+# `opencv-python-headless` 5.0.0.93 pour un 4.10.0.84 réellement chargé. Les
+# versions ci-dessous sont relevées par introspection des modules importés, pas
+# recopiées d'une intention.
+#
+# Python 3.12.3.
+
+# ── Le piège OpenCV, à ne pas défaire ────────────────────────────────────────
+# `ultralytics` déclare une dépendance vers `opencv-python`, la variante AVEC
+# interface graphique. Installée, elle écrase le répertoire `cv2` de la variante
+# headless : les deux paquets se partagent le même nom de module, et c'est le
+# dernier écrit qui gagne. L'environnement de mesure contenait effectivement les
+# deux, et `import cv2` y résolvait vers headless 4.10.0 -- pas vers le 5.0.0.93
+# annoncé.
+#
+# Deux conséquences pratiques :
+#   1. `opencv-python` est explicitement EXCLU ci-dessous. Installer avec
+#      `pip install --no-deps ultralytics` puis les dépendances à la main, ou
+#      réinstaller la variante headless APRÈS ultralytics :
+#          pip install -r requirements-service.txt
+#          pip install --force-reinstall --no-deps opencv-python-headless==4.10.0.84
+#   2. Vérifier après installation, systématiquement :
+#          python -c "import cv2; print(cv2.__version__)"   # doit afficher 4.10.0
+#          pip list | grep -c '^opencv-python '             # doit afficher 0
+#
+# La variante headless est la bonne en service : le moteur tourne sans écran, et
+# `opencv-python` tire des dépendances graphiques inutiles en conteneur.
 
 --extra-index-url https://download.pytorch.org/whl/cpu
 
 ultralytics==8.4.115
 torch==2.13.0+cpu
 torchvision==0.28.0+cpu
-opencv-python-headless==5.0.0.93
-numpy==2.4.4
+opencv-python-headless==4.10.0.84
+numpy==2.3.5
 easyocr==1.7.2
 scikit-image==0.26.0
 lap==0.5.13
+
+# ── Cible GPU ────────────────────────────────────────────────────────────────
+# Les variantes `+cpu` ci-dessus rendent la carte INVISIBLE, quel que soit le
+# serveur. Pour un déploiement GPU, utiliser `requirements-service-gpu.txt` et
+# l'image `Dockerfile.gpu` : sur CPU la cascade complète tient 0,91 image/s
+# (1 094 ms par image, mesuré le 2026-08-19), ce qui exclut le temps réel.

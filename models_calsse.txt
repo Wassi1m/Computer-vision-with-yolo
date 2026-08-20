@@ -20,7 +20,7 @@ L'écart peut être énorme : la fumée sort à AP 0.407 et détecte pourtant
 
 
 ──────────────────────────────────────────────────────────────────────────
-EPI — modèle principal  —  14 classes
+EPI — socle et filet de secours  —  14 classes
 ppe_detection/models/ppe_detector.pt
 
   mesuré le 2026-08-16 sur ppe_dataset/test (4 423 images) / ppe_dataset/test, 40 images par classe, seuil 0.25
@@ -41,12 +41,15 @@ ppe_detection/models/ppe_detector.pt
   12  Safety Cone      cône de signalisation      98 % détecté  ·  AP 0.751
   13  Safety Vest      gilet porté                AP 0.580  ·  AP 0.905 (jeu propre)
 
-  C'est lui qui juge la conformité EPI.
-  Les six classes `NO-` signalent une INFRACTION : ce sont les plus critiques, et les plus faibles du parc.
+  Il porte les 14 classes et reste le SEUL à détecter la personne, la chute, l'échelle et le cône.
+  Mais depuis le 2026-08-19, il n'est plus prioritaire sur AUCUN concept EPI : casque, gants, lunettes, masque et gilet sont servis avant lui par des modèles dédiés (`improvements/ppe_taxonomy.py`).
+  Les scores ci-dessous sont donc ceux de ce modèle SEUL — ce que la cascade produit réellement est mesuré dans reports/v3_results/cascade_complete.json.
 
   ap50_jeu_propre : mesure sur ppe_vest_clean_14c/val, seul jeu ou le gilet est annote correctement.
   Les 35 points d'ecart viennent des annotations, pas du modele.
-  Depuis le 2026-08-17, Mask/NO-Mask/Safety Vest/NO-Safety Vest sont servies en priorite par masque_gilet.pt dans la cascade (improvements/ppe_taxonomy.py) -- les chiffres ci-dessus restent ceux de ce modele seul, filet de secours si masque_gilet.pt est absent.
+  Depuis le 2026-08-19, ce modele n'est prioritaire sur AUCUN concept EPI : casque -> epi_casque.pt (M4), gants et lunettes -> epi_gants_lunettes.pt (M5), masque et gilet -> masque_gilet.pt (M3), chaussures -> epi_chaussures.pt (M6).
+  Il reste indispensable pour Person, Fall-Detected, Ladder et Safety Cone, qu'aucun autre modele ne couvre, et sert de filet de secours partout ou un modele dedie est absent.
+  Les chiffres ci-dessus sont ceux de ce modele SEUL ; la sortie reelle de la cascade est mesuree dans reports/v3_results/cascade_complete.json (improvements/p19_mesure_cascade.py).
 
 
 ──────────────────────────────────────────────────────────────────────────
@@ -61,7 +64,7 @@ ppe_detection/models/masque_gilet.pt
    2  Safety Vest      gilet porté                AP 0.932
    3  NO-Safety Vest   SANS gilet                 AP 0.771
 
-  Troisième modèle de la cascade, prioritaire sur `ppe_detector.pt` pour CES 4 CLASSES UNIQUEMENT (`improvements/ppe_taxonomy.py`).
+  Prioritaire sur `ppe_detector.pt` pour CES 4 CLASSES UNIQUEMENT (`improvements/ppe_taxonomy.py`, M3).
   `ppe_detector.pt` reste le filet de secours si ce modèle est absent.
 
   Modele dedie, prioritaire sur ppe_detector.pt pour ces 4 classes dans la cascade (improvements/ppe_taxonomy.py, improvements/unified_surveillance.py).
@@ -115,7 +118,7 @@ ppe_detection/models/epi_chaussures.pt
   mAP@50 global : 0.7226
 
    0  safety_shoe      chaussures de sécurité     AP 0.814
-   1  NO-safety_shoe                              AP 0.632
+   1  NO-safety_shoe   SANS chaussures de sécurité AP 0.632
 
   Seul modèle du parc couvrant ce concept avec une classe NÉGATIVE, donc capable de signaler l'infraction et pas seulement de confirmer le port.
   Ses deux seuils sont volontairement inégaux (`improvements/ppe_taxonomy.py`) : affirmer à tort une conformité masque une infraction, alors qu'une fausse alerte ne coûte qu'une vérification.
@@ -129,7 +132,7 @@ ppe_detection/models/epi_chaussures.pt
 
 
 ──────────────────────────────────────────────────────────────────────────
-EPI — modèle complémentaire  —  6 classes
+EPI — RETIRÉ de la cascade  —  6 classes
 ppe_detection/models/ppe_complement.pt
 
   mesuré le 2026-08-16 sur ppe_dataset/test, 15 images par classe, seuil 0.25 (tests/mesure_scene_ppe_complement.py)
@@ -141,9 +144,10 @@ ppe_detection/models/ppe_complement.pt
    4  mask             masque                     67 % détecté
    5  safety_shoe      chaussures de sécurité     non mesurée
 
-  Second modèle de la cascade.
-  Il n'a AUCUNE classe négative : il ne peut donc jamais signaler une non-conformité, seulement confirmer un équipement présent.
-  `safety_shoe` est son seul apport unique.
+  N'est PLUS chargé par défaut depuis le 2026-08-19.
+  Ses six classes sont toutes devancées — casque par M4, gants et lunettes par M5, masque et gilet par M3, chaussures par M6 — et il n'a AUCUNE classe négative : il ne peut donc jamais signaler une non-conformité, seulement confirmer un équipement présent.
+  `safety_shoe` était son dernier apport unique, que M6 couvre désormais en sachant aussi dire l'absence.
+  Conservé pour mémoire ; `--avec-complement` le recharge si besoin de comparer.
 
   Indicatif : ce jeu n'est pas celui d'entrainement de ce modele.
   Mesure unifiee dans un seul script (tests/mesure_scene_ppe_complement.py) le 2026-08-16 -- remplace deux mesures precedentes prises separement (13 aout puis 16 aout), dont les tirages aleatoires n'etaient pas comparables entre eux car obtenus par des appels rng.sample() dans un ordre de classes different.
@@ -221,7 +225,7 @@ Ce que la plateforme reçoit réellement. Ce ne sont PAS les classes des
 modèles : un évènement résulte d'une décision, souvent prise sur
 plusieurs images.
 
-  violation_epi        un EPI obligatoire manque à une personne
+  violation_epi        un EPI manque à une personne — `extra` porte `epi` (casque/masque/lunettes/gilet/gants/chaussures), `obligatoire`, et `motif` : `absence_detectee` si un modèle a VU l'absence, `jamais_confirme` si on n'a rien vu
   chute                personne au sol
   fire                 départ de feu
   smoke                fumée

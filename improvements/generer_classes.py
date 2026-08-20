@@ -35,13 +35,17 @@ SCORES = RACINE / "reports/v3_results/scores_par_classe.json"
 # Ordre d'affichage et description. Le dictionnaire porte l'intention
 # éditoriale ; les chiffres et les noms de classes viennent des fichiers.
 MODELES = [
-    ("ppe_detection/models/ppe_detector.pt", "EPI — modèle principal",
-     "C'est lui qui juge la conformité EPI. Les six classes `NO-` signalent une "
-     "INFRACTION : ce sont les plus critiques, et les plus faibles du parc."),
+    ("ppe_detection/models/ppe_detector.pt", "EPI — socle et filet de secours",
+     "Il porte les 14 classes et reste le SEUL à détecter la personne, la chute, "
+     "l'échelle et le cône. Mais depuis le 2026-08-19, il n'est plus prioritaire "
+     "sur AUCUN concept EPI : casque, gants, lunettes, masque et gilet sont "
+     "servis avant lui par des modèles dédiés (`improvements/ppe_taxonomy.py`). "
+     "Les scores ci-dessous sont donc ceux de ce modèle SEUL — ce que la cascade "
+     "produit réellement est mesuré dans reports/v3_results/cascade_complete.json."),
     ("ppe_detection/models/masque_gilet.pt", "EPI — masque et gilet dédiés",
-     "Troisième modèle de la cascade, prioritaire sur `ppe_detector.pt` pour "
-     "CES 4 CLASSES UNIQUEMENT (`improvements/ppe_taxonomy.py`). "
-     "`ppe_detector.pt` reste le filet de secours si ce modèle est absent."),
+     "Prioritaire sur `ppe_detector.pt` pour CES 4 CLASSES UNIQUEMENT "
+     "(`improvements/ppe_taxonomy.py`, M3). `ppe_detector.pt` reste le filet de "
+     "secours si ce modèle est absent."),
     ("ppe_detection/models/epi_casque.pt", "EPI — casque dédié",
      "Prioritaire sur `ppe_detector.pt` pour CES 2 CLASSES UNIQUEMENT "
      "(`improvements/ppe_taxonomy.py`, M4). Il corrige le plus gros déficit "
@@ -58,10 +62,14 @@ MODELES = [
      "Ses deux seuils sont volontairement inégaux (`improvements/ppe_taxonomy.py`) : "
      "affirmer à tort une conformité masque une infraction, alors qu'une fausse "
      "alerte ne coûte qu'une vérification. Il DÉPEND de l'ancrage à la personne."),
-    ("ppe_detection/models/ppe_complement.pt", "EPI — modèle complémentaire",
-     "Second modèle de la cascade. Il n'a AUCUNE classe négative : il ne peut "
-     "donc jamais signaler une non-conformité, seulement confirmer un "
-     "équipement présent. `safety_shoe` est son seul apport unique."),
+    ("ppe_detection/models/ppe_complement.pt", "EPI — RETIRÉ de la cascade",
+     "N'est PLUS chargé par défaut depuis le 2026-08-19. Ses six classes sont "
+     "toutes devancées — casque par M4, gants et lunettes par M5, masque et "
+     "gilet par M3, chaussures par M6 — et il n'a AUCUNE classe négative : il ne "
+     "peut donc jamais signaler une non-conformité, seulement confirmer un "
+     "équipement présent. `safety_shoe` était son dernier apport unique, que M6 "
+     "couvre désormais en sachant aussi dire l'absence. Conservé pour mémoire ; "
+     "`--avec-complement` le recharge si besoin de comparer."),
     ("surveillance_suite/models/fire_smoke.pt", "Feu et fumée", ""),
     ("surveillance_suite/models/fall_detector.pt", "Chute", ""),
     ("surveillance_suite/models/license_plate.pt", "Plaques d'immatriculation",
@@ -80,6 +88,7 @@ TRADUCTIONS = {
     "Person": "personne", "Safety Cone": "cône de signalisation",
     "Safety Vest": "gilet porté", "Vest": "gilet", "goggles": "lunettes",
     "helmet": "casque", "mask": "masque", "safety_shoe": "chaussures de sécurité",
+    "NO-safety_shoe": "SANS chaussures de sécurité",
     "fire": "flammes visibles", "smoke": "fumée, panache",
     "falling": "personne au sol", "stand": "personne debout",
     "plate": "plaque d'immatriculation", "Closed": "fermée", "Open": "ouverte",
@@ -87,7 +96,10 @@ TRADUCTIONS = {
 }
 
 EVENEMENTS = [
-    ("violation_epi", "un EPI obligatoire manque à une personne"),
+    ("violation_epi", "un EPI manque à une personne — `extra` porte `epi` "
+                      "(casque/masque/lunettes/gilet/gants/chaussures), "
+                      "`obligatoire`, et `motif` : `absence_detectee` si un "
+                      "modèle a VU l'absence, `jamais_confirme` si on n'a rien vu"),
     ("chute", "personne au sol"),
     ("fire", "départ de feu"),
     ("smoke", "fumée"),

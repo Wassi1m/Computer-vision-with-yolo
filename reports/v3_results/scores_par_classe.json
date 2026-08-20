@@ -61,7 +61,7 @@
       }
     },
     "mAP50": 0.7689,
-    "note": "ap50_jeu_propre : mesure sur ppe_vest_clean_14c/val, seul jeu ou le gilet est annote correctement. Les 35 points d'ecart viennent des annotations, pas du modele. Depuis le 2026-08-17, Mask/NO-Mask/Safety Vest/NO-Safety Vest sont servies en priorite par masque_gilet.pt dans la cascade (improvements/ppe_taxonomy.py) -- les chiffres ci-dessus restent ceux de ce modele seul, filet de secours si masque_gilet.pt est absent."
+    "note": "ap50_jeu_propre : mesure sur ppe_vest_clean_14c/val, seul jeu ou le gilet est annote correctement. Les 35 points d'ecart viennent des annotations, pas du modele. Depuis le 2026-08-19, ce modele n'est prioritaire sur AUCUN concept EPI : casque -> epi_casque.pt (M4), gants et lunettes -> epi_gants_lunettes.pt (M5), masque et gilet -> masque_gilet.pt (M3), chaussures -> epi_chaussures.pt (M6). Il reste indispensable pour Person, Fall-Detected, Ladder et Safety Cone, qu'aucun autre modele ne couvre, et sert de filet de secours partout ou un modele dedie est absent. Les chiffres ci-dessus sont ceux de ce modele SEUL ; la sortie reelle de la cascade est mesuree dans reports/v3_results/cascade_complete.json (improvements/p19_mesure_cascade.py)."
   },
   "masque_gilet.pt": {
     "jeu_ap50": "ppe_dataset/test filtre+remappe (655 images), jamais entraine dessus",

@@ -69,6 +69,13 @@ L'endpoint `/health` expose l'état de la livraison :
 `octets_en_attente` durablement non nul signifie que la plateforme ne consomme
 plus — c'est le signal à surveiller côté supervision.
 
+**Le journal ne croît pas indéfiniment.** Une fois tout livré et le fichier
+au-delà de 64 Mo (environ 150 000 évènements déjà remis), il est tronqué à la
+prochaine période de calme. La compaction n'a jamais lieu tant qu'un évènement
+reste à livrer, et un arrêt brutal en pleine opération ne fait ni perdre ni
+rejouer d'évènement. Sans cela, un moteur en service continu finissait par
+saturer son disque.
+
 ## 3. Format d'un évènement
 
 Objet JSON, encodé en UTF-8.
@@ -94,7 +101,7 @@ Objet JSON, encodé en UTF-8.
 | `camera_id` | string | **Caméra émettrice**, issue de la configuration (`--camera-id`). Vide si non configuré — le moteur émet alors un avertissement au démarrage. Indispensable dès qu'un site compte plusieurs caméras. |
 | `site_id` | string | Site, issu de la configuration (`--site-id`). Facultatif. |
 | `event_id` | string | Identifiant unique (hexadécimal, 32 caractères). **À utiliser pour dédupliquer** : la livraison étant « au moins une fois », un accusé perdu fait renvoyer l'évènement. |
-| `t` | float | Horodatage Unix (secondes, décimales). **Clé d'ordonnancement.** |
+| `t` | float | Horodatage Unix (secondes, décimales) de la **capture de l'image**, pas de la fin de son analyse. **Clé d'ordonnancement.** L'écart entre les deux est publié sur `/health` (`retard_flux_s`) : un évènement peut donc arriver quelques centaines de millisecondes après la date qu'il porte, ce qui est normal. |
 | `frame` | int | Numéro d'image depuis le démarrage. `-1` pour les évènements techniques (flux perdu/repris) qui ne proviennent pas d'une image. |
 | `source` | string | Module émetteur : `epi`, `chute`, `feu`, `ligne`, `porte`, `lpr`, `capture`. |
 | `type` | string | Nature de l'évènement (voir §4). |
@@ -192,6 +199,8 @@ GET /health
   "modeles": ["general", "ligne", "chute", "feu", "porte", "epi"],
   "flux_connecte": true,
   "reconnexions": 0,
+  "retard_flux_s": 0.042,
+  "images_ignorees": 1873,
   "frames": 93,
   "fps": 6.23,
   "evenements": 28,
@@ -209,6 +218,13 @@ GET /health
 Le champ `reconnexions` mérite d'être surveillé : une valeur qui augmente
 régulièrement signale un flux instable, même si le moteur reste « sain » à
 l'instant du sondage.
+
+`retard_flux_s` est l'âge de l'image au moment où l'analyse l'a prise. Il répond
+à la question « ce que le moteur vient de voir est-il récent ? », et doit rester
+de l'ordre du dixième de seconde sur un flux direct. `images_ignorees` compte les
+images sautées faute de temps de calcul : sa croissance est **attendue** dès que
+la caméra produit plus vite que le moteur n'analyse (voir §8), et c'est
+précisément ce qui empêche `retard_flux_s` de dériver.
 
 ## 7. Cycle de vie
 
@@ -229,6 +245,13 @@ provoque un arrêt immédiat.
 - **Cadence** : environ 3,8 images/seconde sur CPU (12 cœurs, sans GPU). Ce
   n'est pas un flux temps réel à 25 images/seconde ; les évènements sont
   échantillonnés à cette cadence.
+- **Sur un flux direct, les images en trop sont jetées, pas mises en file.** Le
+  moteur analyse toujours la dernière image reçue. Conséquence à intégrer : un
+  fait très bref (moins de ~0,3 s) peut passer entre deux analyses. C'est un
+  choix assumé — l'alternative, analyser toutes les images dans l'ordre, fait
+  reculer l'analyse dans le passé sans limite : mesuré à 3,25 s de retard après
+  quelques secondes seulement, et croissant. Sur un **fichier** vidéo, en
+  revanche, aucune image n'est sautée : la lecture suit l'analyse.
 - ~~Pas de livraison garantie sur le webhook~~ — **corrigé le 2026-08-13** : journal sur disque, réessais, reprise après redémarrage (voir §2).
 - **Une seule caméra par processus.** Plusieurs caméras demandent plusieurs
   instances. Chacune porte désormais son `camera_id` (`--camera-id`), donc les

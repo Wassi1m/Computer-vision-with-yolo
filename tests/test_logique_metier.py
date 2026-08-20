@@ -10,6 +10,7 @@ manquantes aussi sûrement qu'une erreur de modèle, et elle est bien plus facil
 Lancement : python -m pytest tests/ -q
 """
 
+import json
 import sys
 import time
 from pathlib import Path
@@ -239,6 +240,10 @@ def _capture_test(bus):
     cap.connecte, cap._echecs, cap.reconnexions = True, 0, 0
     cap.DELAI_MIN_S = cap.DELAI_MAX_S = 0.01
     cap._delai = 0.01
+    # Sans fil de vidange : ces tests portent sur la reconnexion, qui se
+    # vérifie sur la lecture séquentielle.
+    cap._vidangeur, cap._vidange_morte = None, False
+    cap.t_capture, cap.retard_s, cap.images_ignorees = None, 0.0, 0
 
     def _reouvrir_simule():
         cap._echecs = 0
@@ -834,6 +839,195 @@ def test_sans_qualification_le_comportement_d_origine_est_intact():
     for i in range(5):
         bus.publier(Evenement(float(i), i, "feu", "fire", f"FIRE {i}", box=(10, 10, 50, 50)))
     assert len(s.recus) == 5
+
+
+# ── Retard du flux (audit du 2026-08-20, B4) ─────────────────────────────────
+
+import threading  # noqa: E402
+import unified_surveillance as us  # noqa: E402
+
+
+class CameraSimulee:
+    """Flux qui avance seul et empile ses images, comme un décodeur RTSP.
+
+    C'est la propriété qui manquait aux autres doublures : une vraie caméra ne
+    ralentit pas quand l'analyse ralentit, elle accumule.
+    """
+
+    FPS = 50.0
+
+    def __init__(self):
+        self.file, self.n = [], 0
+        self._v = threading.Lock()
+        self._stop = threading.Event()
+        threading.Thread(target=self._produire, daemon=True).start()
+
+    def _produire(self):
+        while not self._stop.is_set():
+            time.sleep(1.0 / self.FPS)
+            with self._v:
+                self.n += 1
+                self.file.append((self.n, time.time()))
+
+    def isOpened(self):
+        return True
+
+    def read(self):
+        while not self._stop.is_set():
+            with self._v:
+                if self.file:
+                    return True, self.file.pop(0)
+            time.sleep(0.002)
+        return False, None
+
+    def set(self, prop, valeur):
+        self.reglages = getattr(self, "reglages", {})
+        self.reglages[prop] = valeur
+        return True
+
+    def release(self):
+        self._stop.set()
+
+
+def _capture_simulee(monkeypatch, **kw):
+    cam = CameraSimulee()
+    monkeypatch.setattr(us.cv2, "VideoCapture", lambda *a, **k: cam)
+    return us.CaptureRobuste("rtsp://simulee", **kw), cam
+
+
+def _retard_apres_analyse_lente(cap, cam, tours=6, cout_analyse=0.1):
+    time.sleep(0.4)                        # laisse le flux prendre de l'avance
+    retard = 0.0
+    for _ in range(tours):
+        _, t_capture = cap.lire()
+        retard = time.time() - t_capture
+        time.sleep(cout_analyse)           # analyse plus lente que la caméra
+    return retard
+
+
+def test_le_retard_du_flux_est_borne_par_la_vidange(monkeypatch):
+    """Le bloquant B4 : sans vidange, l'analyse recule dans le passé.
+
+    `CAP_PROP_BUFFERSIZE` ne suffit pas — le pilote peut l'ignorer, et il
+    n'était de toute façon appliqué qu'aux webcams. Mesuré avant correctif :
+    1,45 s de retard au début de la boucle, 3,25 s deux secondes plus tard, sans
+    palier. Après : stable à 0,04 s.
+    """
+    lent, cam_l = _capture_simulee(monkeypatch, vidanger=False)
+    retard_sans = _retard_apres_analyse_lente(lent, cam_l)
+    lent.liberer(); cam_l.release()
+
+    rapide, cam_r = _capture_simulee(monkeypatch, vidanger=True)
+    retard_avec = _retard_apres_analyse_lente(rapide, cam_r)
+    ignorees = rapide.images_ignorees
+    rapide.liberer(); cam_r.release()
+
+    assert retard_avec < 0.3, f"retard non borne : {retard_avec:.2f}s"
+    assert retard_sans > 2 * retard_avec, (
+        f"la doublure n'accumule pas assez pour prouver quoi que ce soit "
+        f"(sans vidange {retard_sans:.2f}s, avec {retard_avec:.2f}s)")
+    assert ignorees > 0, "aucune image jetee : la vidange n'a pas fonctionne"
+
+
+def test_le_tampon_est_reduit_sur_un_flux_reseau(monkeypatch):
+    """Le réglage existait mais était réservé à `isinstance(source, int)` :
+    jamais appliqué au RTSP, la source pour laquelle il compte le plus."""
+    cap, cam = _capture_simulee(monkeypatch, vidanger=False)
+    assert cam.reglages.get(us.cv2.CAP_PROP_BUFFERSIZE) == 1
+    cap.liberer(); cam.release()
+
+
+def test_l_evenement_porte_l_heure_de_capture(monkeypatch):
+    """Sinon un retard de flux est invisible en aval : la plateforme reçoit des
+    scènes anciennes datées de maintenant."""
+    cap, cam = _capture_simulee(monkeypatch, vidanger=True)
+    _, t_produite = cap.lire()
+    assert cap.t_capture == pytest.approx(t_produite, abs=0.05)
+
+    time.sleep(0.3)                      # le temps que prendrait l'analyse
+    horodatage = cap.t_capture           # ce que le moteur met dans l'evenement
+    assert time.time() - horodatage > 0.25, (
+        "l'horodatage suit l'analyse au lieu de rester celui de la capture")
+    cap.liberer(); cam.release()
+
+
+# ── Compaction du journal de livraison (audit du 2026-08-20, B5) ─────────────
+
+
+def test_le_journal_est_compacte_une_fois_tout_livre(tmp_path):
+    """Le bloquant B5 : sans troncature, un moteur 24/7 remplit son disque."""
+    w = _webhook(tmp_path, [])
+    w.compacter_au_dela = 512
+    for i in range(40):
+        w.emettre(Evenement(float(i), i, "test", "essai", f"evenement {i}"))
+    pos = 0
+    while True:                             # livre tout, comme le ferait le fil
+        with open(w.journal, "rb") as f:
+            f.seek(pos)
+            ligne = f.readline()
+        if not ligne:
+            break
+        w._poster(ligne.strip())
+        pos += len(ligne)
+        w._ecrire_position(pos)
+    assert pos >= w.compacter_au_dela, "journal trop court pour declencher la compaction"
+
+    assert w._compacter(pos) == 0
+    assert w.journal.stat().st_size == 0
+    assert w._lire_position() == 0
+    assert len(w.envoyes) == 40
+
+
+def test_la_compaction_est_refusee_si_un_evenement_attend(tmp_path):
+    """Réécrire un journal qui contient encore du non-livré perdrait ces
+    évènements : la compaction doit attendre le prochain moment de calme."""
+    w = _webhook(tmp_path, [])
+    w.emettre(Evenement(0.0, 0, "test", "essai", "livre"))
+    livre = w.journal.stat().st_size
+    w.emettre(Evenement(1.0, 1, "test", "essai", "pas encore livre"))
+    assert w._compacter(livre) == livre
+    assert w.journal.stat().st_size > livre
+
+
+def test_une_compaction_interrompue_ne_fait_perdre_aucun_evenement(tmp_path):
+    """Arrêt brutal entre la troncature et la remise à zéro de la position.
+
+    Mesuré avant correctif : 10 évènements perdus sur 40, plus une charge
+    illisible livrée à la plateforme — la lecture reprenait à un décalage qui ne
+    correspondait plus à rien, donc au milieu d'une ligne.
+    """
+    w = _webhook(tmp_path, [])
+    w.journal.write_text("")                    # journal tronqué
+    w.position.write_text("2048")               # position restée en arrière
+
+    for i in range(10):
+        w.emettre(Evenement(float(i), i, "test", "apres_reprise", f"evenement {i}"))
+
+    assert w._lire_position() == 0, "la position aberrante n'a pas ete rattrapee"
+    pos = 0
+    while True:
+        with open(w.journal, "rb") as f:
+            f.seek(pos)
+            ligne = f.readline()
+        if not ligne:
+            break
+        w._poster(ligne.strip())
+        pos += len(ligne)
+    assert len(w.envoyes) == 10
+    for charge in w.envoyes:
+        json.loads(charge)                      # aucune ligne coupée en deux
+
+
+def test_une_position_legitime_est_respectee(tmp_path):
+    """Le rattrapage ne doit pas dégénérer en « on repart de zéro » : une reprise
+    normale rejouerait alors tout le journal à chaque démarrage."""
+    w = _webhook(tmp_path, [])
+    for i in range(4):
+        w.emettre(Evenement(float(i), i, "test", "essai", f"evenement {i}"))
+    milieu = w.journal.stat().st_size
+    w.emettre(Evenement(9.0, 9, "test", "essai", "a livrer"))
+    w._ecrire_position(milieu)
+    assert w._lire_position() == milieu
 
 
 if __name__ == "__main__":

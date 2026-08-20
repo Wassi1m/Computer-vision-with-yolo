@@ -199,12 +199,17 @@ class SortieWebhook(Sortie):
 
     def __init__(self, url: str, timeout_s: float = 3.0, workers: int = 2,
                  journal: Path | None = None, tentatives_max: int = 8,
-                 attente_max_s: float = 60.0, jeton: str = ""):
+                 attente_max_s: float = 60.0, jeton: str = "",
+                 compacter_au_dela: int = 64 * 1024 * 1024):
         self.url = url
         self.timeout_s = timeout_s
         self.tentatives_max = tentatives_max
         self.attente_max_s = attente_max_s
         self.jeton = jeton
+        # Seuil de compaction. 64 Mo represente de l'ordre de 150 000 evenements
+        # deja livres : assez rare pour ne pas compacter sans arret, assez bas
+        # pour qu'un disque ne se remplisse jamais.
+        self.compacter_au_dela = compacter_au_dela
         self.journal = Path(journal) if journal else Path("evenements_a_livrer.jsonl")
         self.position = self.journal.with_suffix(".pos")
         self.journal.parent.mkdir(parents=True, exist_ok=True)
@@ -233,9 +238,29 @@ class SortieWebhook(Sortie):
 
     def _lire_position(self) -> int:
         try:
-            return int(self.position.read_text().strip())
+            pos = int(self.position.read_text().strip())
         except Exception:
             return 0
+        try:
+            taille = self.journal.stat().st_size
+        except OSError:
+            return pos
+        if pos > taille:
+            # Position au-dela de la fin du journal : signature d'une compaction
+            # interrompue -- le fichier a ete tronque, la position pas encore
+            # remise a zero. Reprendre au debut est sur : la compaction ne
+            # s'execute qu'a journal integralement livre, donc rien de ce qui
+            # precedait n'attend d'etre envoye. Sans ce rattrapage, la lecture
+            # reprend a un decalage qui ne correspond plus a rien : les
+            # evenements ecrits depuis sont sautes en silence, et le premier lu
+            # l'est au milieu d'une ligne (verifie : 10 evenements perdus sur 40
+            # et une charge illisible livree a la plateforme).
+            log.warning("position de livraison (%d) au-dela de la fin du journal "
+                        "(%d octets) : compaction interrompue, reprise au debut",
+                        pos, taille)
+            self._ecrire_position(0)
+            return 0
+        return pos
 
     def _ecrire_position(self, octets: int):
         # Ecriture atomique : un arret entre l'ouverture et l'ecriture laisserait
@@ -260,6 +285,36 @@ class SortieWebhook(Sortie):
             log.debug("webhook en echec (%s) : %s", type(e).__name__, e)
             return False
 
+    def _compacter(self, pos: int) -> int:
+        """Réécrit le journal sans la partie déjà livrée. Rend la nouvelle position.
+
+        Sans cela le journal croît aussi longtemps que le moteur tourne : sur une
+        installation 24/7, la saturation du disque est certaine, seule sa date
+        est inconnue. C'était le point bloquant B5 de l'audit du 2026-08-20.
+
+        La compaction ne s'exécute que si TOUT est livré (`pos` en fin de
+        fichier). Réécrire un reliquat non livré demanderait de suspendre les
+        écritures entrantes ; attendre le prochain moment de calme est plus
+        simple et arrive de toute façon sur n'importe quel site réel.
+
+        L'ordre des opérations est ce qui rend l'opération sûre en cas d'arrêt
+        brutal : on tronque le journal AVANT de remettre la position à zéro.
+        L'ordre inverse rejouerait tout le journal. Un arrêt entre les deux
+        laisse une position au-delà de la fin du fichier, que `_lire_position`
+        rattrape en reprenant à zéro.
+        """
+        with self._verrou:
+            if self.journal.stat().st_size != pos:
+                return pos                    # écrit entre-temps : on repassera
+            self._f.truncate(0)
+            self._f.seek(0)
+            self._f.flush()
+            os.fsync(self._f.fileno())
+        self._ecrire_position(0)
+        log.info("journal de livraison compacte (%d octets liberes, %d evenements livres)",
+                 pos, self.livres)
+        return 0
+
     def _boucle(self):
         while not self._stop.is_set():
             pos = self._lire_position()
@@ -270,13 +325,21 @@ class SortieWebhook(Sortie):
                     ligne = f.readline()
                     if ligne and ligne.endswith(b"\n"):
                         if self._livrer(ligne.strip()):
-                            self._ecrire_position(pos + len(ligne))
+                            pos += len(ligne)
+                            self._ecrire_position(pos)
                             self.livres += 1
                         envoye = True
             except FileNotFoundError:
                 pass
             if not envoye:
-                # Rien a envoyer : on dort jusqu'au prochain evenement.
+                # Rien a livrer : c'est le moment de compacter si le journal a
+                # depasse le seuil, puis de dormir jusqu'au prochain evenement.
+                if pos >= self.compacter_au_dela:
+                    try:
+                        self._compacter(pos)
+                    except Exception as e:
+                        log.error("compaction du journal impossible : %s: %s",
+                                  type(e).__name__, e)
                 self._reveil.wait(timeout=1.0)
                 self._reveil.clear()
 
@@ -425,6 +488,8 @@ class EtatSante:
             "modeles": analyseurs_noms,
             "flux_connecte": True,
             "reconnexions": 0,
+            "retard_flux_s": 0.0,
+            "images_ignorees": 0,
             "frames": 0,
             "fps": 0.0,
             "evenements": 0,
@@ -438,6 +503,13 @@ class EtatSante:
                 frames=frames, fps=round(fps, 2), evenements=bus.total,
                 derniere_detection=bus.dernier_t or None,
                 flux_connecte=cap.connecte, reconnexions=cap.reconnexions,
+                # Ecart entre la capture d'une image et le moment ou l'analyse la
+                # prend. Les images ignorees disent a quel point l'analyse est
+                # distancee par la camera : les deux ensemble repondent a « ce
+                # que je vois est-il recent ? », question qu'aucun champ ne
+                # permettait de trancher jusqu'ici.
+                retard_flux_s=round(cap.retard_s, 3),
+                images_ignorees=cap.images_ignorees,
                 camera_id=bus.camera_id or None, site_id=bus.site_id or None,
             )
             # Etat de la livraison : ces compteurs existaient sans jamais etre
@@ -519,7 +591,8 @@ class CaptureRobuste:
     DELAI_MIN_S = 1.0
     DELAI_MAX_S = 30.0
 
-    def __init__(self, source, bus=None, boucler=False, echecs_avant_perte=5):
+    def __init__(self, source, bus=None, boucler=False, echecs_avant_perte=5,
+                 vidanger=None):
         self.source = source
         self.bus = bus
         self.boucler = boucler
@@ -531,7 +604,33 @@ class CaptureRobuste:
         self._echecs = 0
         self._delai = self.DELAI_MIN_S
         self.reconnexions = 0
+
+        # Retard capture -> analyse. `t_capture` date l'image REELLEMENT lue,
+        # et non le moment ou l'analyse la traite : c'est cet horodatage qui doit
+        # partir dans les evenements, sinon un retard de flux est indetectable en
+        # aval (la plateforme recoit des scenes anciennes datees de maintenant).
+        self.t_capture = None
+        self.retard_s = 0.0
+        self.images_ignorees = 0
+
+        self._vidangeur = None
+        self._vidange_morte = False
+        self._arret_vidange = threading.Event()
+        self._slot = None
+        self._slot_verrou = threading.Lock()
+        self._image_prete = threading.Event()
+
         self._ouvrir()
+
+        # Un fichier se lit a la vitesse de l'analyse : aucune image ne s'accumule
+        # et les sauter fausserait une mesure. Un flux direct, lui, continue
+        # d'avancer que l'analyse suive ou non.
+        if vidanger is None:
+            vidanger = not self.est_fichier
+        if vidanger:
+            self._vidangeur = threading.Thread(target=self._vidanger_en_continu,
+                                               name="vidange-flux", daemon=True)
+            self._vidangeur.start()
 
     def _ouvrir(self) -> bool:
         if self.cap is not None:
@@ -540,6 +639,14 @@ class CaptureRobuste:
         if isinstance(self.source, int):
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        if not self.est_fichier:
+            # Le tampon ne concerne pas que les webcams : sur un flux reseau,
+            # c'est precisement lui qui accumule le retard. Ce reglage etait
+            # reserve a `isinstance(source, int)`, donc jamais applique au RTSP,
+            # la source pour laquelle il compte le plus. Le pilote reste libre
+            # de l'ignorer -- c'est courant en RTSP/FFMPEG -- et c'est pourquoi
+            # il ne suffit pas : le fil de vidange, lui, ne depend d'aucun
+            # reglage de pilote.
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         ouvert = self.cap.isOpened()
         if ouvert:
@@ -554,11 +661,72 @@ class CaptureRobuste:
             self.bus.publier(Evenement(time.time(), -1, "capture", type_ev, libelle))
 
     def lire(self, arret=None):
-        """Retourne une frame, ou None si la source est épuisée / l'arrêt demandé.
+        """Retourne l'image la plus récente, ou None (source épuisée / arrêt).
 
-        Bloque pendant les tentatives de reconnexion, en vérifiant `arret` pour
-        rester interruptible par un signal.
+        Sur un flux direct, l'image vient du fil de vidange : c'est toujours la
+        DERNIÈRE captée, jamais la plus ancienne d'une file d'attente. Sur un
+        fichier, la lecture reste séquentielle — sauter des images y fausserait
+        toute mesure.
         """
+        if self._vidangeur is not None and not self._vidange_morte:
+            return self._lire_du_tampon(arret)
+        frame = self._lire_source(arret)
+        if frame is not None:
+            self.t_capture = time.time()
+            self.retard_s = 0.0
+        return frame
+
+    def _lire_du_tampon(self, arret=None):
+        """Consomme l'image déposée par le fil de vidange, ou attend la suivante."""
+        while True:
+            with self._slot_verrou:
+                if self._slot is not None:
+                    frame, t = self._slot
+                    self._slot = None
+                    self._image_prete.clear()
+                    self.t_capture = t
+                    self.retard_s = time.time() - t
+                    return frame
+            if arret is not None and arret.is_set():
+                return None
+            if self._vidange_morte:
+                # Le fil a succombé : plutôt que de laisser l'appelant attendre
+                # une image qui ne viendra jamais, on retombe sur la lecture
+                # directe. Le retard n'est plus borné, mais le moteur tourne.
+                return self._lire_source(arret)
+            self._image_prete.wait(timeout=0.2)
+
+    def _vidanger_en_continu(self):
+        """Lit le flux sans discontinuer et ne garde que la dernière image.
+
+        C'est le cœur du correctif : sans ce fil, la lecture avance au rythme de
+        l'analyse. Une analyse plus lente que la caméra laisse les images
+        s'entasser dans le tampon du décodeur, et le moteur travaille sur des
+        scènes de plus en plus vieilles — dérive qui n'apparaît nulle part, car
+        rien ne compare la date de capture à la date de traitement.
+
+        Ici les images en trop sont jetées à la source. Le moteur analyse moins
+        d'images, mais toujours des images d'il y a un instant.
+        """
+        try:
+            while not self._arret_vidange.is_set():
+                frame = self._lire_source(self._arret_vidange)
+                if frame is None:
+                    break                      # arrêt demandé, ou source épuisée
+                with self._slot_verrou:
+                    if self._slot is not None:
+                        self.images_ignorees += 1
+                    self._slot = (frame, time.time())
+                    self._image_prete.set()
+        except Exception as e:
+            log.error("fil de vidange interrompu (%s: %s) : lecture directe, "
+                      "le retard du flux n'est plus borne", type(e).__name__, e)
+        finally:
+            self._vidange_morte = True
+            self._image_prete.set()
+
+    def _lire_source(self, arret=None):
+        """Lecture séquentielle brute, avec reconnexion et temporisation."""
         while True:
             if arret is not None and arret.is_set():
                 return None
@@ -595,6 +763,14 @@ class CaptureRobuste:
                 self._ouvrir()
 
     def liberer(self):
+        if self._vidangeur is not None:
+            self._arret_vidange.set()
+            self._vidangeur.join(timeout=2.0)
+            if self._vidangeur.is_alive():
+                # Bloque dans un `read()` que le pilote ne rend pas : relacher la
+                # capture sous ses pieds ferait tomber le processus a l'arret.
+                log.warning("fil de vidange encore actif a l'arret : capture non relachee")
+                return
         if self.cap is not None:
             self.cap.release()
 
@@ -1738,7 +1914,9 @@ def main():
             if frame is None:
                 break  # source epuisee (fichier termine) ou arret demande
             frame_idx += 1
-            ctx = {"frame": frame_idx, "t": time.time()}
+            # Date de capture, pas date de traitement : c'est la seule qui
+            # situe la scene dans le temps pour la plateforme aval.
+            ctx = {"frame": frame_idx, "t": cap.t_capture or time.time()}
 
             if general is not None:
                 t0 = time.time()

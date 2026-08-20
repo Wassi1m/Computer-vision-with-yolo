@@ -3,8 +3,9 @@
 
 Situation corrigée
 ------------------
-`ppe_detection/scripts/ppe_dual_model_backup2.py` et `surveillance_suite/main.py`
-ouvrent chacun leur propre `cv2.VideoCapture`. Sur une caméra de surveillance
+Les deux applications d'origine — `ppe_dual_model_backup2.py`, retiré du dépôt
+le 2026-08-20 mais présent dans l'historique git, et `surveillance_suite/main.py`
+— ouvraient chacune leur propre `cv2.VideoCapture`. Sur une caméra de surveillance
 réelle c'est impossible : un flux V4L2 n'accepte généralement qu'un seul
 lecteur, et un flux RTSP ouvert deux fois double la bande passante, désynchronise
 les deux analyses (elles ne voient pas la même image au même instant) et rend

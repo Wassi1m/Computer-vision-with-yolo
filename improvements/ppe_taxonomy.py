@@ -3,8 +3,9 @@
 
 Problème traité
 ---------------
-`ppe_dual_model_backup2.py` fait cohabiter `ppe_detector.pt` (M1, 14 classes) et
-`ppe_complement.pt` (M2, 6 classes) en associant leurs sorties par simple
+`ppe_dual_model_backup2.py` — le script d'origine, retiré du dépôt le 2026-08-20
+et consultable dans l'historique git — faisait cohabiter `ppe_detector.pt` (M1,
+14 classes) et `ppe_complement.pt` (M2, 6 classes) en associant leurs sorties par simple
 recherche de sous-chaîne (`MOTS_CLES_EPI`) puis par IoU avec les personnes.
 Trois défauts en découlent :
 

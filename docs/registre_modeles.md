@@ -101,6 +101,28 @@ image, `ppe_detector.pt` prend le relais automatiquement. Désactivable via
 
 ### `surveillance_suite/models/fall_detector.pt` — détection de chute
 
+> **Version en service depuis le 2026-09-27 : « chute à distance v2 »** (sha256 `7d3dedc0ad87…`).
+> Fine-tuning Kaggle T4 (kernel `wassimmay/candidat-chute-distance-v2`, SGD, `lr0=0.001`,
+> 60 époques, meilleure 49) depuis le poids P8, sur trois jeux Roboflow **CC BY 4.0**
+> (`nathan-yan/fall-detection-real` v31, `fall-stand-and-squat/fall-down-detection-czmzj` v1,
+> `customdataset-lmry5/human-fall-detection-hdkty` v8 ; assis et accroupi → `stand`) + le jeu
+> d'origine (train/valid, jamais son test ; **polygones convertis en boîtes**), avec une copie
+> « à distance » de chaque image d'entraînement (personne de 30 à 250 px dans une trame 1280×720).
+>
+> | Mesure | P8 | v2 |
+> |---|---|---|
+> | Non-régression `falling` / `stand` (AP@50, `test`) | 0,9923 / 0,9879 | **0,995 / 0,995** |
+> | Banc S4, chutes vues : personne 80 px / 160 px / 320 px (jour) | 0 % / 36 % / 78 % | **67 % / 89 % / 92 %** |
+> | Banc S4, 160 px nuit IR / faible lumière | 25 % / 17 % | **75 % / 81 %** |
+> | Robustesse (image proche) faible lumière / flou, mAP@50 | 0,979 / 0,992 | 0,929 / 0,975 |
+>
+> Contrepartie connue : sur une image **proche** et dégradée, légère baisse de mAP (ci-dessus).
+> Délai et fausses alarmes sur séquences (accroupi, assis) : à mesurer (`mesure_sequences.py`).
+> Poids P8 conservé : `reports/v3_results/poids_remplaces/fall_detector_avant_chute_v2_20260927.pt`.
+> Verdict complet : `reports/candidats/chute_v2_verdict.md` (branche `amelioration/plan-4-volets`).
+>
+> *Description de la version précédente (P8), conservée ci-dessous.*
+
 | | |
 |---|---|
 | **Rôle** | 2 classes : `falling`, `stand` |
@@ -125,6 +147,29 @@ en conditions dégradées avant de considérer le point clos. Ancien poids
 conservé en `fall_detector_pre_p8.pt` (hors dépôt, voir `.gitignore`).
 
 ### `surveillance_suite/models/fire_smoke.pt` — feu et fumée
+
+> **Version en service depuis le 2026-09-27 : « avec négatifs »** (sha256 `5d26152e351e…`),
+> **installée à la demande explicite de l'utilisateur malgré un échec de non-régression sur `smoke`.**
+> Fine-tuning Kaggle T4 (kernel `wassimmay/candidat-feu-fumee-negatifs`, SGD, `lr0=0.001`, 60 époques,
+> meilleure 43) depuis P4 : `fire_smoke_v9` en 2 classes (`smoke_distant` → `smoke`), sans image
+> du test de non-régression, 25 % de copies dégradées (dont nuit IR), **+ 3 000 scènes de chantier
+> sans feu** (`ppe-14c-equilibre`, jamais une image du test de mesure — exclusion par nom et contenu).
+> Cause traitée : `fire_smoke_v9` ne contenait **aucune** image négative.
+>
+> | Mesure | P4 | Négatifs |
+> |---|---|---|
+> | Non-régression `fire` / `smoke` (AP@50) | 0,9037 / **0,4071** | 0,9136 / 0,3537 (−5,3) |
+> | Opérationnel jour, seuil 0,10 (scènes / fausse alarme) | 96,7 % / 2,0 % | **97,5 %** / 2,2 % |
+> | Opérationnel nuit, seuil 0,30 | 32,0 % / 1,2 % | **57,1 %** / 1,6 % |
+> | **Scènes sans feu** (`tests/mesure_scenes_vides.py`), seuil 0,10 : jour / nuit / nuit IR | 15,8 % / 6,2 % / 45,0 % | **1,6 % / 3,8 % / 10,0 %** |
+>
+> La référence de `tests/reference_modeles.json` a été abaissée **par décision de l'utilisateur**
+> (champ `decision_utilisateur`, ancienne valeur dans `reference_precedente`), pas pour faire passer
+> le test. Réserve : les scènes vides viennent du même domaine que les négatifs d'entraînement —
+> le gain sur site est probablement moindre. Poids P4 conservé :
+> `reports/v3_results/poids_remplaces/fire_smoke_avant_feu_negatifs_20260927.pt`.
+>
+> *Description de la version précédente (P4), conservée ci-dessous.*
 
 | | |
 |---|---|

@@ -43,3 +43,14 @@ lap==0.5.13
 # installation, vérifier :
 #     python -c "import cv2; print(cv2.__version__)"   # 4.10.0
 #     python -c "import torch; print(torch.cuda.is_available())"   # True
+
+# ── Reconnaissance faciale (facultative) ─────────────────────────────────────
+# Variante GPU : `onnxruntime-gpu` et non `onnxruntime`. Les deux paquets se
+# partagent le module `onnxruntime` et le dernier installé gagne — même piège
+# que les deux variantes d'OpenCV. Installer les deux fait tourner ArcFace sur
+# CPU sans qu'aucune erreur ne le signale : la seule trace est une cadence
+# effondrée. Vérifier après installation :
+#     python -c "import onnxruntime as o; print(o.get_available_providers())"
+#     # doit contenir CUDAExecutionProvider
+insightface==0.7.3
+onnxruntime-gpu==1.20.1

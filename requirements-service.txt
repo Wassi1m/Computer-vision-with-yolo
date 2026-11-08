@@ -44,6 +44,22 @@ easyocr==1.7.2
 scikit-image==0.26.0
 lap==0.5.13
 
+# ── Reconnaissance faciale (facultative) ─────────────────────────────────────
+# Le module `visage` ne se charge que si ces deux paquets sont présents ; sans
+# eux le moteur démarre normalement et les six autres modules fonctionnent
+# (`DetecteurVisage.disponible` reste faux, journalisé en avertissement).
+#
+# `insightface` fournit SCRFD (détection) et ArcFace R50 (signature) via le
+# paquet `buffalo_l`, téléchargé au premier usage dans ~/.insightface. Les poids
+# ne sont donc pas versionnés ici, contrairement aux autres modèles du projet.
+#
+# `onnxruntime` et non `onnxruntime-gpu` dans ce fichier CPU : les deux paquets
+# se partagent le module `onnxruntime` et le dernier installé gagne, exactement
+# comme les deux variantes d'OpenCV décrites plus haut. La cible GPU est dans
+# requirements-service-gpu.txt.
+insightface==0.7.3
+onnxruntime==1.20.1
+
 # ── Cible GPU ────────────────────────────────────────────────────────────────
 # Les variantes `+cpu` ci-dessus rendent la carte INVISIBLE, quel que soit le
 # serveur. Pour un déploiement GPU, utiliser `requirements-service-gpu.txt` et

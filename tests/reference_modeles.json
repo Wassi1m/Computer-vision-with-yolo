@@ -12,24 +12,33 @@
       "poids": "surveillance_suite/models/fall_detector.pt",
       "data": "ppe_detection/data/extracted/fall_detection_enriched/data.yaml",
       "split": "test",
-      "origine": "P8 — fine-tuning Colab T4 du 2026-08-10, robustesse conditions dégradées (nuit/contre-jour/flou/intempérie), reprend le poids P5",
-      "mesure_le": "2026-08-10",
+      "origine": "Chute à distance v2 — fine-tuning Kaggle T4 du 2026-09-27 (kernel wassimmay/candidat-chute-distance-v2), reprend le poids P8 ; 3 jeux Roboflow CC BY 4.0 + jeu d'origine, copies « à distance ». Remplace P8 (sha 1b87beb6…, conservé dans reports/v3_results/poids_remplaces/).",
+      "mesure_le": "2026-09-27",
       "classes": {
-        "falling": 0.9923,
-        "stand": 0.9879
+        "falling": 0.995,
+        "stand": 0.995
       },
-      "mAP50": 0.9901
+      "mAP50": 0.995
     },
     "fire_smoke": {
       "poids": "surveillance_suite/models/fire_smoke.pt",
       "data": "surveillance_suite/data/dataset/fire_smoke_enriched/data.yaml",
       "split": "test",
-      "origine": "P4 — fine-tuning Colab T4, dataset d'origine + complément pyro-sdis",
+      "origine": "Négatifs — fine-tuning Kaggle T4 du 2026-09-27 (kernel wassimmay/candidat-feu-fumee-negatifs), reprend P4 ; + 3 000 scènes de chantier sans feu. Remplace P4 (sha de45dd98…, conservé dans reports/v3_results/poids_remplaces/).",
       "classes": {
-        "fire": 0.9037,
-        "smoke": 0.4071
+        "fire": 0.9136,
+        "smoke": 0.3537
       },
-      "mAP50": 0.6554
+      "mAP50": 0.6336,
+      "mesure_le": "2026-09-27",
+      "decision_utilisateur": "2026-09-27 : installé À LA DEMANDE EXPLICITE DE L'UTILISATEUR malgré une baisse de l'AP@50 `smoke` de 0,4071 à 0,3537 (hors tolérance). Contrepartie mesurée : fausses alarmes sur 4 423 scènes de chantier sans feu, seuil 0,10, jour 15,8 % → 1,6 %, nuit IR 45,0 % → 10,0 % ; détection opérationnelle de jour 96,7 % → 97,5 %, de nuit (seuil 0,30) 32,0 % → 57,1 %. Le registre juge ce modèle sur la mesure opérationnelle, non sur l'AP de `smoke`. Référence abaissée par décision, pas pour faire passer un test.",
+      "reference_precedente": {
+        "classes": {
+          "fire": 0.9037,
+          "smoke": 0.4071
+        },
+        "mAP50": 0.6554
+      }
     },
     "license_plate": {
       "poids": "surveillance_suite/models/license_plate.pt",

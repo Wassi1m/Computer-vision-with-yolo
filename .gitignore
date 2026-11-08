@@ -72,3 +72,8 @@ reports/v3_results/controle_avant_vol/
 # Archives .zip d'anciens jeux de donnees / experiences abandonnees, conservees
 # pour ne rien perdre mais trop volumineuses pour git (menage du 2026-08-17)
 /archives/
+
+# File d'évènements écrite par le moteur en marche (journal de livraison au
+# webhook et sa position) : donnée d'exécution, propre à chaque poste.
+evenements_a_livrer.jsonl
+evenements_a_livrer.pos

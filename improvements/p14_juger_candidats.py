@@ -145,6 +145,8 @@ def main() -> int:
     ap.add_argument("--poids", required=True)
     ap.add_argument("--conf", type=float, default=0.25)
     ap.add_argument("--sortie", default=None)
+    ap.add_argument("--ecraser", action="store_true",
+                    help="autorise le remplacement d'un fichier de mesure existant")
     args = ap.parse_args()
 
     poids = Path(args.poids)
@@ -213,9 +215,19 @@ def main() -> int:
             print(f"  {nom:<12} candidat {c['candidat']:.3f}  vs  "
                   f"{c['ppe_detector']:.3f}   {'GAGNE' if c['gagne'] else 'PERD'}")
 
+    # Nom DATÉ par défaut. Le nom fixe `<candidat>_candidat.json` écrasait la
+    # mesure de la campagne précédente à chaque exécution : le 2026-09-08, le
+    # jugement d'un nouveau candidat `gants` a effacé celle du 2026-08-19, qui
+    # servait pourtant de point de comparaison — elle n'a été récupérée que
+    # parce que le dépôt est versionné. Une mesure est une observation, elle ne
+    # se remplace pas.
     sortie = Path(args.sortie or
-                  RACINE / f"reports/v3_results/{args.candidat}_candidat.json")
+                  RACINE / f"reports/v3_results/{args.candidat}_candidat_{date.today()}.json")
     sortie.parent.mkdir(parents=True, exist_ok=True)
+    if sortie.exists() and not args.ecraser:
+        print(f"\n{sortie.name} existe deja. Relancer avec --ecraser pour le "
+              f"remplacer, ou donner --sortie <autre chemin>.", file=sys.stderr)
+        return 1
     sortie.write_text(json.dumps(resultat, ensure_ascii=False, indent=2),
                       encoding="utf-8")
     print(f"\n-> {sortie}")

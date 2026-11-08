@@ -1,6 +1,6 @@
 # Contrat d'interface — moteur de détection
 
-Version : 1.1 (2026-08-13)
+Version : 1.2 (2026-08-31)
 
 Ce document décrit ce que le moteur de détection produit et comment le
 consommer. Il s'adresse à l'équipe qui développe la plateforme d'alerting
@@ -103,7 +103,7 @@ Objet JSON, encodé en UTF-8.
 | `event_id` | string | Identifiant unique (hexadécimal, 32 caractères). **À utiliser pour dédupliquer** : la livraison étant « au moins une fois », un accusé perdu fait renvoyer l'évènement. |
 | `t` | float | Horodatage Unix (secondes, décimales) de la **capture de l'image**, pas de la fin de son analyse. **Clé d'ordonnancement.** L'écart entre les deux est publié sur `/health` (`retard_flux_s`) : un évènement peut donc arriver quelques centaines de millisecondes après la date qu'il porte, ce qui est normal. |
 | `frame` | int | Numéro d'image depuis le démarrage. `-1` pour les évènements techniques (flux perdu/repris) qui ne proviennent pas d'une image. |
-| `source` | string | Module émetteur : `epi`, `chute`, `feu`, `ligne`, `porte`, `lpr`, `capture`. |
+| `source` | string | Module émetteur : `epi`, `chute`, `feu`, `ligne`, `porte`, `lpr`, `visage`, `capture`. |
 | `type` | string | Nature de l'évènement (voir §4). |
 | `libelle` | string | Description lisible, en français. **Destinée à l'affichage, pas à être analysée par programme** — utiliser `type` pour toute logique. |
 | `conf` | float | Confiance du modèle, entre 0 et 1. `0.0` quand la notion ne s'applique pas (une violation EPI résulte d'un lissage sur plusieurs images, pas d'une détection unique). |
@@ -122,6 +122,7 @@ Objet JSON, encodé en UTF-8.
 | `objet_abandonne` | `objet_abandonne` | Bagage immobile, sans personne à proximité depuis le délai configuré (30 s par défaut) | Boîte de l'objet |
 | `foule` | `foule` | Seuil d'effectif ou de densité franchi dans la zone | `null` |
 | `foule` | `foule_terminee` | Retour sous le seuil | `null` |
+| `visage` | `visage` | Signature faciale d'une personne suivie (voir §4 ter) | Boîte du visage |
 | `porte` | `porte` | Changement d'état de la porte (ouverte/fermée) | `null` |
 | `lpr` | `plaque` | Plaque d'immatriculation lue | Boîte de la plaque |
 | `capture` | `flux_perdu` | Le flux vidéo n'est plus lisible | `null` |
@@ -175,6 +176,55 @@ confiance.
 
 `chaussures` n'est **pas obligatoire** par défaut (`obligatoire: false`) : il
 remonte donc à titre indicatif, sauf configuration contraire.
+
+## 4 ter. La signature faciale, et ce qu'elle n'est pas
+
+**Le moteur ne nomme personne.** L'évènement `visage` transporte une *signature*
+numérique et le `track_id` de la personne qui la porte ; c'est la plateforme qui
+cherche à qui elle appartient. Le moteur ne détient aucun trombinoscope et ne
+peut donc rien dire de l'identité de quiconque.
+
+Cette répartition répond à trois contraintes. Le trombinoscope reste en un seul
+endroit, ce qui rend la purge à l'échéance de rétention et le registre des accès
+réellement applicables ; le moteur n'a pas accès à la base de la plateforme ;
+et l'enrôlement doit employer exactement le même modèle que la reconnaissance,
+ce que les champs `modele` et `dim` permettent de vérifier.
+
+```json
+"extra": {
+  "track_id": 7,
+  "suivi": true,
+  "signature": "PGY8ZDxjPGI8YTxgPF88Xjxd…",
+  "modele": "buffalo_l",
+  "dim": 512,
+  "qualite": 0.72,
+  "score_detection": 0.91,
+  "boite_personne": [189, 250, 266, 556]
+}
+```
+
+| Champ | Type | Description |
+|---|---|---|
+| `track_id` | int | **Le champ essentiel.** Même identifiant que celui porté par les violations EPI (§4 bis) : c'est lui qui permet de rattacher « personne 7 sans casque » à « personne 7 a le visage X ». |
+| `signature` | string | Vecteur ArcFace normalisé, `float16` sérialisé en base64. **Donnée biométrique.** |
+| `modele` | string | Paquet ayant produit la signature. Une signature n'est comparable qu'à un gabarit du même modèle : comparer deux modèles produit des scores plausibles et dénués de sens. |
+| `dim` | int | Dimension du vecteur, 512 pour `buffalo_l`. À vérifier avant toute comparaison. |
+| `qualite` | float | Note entre 0 et 1 : détection × netteté × taille × frontalité. Sous ~0,35 la signature est instable et polluerait la recherche. |
+| `boite_personne` | array | Boîte de la personne dont ce visage a été extrait. |
+
+**Ce module ne détecte pas les personnes.** Il réutilise le suivi de
+`AnalyseurGeneral`, déjà exécuté à chaque image, et ne cherche un visage que
+dans le tiers supérieur de chaque boîte de personne. Il dépend donc de
+`general` : le désactiver rend `visage` inopérant.
+
+**Économie d'émission.** Une signature n'est utile qu'une fois par piste.
+Le moteur n'émet qu'à la première vue d'une piste, ou lorsque la qualité gagne
+au moins 0,12 sur la meilleure déjà envoyée. Une personne qui traverse le champ
+en dix secondes produit deux ou trois évènements, pas trois cents.
+
+**Activation.** `--visage`, désactivé par défaut. C'est le seul module dont
+l'activation soit explicite : les autres démarrent dès que leurs poids sont
+présents, parce qu'un casque détecté n'engage personne. Un visage reconnu, si.
 
 ## 5. Anti-répétition
 
@@ -282,8 +332,13 @@ provoque un arrêt immédiat.
   instances. Chacune porte désormais son `camera_id` (`--camera-id`), donc les
   flux d'évènements de plusieurs instances peuvent être agrégés sans ambiguïté.
 - **Données sensibles** : les évènements `plaque` contiennent des numéros
-  d'immatriculation en clair. La politique de rétention côté plateforme doit
-  être définie explicitement.
+  d'immatriculation en clair, et les évènements `visage` des signatures
+  biométriques. La politique de rétention côté plateforme doit être définie
+  explicitement pour les deux.
+- **Le rattachement d'une identité ne survit pas à une rupture de suivi.** Si le
+  moteur perd une personne et lui attribue un nouveau `track_id`, il faut une
+  nouvelle signature pour la renommer. C'est délibéré : prolonger une identité
+  par-delà une rupture reviendrait à imputer une infraction sur une supposition.
 
 ## 9. Questions ouvertes à trancher ensemble
 

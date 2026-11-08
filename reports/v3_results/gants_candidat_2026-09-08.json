@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-08",
+  "candidat": "gants",
+  "poids": "/tmp/claude-1000/-home-user-Bureau-sharp-ia-project/828904c1-8e46-49e2-b9a7-a55f5495169b/scratchpad/candidat_v2.pt",
+  "mesure": "ppe_dataset/test filtre+remappe (1179 scenes annotees), jamais inclus dans un jeu d'entrainement, conf=0.25",
+  "detection_scene": {
+    "Gloves": 0.9899,
+    "NO-Gloves": 0.9778,
+    "Goggles": 0.9946,
+    "NO-Goggles": 0.9617
+  },
+  "ap50": {
+    "Gloves": 0.9584,
+    "NO-Gloves": 0.9267,
+    "Goggles": 0.9669,
+    "NO-Goggles": 0.965
+  },
+  "mAP50_global": 0.9542,
+  "effectifs": {
+    "Gloves": 198,
+    "NO-Gloves": 270,
+    "Goggles": 372,
+    "NO-Goggles": 339
+  },
+  "comparaison_ppe_detector": {
+    "Gloves": {
+      "candidat": 0.9584,
+      "ppe_detector": 0.932,
+      "gagne": true
+    },
+    "NO-Gloves": {
+      "candidat": 0.9267,
+      "ppe_detector": 0.909,
+      "gagne": true
+    },
+    "Goggles": {
+      "candidat": 0.9669,
+      "ppe_detector": 0.96,
+      "gagne": true
+    },
+    "NO-Goggles": {
+      "candidat": 0.965,
+      "ppe_detector": 0.961,
+      "gagne": true
+    }
+  }
+}

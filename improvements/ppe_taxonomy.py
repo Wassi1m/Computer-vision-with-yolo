@@ -218,6 +218,30 @@ M4 = {
 # désormais M1 sur les QUATRE classes : 0.955/0.931/0.966/0.965 contre
 # 0.932/0.909/0.960/0.961 (reports/v3_results/gants_candidat.json). Sa détection
 # de scène, jamais mesurée auparavant sur ces classes, va de 95 % à 99 %.
+# RÉENTRAÎNÉ le 2026-09-08 (campagne « gros plan »). Le modèle du 18 août ne
+# proposait AUCUNE boîte sur un cadrage de webcam, ni gants ni lunettes, même à
+# un seuil de 0,03 : ses boîtes d'entraînement plafonnaient à 4,6 % de l'image
+# pour les gants et 1,1 % pour les lunettes, quand une main en gros plan en
+# occupe 30 %. Le jeu `epi_gants_gros_plan` y ajoute 2 802 gros plans de mains
+# (Kaggle `waquarahmed1/glove-and-no-gloves-2-3k`) et 2 140 visages en gros plan
+# étiquetés `NO-Goggles`.
+#
+# Les visages ne sont pas un ornement : un premier candidat, entraîné avec les
+# seuls gros plans de mains, a été REJETÉ parce qu'il annonçait `NO-Gloves` sur
+# un visage seul (0,58 et 0,25 sur deux captures sans la moindre main). Sans
+# annotation, la zone du visage restait un terrain vague où le détecteur de
+# gants s'installait sans être pénalisé.
+#
+# Mesuré sur `ppe_dataset/test` (947 images, jamais téléversées), détection de
+# scène ÉGALE OU MEILLEURE sur les quatre classes face au modèle d'août :
+# 99,0 / 97,8 / 99,5 / 96,2 % contre 98,99 / 97,78 / 99,19 / 95,28 %.
+# Voir reports/v3_results/gants_candidat_2026-09-08.json.
+#
+# ⚠️ DETTE : aucun `Goggles` en gros plan dans le jeu (aucune paire de lunettes
+# de sécurité disponible, et aucun jeu public n'en fournit vues de près). Sur un
+# visage très proche de l'objectif, le modèle n'a aucun contre-exemple et dira
+# « sans lunettes » même sur un porteur en règle. Sans effet sur les caméras de
+# surveillance cadrant en pied, où `Goggles` est détecté à 99,5 %.
 M5_NOM = "epi_gants_lunettes.pt"
 M5 = {
     "Gloves":      Correspondance("gants",    True,  0.25),

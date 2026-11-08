@@ -4,7 +4,7 @@
     "quand_mettre_a_jour": "Apres un remplacement de modele ASSUME et mesure. Jamais pour faire passer une verification en echec : c'est exactement la substitution que ce fichier existe pour detecter.",
     "verifier": "python outils/verifier_modeles.py --verifier"
   },
-  "fige_le": "2026-08-20",
+  "fige_le": "2026-09-27",
   "modeles": {
     "ppe_detection/models/ppe_detector.pt": {
       "sha256": "d778bf05da5e691df65fdb35d3a6c6073919c0888a17d5fd29f70e383c3cb908",
@@ -45,8 +45,8 @@
       ]
     },
     "ppe_detection/models/epi_gants_lunettes.pt": {
-      "sha256": "fe633d2c5a5df57604c0a86a9626c62501b2b1b66bd6a2b97ea26954719b7be6",
-      "octets": 52030546,
+      "sha256": "6b46483e5293173c2f09ed7ee5d420dfd2733249c314eab9484909a1fcb36afd",
+      "octets": 52030482,
       "classes": [
         "Gloves",
         "NO-Gloves",
@@ -63,16 +63,16 @@
       ]
     },
     "surveillance_suite/models/fire_smoke.pt": {
-      "sha256": "de45dd98fe1013a231e8d36be8fe77508194bd2064f68dbfefffb533ca9cce4f",
-      "octets": 5391941,
+      "sha256": "5d26152e351e443a108e8469f1d1d89c66e1e271f5323e1b900a430346e1b33c",
+      "octets": 5389189,
       "classes": [
         "fire",
         "smoke"
       ]
     },
     "surveillance_suite/models/fall_detector.pt": {
-      "sha256": "1b87beb668d6c9495245c6cebe77dc85925d0aec4f1cd535555c097b7307fe92",
-      "octets": 5389061,
+      "sha256": "7d3dedc0ad87a6043c3e17d8adc408e897994dc144b7fb1fc7258fb3e92b499c",
+      "octets": 5389189,
       "classes": [
         "falling",
         "stand"

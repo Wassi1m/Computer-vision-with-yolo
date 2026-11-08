@@ -23,8 +23,18 @@ WORKDIR /app
 
 # Couche de dépendances séparée : elle ne se reconstruit que si les versions
 # changent, pas à chaque modification de code.
+#
+# `insightface` (reconnaissance faciale) ne publie aucune roue précompilée : il
+# compile des extensions Cython à l'installation, et échoue sans g++. La chaîne
+# de compilation est installée puis RETIRÉE dans la même couche — la garder
+# ajouterait ~250 Mo à une image de production qui n'a rien à compiler, et
+# offrirait un compilateur à qui prendrait la main dans le conteneur.
 COPY requirements-service.txt .
-RUN pip install --no-cache-dir -r requirements-service.txt
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential \
+ && pip install --no-cache-dir -r requirements-service.txt \
+ && apt-get purge -y --auto-remove build-essential \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY improvements/ ./improvements/
 COPY surveillance_suite/ ./surveillance_suite/

@@ -160,6 +160,102 @@ def test_purge_retire_les_cles_inactives():
     assert "z" not in c._hist
 
 
+def test_vieillir_compte_les_analyses_sans_detection():
+    """Le feu n'appelait `confirmer` qu'en présence d'une détection : deux
+    reflets au même endroit, séparés par des centaines d'analyses vides, se
+    confirmaient. `vieillir` fait entrer ces analyses vides dans la fenêtre."""
+    c = ConfirmationTemporelle(fenetre=3, minimum=2)
+    assert c.confirmer("z", True) is False
+    for _ in range(3):
+        c.vieillir(set())
+    assert c.confirmer("z", True) is False
+
+
+def test_vieillir_epargne_les_cles_vues():
+    c = ConfirmationTemporelle(fenetre=3, minimum=2)
+    c.confirmer("z", True)
+    c.vieillir({"z"})
+    assert c.confirmer("z", True) is True
+
+
+def test_vieillir_permet_la_purge():
+    c = ConfirmationTemporelle(fenetre=2, minimum=2)
+    c.confirmer("z", True)
+    c.vieillir(set())
+    c.vieillir(set())
+    c.purger()
+    assert "z" not in c._hist
+
+
+def _analyseur_feu(sorties):
+    """AnalyseurFeu sans modèle : `sorties` donne les détections image par image."""
+    from unified_surveillance import AnalyseurFeu
+    a = AnalyseurFeu.__new__(AnalyseurFeu)
+    a.every, a.res = 1, []
+    a.confirmation = ConfirmationTemporelle(3, 2)
+    suite = iter(sorties)
+    a.det = type("D", (), {"detect": lambda self, f: next(suite)})()
+    return a
+
+
+def test_feu_doublon_sur_une_image_ne_confirme_pas():
+    """Deux boîtes de fumée qui se chevauchent sur UNE image sont une seule
+    observation : elles ne doivent pas confirmer à elles seules."""
+    fumee = {"box": (100, 100, 140, 140), "label": "smoke", "conf": 0.6}
+    a = _analyseur_feu([[fumee, dict(fumee, conf=0.5)]])
+    assert a.process(None, {"t": 0.0, "frame": 1}) == []
+
+
+def test_feu_detections_espacees_ne_confirment_pas():
+    fumee = {"box": (100, 100, 140, 140), "label": "smoke", "conf": 0.6}
+    a = _analyseur_feu([[fumee], [], [], [], [fumee]])
+    evs = [a.process(None, {"t": float(i), "frame": i}) for i in range(5)]
+    assert all(e == [] for e in evs)
+
+
+def test_feu_persistant_confirme():
+    fumee = {"box": (100, 100, 140, 140), "label": "smoke", "conf": 0.6}
+    a = _analyseur_feu([[fumee], [fumee]])
+    a.process(None, {"t": 0.0, "frame": 1})
+    assert len(a.process(None, {"t": 1.0, "frame": 2})) == 1
+
+
+def test_chute_doublon_sur_une_image_ne_confirme_pas():
+    from unified_surveillance import AnalyseurChute
+    a = AnalyseurChute.__new__(AnalyseurChute)
+    a.confirmation = ConfirmationTemporelle(4, 2)
+    a._mode = "pose"
+    a.ratio = a.angle = 0
+    a.model = lambda *x, **k: [None]
+    a._detect = lambda r, ratio, angle: [
+        {"box": (100, 300, 220, 360), "fallen": True},
+        {"box": (104, 302, 224, 362), "fallen": True}]
+    a.imgsz = 480
+    assert a.process(None, {"t": 0.0, "frame": 1}) == []
+
+
+# ── Visage : un seul visage par personne suivie ──────────────────────────────
+
+def test_visage_du_voisin_ecarte():
+    """La vignette de tête déborde sur le voisin : son visage ne doit pas être
+    émis sous le track_id de la personne analysée."""
+    from unified_surveillance import AnalyseurVisage
+    personne = (100, 50, 200, 400)
+    decalage = 85                       # vignette = personne - marge de 15 px
+    mien = {"box": (35, 10, 80, 60)}     # centre absolu x = 142
+    voisin = {"box": (0, 10, 20, 60)}    # centre absolu x = 95, hors de la boîte
+    assert AnalyseurVisage._visage_de_la_personne([voisin, mien], personne, decalage) == [mien]
+    assert AnalyseurVisage._visage_de_la_personne([voisin], personne, decalage) == []
+
+
+def test_visage_le_plus_proche_de_l_axe():
+    from unified_surveillance import AnalyseurVisage
+    personne = (100, 50, 200, 400)
+    centre = {"box": (40, 10, 90, 60)}   # x = 150 : sur l'axe
+    bord = {"box": (95, 10, 110, 40)}    # x = 187 : dans la boîte, excentré
+    assert AnalyseurVisage._visage_de_la_personne([bord, centre], personne, 85) == [centre]
+
+
 # ── Bus d'évènements : anti-répétition et robustesse des sorties ─────────────
 
 def test_anti_repetition_bloque_le_doublon_immediat():
@@ -1147,3 +1243,104 @@ def test_un_identifiant_a_pourcent_ne_rend_pas_le_moteur_muet(capsys):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── Cascade EPI sur image isolée (services à la demande) ─────────────────────
+
+import epi_image as ei  # noqa: E402
+
+#: Une personne cadrée normalement dans une image 1000×1000 : elle en occupe
+#: 18 %, comme sur une scène de chantier.
+PERSONNE_CADREE = (400, 200, 700, 800)
+IMAGE = (1000, 1000)
+
+
+def _detection(fichier, classe, conf, box):
+    return {"fichier": fichier, "classe": classe, "confiance": conf, "box": box}
+
+
+def test_un_modele_hors_epi_traverse_sans_etre_juge():
+    """Ce module n'a rien à dire sur un départ de feu."""
+    feu = _detection("fire_smoke.pt", "fire", 0.55, (10, 10, 50, 50))
+    retenues, ecartees = ei.qualifier([feu], [PERSONNE_CADREE])
+    assert retenues == [feu] and ecartees == []
+
+
+def test_des_chaussures_sur_la_tete_sont_ecartees():
+    """Le cas exact que `epi_chaussures.pt` produit sans ancrage : il déclenche
+    sur 59 % des images au lieu de 1 % (chaussures_ancrage.json)."""
+    tete = (430, 210, 660, 330)          # premier cinquième de la personne
+    retenues, ecartees = ei.qualifier(
+        [_detection("epi_chaussures.pt", "safety_shoe", 0.88, tete)],
+        [PERSONNE_CADREE])
+    assert retenues == []
+    assert "hauteur invraisemblable" in ecartees[0]["motif"]
+
+
+def test_des_chaussures_aux_pieds_sont_retenues():
+    pieds = (430, 700, 660, 790)
+    retenues, ecartees = ei.qualifier(
+        [_detection("epi_chaussures.pt", "safety_shoe", 0.88, pieds)],
+        [PERSONNE_CADREE])
+    assert ecartees == []
+    assert retenues[0]["epi"] == "chaussures" and retenues[0]["porte"] is True
+
+
+def test_un_epi_hors_de_toute_personne_est_ecarte():
+    """Sans rejet possible, un faux positif était attribué d'office à quelqu'un
+    et le déclarait conforme — le sens d'erreur le plus grave."""
+    ailleurs = (10, 10, 60, 40)
+    retenues, ecartees = ei.qualifier(
+        [_detection("epi_casque.pt", "Hardhat", 0.90, ailleurs)],
+        [PERSONNE_CADREE])
+    assert retenues == []
+    assert "hors de toute personne" in ecartees[0]["motif"]
+
+
+def test_les_seuils_par_classe_sont_ceux_de_la_table():
+    """`Gloves` est calibré à 0,08 sur le modèle principal : un seuil unique de
+    0,35 le supprimait purement et simplement."""
+    main = (430, 400, 500, 470)
+    retenues, _ = ei.qualifier(
+        [_detection("ppe_detector.pt", "Gloves", 0.12, main)], [PERSONNE_CADREE])
+    assert retenues and retenues[0]["epi"] == "gants"
+
+    _, ecartees = ei.qualifier(
+        [_detection("ppe_detector.pt", "Gloves", 0.05, main)], [PERSONNE_CADREE])
+    assert "seuil calibré" in ecartees[0]["motif"]
+
+
+def test_le_seuil_minimal_couvre_toute_la_table():
+    seuils = [c.conf_min for t in tax.TABLES.values() for c in t.values()]
+    assert ei.seuil_minimal() == min(seuils)
+
+
+def test_sans_personne_aucun_epi_nest_attribue():
+    retenues, ecartees = ei.qualifier(
+        [_detection("epi_casque.pt", "Hardhat", 0.90, (430, 210, 500, 260))], [])
+    assert retenues == []
+    assert "aucune personne" in ecartees[0]["motif"]
+
+
+def test_les_classes_hors_epi_du_modele_epi_passent():
+    """`Person`, `Ladder`, `Safety Cone` ne décrivent pas un équipement porté :
+    il n'y a rien à ancrer, et les faire disparaître appauvrirait l'image."""
+    echelle = _detection("ppe_detector.pt", "Ladder", 0.80, (10, 10, 90, 400))
+    retenues, ecartees = ei.qualifier([echelle], [PERSONNE_CADREE])
+    assert retenues == [echelle] and ecartees == []
+
+
+def test_un_cadrage_normal_ne_declenche_aucun_avertissement():
+    assert ei.avertissement_cadrage([PERSONNE_CADREE], IMAGE) == ""
+
+
+def test_un_gros_plan_est_signale():
+    """Sur un gros plan, la boîte de la personne couvre toute l'image : le bas
+    du cadre devient « les pieds » alors qu'on n'y voit qu'un visage."""
+    gros_plan = (0, 0, 1000, 950)
+    message = ei.avertissement_cadrage([gros_plan], IMAGE)
+    assert "gros plan" in message.lower()
+
+
+def test_sans_dimensions_on_ne_conclut_rien():
+    assert ei.avertissement_cadrage([PERSONNE_CADREE], None) == ""

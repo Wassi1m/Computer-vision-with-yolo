@@ -37,6 +37,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import base64
 import hmac
 import json
 import logging
@@ -54,6 +55,13 @@ import cv2
 
 ROOT = Path(__file__).resolve().parents[1]
 SUITE = ROOT / "surveillance_suite"
+# La racine elle-meme, et pas seulement `surveillance_suite` : `AnalyseurVisage`
+# importe `surveillance_suite.modules.module_visage` par son nom complet. Sans
+# cette entree, l'import echouait des que le moteur etait lance depuis
+# `improvements/` -- c'est-a-dire toujours, superviseur et conteneur compris --
+# et la reconnaissance faciale etait declaree « indisponible » au demarrage
+# (constate le 2026-09-23 : `No module named 'surveillance_suite'`).
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(SUITE))
 sys.path.insert(0, str(SUITE / "modules"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -464,7 +472,13 @@ class BusEvenements:
         return publie
 
     def _publier_brut(self, ev: Evenement) -> bool:
-        cle = f"{ev.source}|{ev.type}|{ev.libelle}"
+        # L'etat de qualification fait partie de la cle : sans lui, le passage
+        # suspicion -> probable -> confirme, qui survient en moins de 3 s sur un
+        # evenement continu, etait avale par l'anti-repetition et l'alerte
+        # n'atteignait jamais l'etat exige par la plateforme (banc, Q9 ; applique
+        # le 2026-09-27 a la demande de l'utilisateur). Les evenements bruts
+        # n'ont pas d'etat : leur cle ne change pas.
+        cle = f"{ev.source}|{ev.type}|{ev.libelle}|{ev.extra.get('etat', '')}"
         if ev.t - self._dernier.get(cle, -1e9) < self._anti_rep:
             return False
         self._dernier[cle] = ev.t
@@ -900,9 +914,17 @@ class CaptureRobuste:
 # ── Analyseurs ───────────────────────────────────────────────────────────────
 
 class Analyseur:
-    """Contrat commun. `every` = période d'exécution en frames."""
+    """Contrat commun. `every` = période d'exécution en frames.
+
+    `inference` dit si l'analyseur exécute un modèle. Ceux qui n'en exécutent
+    pas (ligne, foule, objet abandonné) ne consomment que le suivi de
+    `general` : ils tournent dans la boucle principale, à chaque image, et ne
+    passent jamais par le pool où ils risqueraient d'attendre derrière la
+    cascade EPI.
+    """
     nom = "base"
     every = 1
+    inference = True
 
     def process(self, frame, ctx: dict) -> list[Evenement]:
         raise NotImplementedError
@@ -935,6 +957,23 @@ class ConfirmationTemporelle:
         if len(h) > self.fenetre:
             del h[0]
         return sum(h) >= self.minimum
+
+    def vieillir(self, cles_vues):
+        """Compte une analyse négative pour chaque clé connue absente de celle-ci.
+
+        Sans cet appel, une clé n'est alimentée que les fois où quelque chose
+        est détecté à cet endroit : la fenêtre ne contient alors que des `True`
+        et « 2 sur les 3 dernières analyses » devient « 2 fois depuis le
+        démarrage ». Deux reflets au même endroit à une heure d'écart
+        confirmaient ainsi un feu. L'absence de détection est une observation,
+        elle doit entrer dans la fenêtre comme les autres.
+        """
+        vues = set(cles_vues)
+        for cle, h in self._hist.items():
+            if cle not in vues:
+                h.append(False)
+                if len(h) > self.fenetre:
+                    del h[0]
 
     def purger(self):
         """Retire les clés dont l'historique est entièrement négatif : évite
@@ -1060,6 +1099,24 @@ class AnalyseurEPI(Analyseur):
             elif servants[0] != tax.PRIORITE_MODELE[concept][0]:
                 print(f"  /!\\ concept '{concept}' servi par {servants[0]} au lieu de "
                       f"{tax.PRIORITE_MODELE[concept][0]} : modèle de repli, moins fiable.")
+        # Les modèles de la cascade sont interrogés EN PARALLÈLE, un fil chacun.
+        # Ils ne dépendent pas les uns des autres (même image, résultats
+        # fusionnés ensuite), et sur CPU une convolution ne profite pas
+        # linéairement de ses threads : cinq modèles à trois threads vont plus
+        # vite que cinq modèles à la suite sur douze. Mesure du 2026-09-23 sur
+        # la séquence de test, en alternance image par image : 708 ms contre
+        # 1 859 ms, sorties identiques à 1e-4 près (bruit flottant).
+        # Chaque modèle reste servi par un seul fil à la fois : une instance
+        # YOLO n'est pas prévue pour l'accès concurrent.
+        self._cascade = [(nom, m) for nom, m in (
+            (tax.M1_NOM, self.m1), (tax.M2_NOM, self.m2), (tax.M3_NOM, self.m3),
+            (tax.M4_NOM, self.m4), (tax.M5_NOM, self.m5), (tax.M6_NOM, self.m6))
+            if m is not None]
+        self._pool_cascade = (ThreadPoolExecutor(max_workers=len(self._cascade),
+                                                 thread_name_prefix="epi")
+                              if len(self._cascade) > 1 else None)
+        self._seuil_bas = min(c.conf_min for t in tax.TABLES.values() for c in t.values())
+
         self.hist_n, self.hist_k = hist_n, hist_k
         # Historique indexé par identifiant de suivi (track_id), jamais par
         # position dans la liste des détections : cette liste est reconstruite à
@@ -1086,15 +1143,20 @@ class AnalyseurEPI(Analyseur):
             self._hist.pop(cle, None)
             self._vu_le.pop(cle, None)
 
+    def _predire(self, model, frame):
+        return model.predict(frame, conf=self._seuil_bas, imgsz=self.imgsz, verbose=False)[0].boxes
+
     def process(self, frame, ctx):
-        seuil_bas = min(c.conf_min for t in tax.TABLES.values() for c in t.values())
+        if self._pool_cascade is not None:
+            sorties = list(self._pool_cascade.map(
+                lambda nm: self._predire(nm[1], frame), self._cascade))
+        else:
+            sorties = [self._predire(m, frame) for _, m in self._cascade]
+        # Traduction dans l'ordre fixe de la cascade, quel que soit l'ordre
+        # d'achèvement des fils : la fusion doit rester déterministe.
         brutes = []
-        for nom_modele, model in ((tax.M1_NOM, self.m1), (tax.M2_NOM, self.m2),
-                                  (tax.M3_NOM, self.m3), (tax.M4_NOM, self.m4),
-                                  (tax.M5_NOM, self.m5), (tax.M6_NOM, self.m6)):
-            if model is None:
-                continue
-            for b in model.predict(frame, conf=seuil_bas, imgsz=self.imgsz, verbose=False)[0].boxes:
+        for (nom_modele, model), boites in zip(self._cascade, sorties):
+            for b in boites:
                 d = tax.traduire(nom_modele, model.names[int(b.cls)], float(b.conf),
                                  tuple(map(int, b.xyxy[0])))
                 if d:
@@ -1168,19 +1230,28 @@ class AnalyseurEPI(Analyseur):
             # consommatrice n'avait pourtant aucun autre moyen de savoir QUEL
             # équipement manquait -- corrigé le 2026-08-19.
             manquants: list[tuple[str, str]] = []
+            # Une absence POSITIVEMENT constatée (classe négative détectée : tête
+            # nue, torse sans gilet) prime sur « jamais confirmé ». Auparavant,
+            # pour un EPI obligatoire non vu, `jamais_confirme` était posé en
+            # premier et masquait `absence_detectee` : un ouvrier sans casque
+            # filmé en continu ne produisait que `jamais_confirme`, que la
+            # plateforme écarte (`motif_minimum = absence_detectee`,
+            # ai_models/ingestion.py) — aucune alerte casque ni gilet n'arrivait.
+            # Constaté et corrigé le 2026-09-27 (banc S1/S2, tests/test_epi_motif.py).
+            constates = set(absent[cle])
             for epi in tax.EPI_CANONIQUES:
                 h = self._histo(cle, epi)
                 h.append(epi in porte[cle])
                 del h[0]
                 stable = sum(h) >= self.hist_k
-                if tax.EPI_OBLIGATOIRES[epi] and not stable:
+                if tax.EPI_OBLIGATOIRES[epi] and not stable and epi not in constates:
                     # L'équipement n'a pas été VU assez souvent. Ce n'est pas la
                     # même chose que d'avoir constaté son absence : il peut être
                     # hors champ ou masqué.
                     manquants.append((epi, "jamais_confirme"))
             deja = {epi for epi, _ in manquants}
-            for epi in absent[cle]:
-                if epi not in deja:
+            for epi in tax.EPI_CANONIQUES:
+                if epi in constates and epi not in deja:
                     # Une classe négative a été détectée : l'absence est
                     # positivement constatée, pas seulement supposée.
                     manquants.append((epi, "absence_detectee"))
@@ -1255,13 +1326,26 @@ class AnalyseurChute(Analyseur):
         # analyses est un évènement, une détection isolée est du bruit. La zone
         # sert de clé faute d'identifiant de suivi sur ce modèle — grille
         # grossière (80 px) pour tolérer le léger déplacement des boîtes.
-        evs = []
+        # Une observation par zone et par analyse. Deux boîtes « au sol » dans
+        # la même zone d'une même image (doublon du détecteur) comptaient pour
+        # deux observations, et confirmaient donc une chute sur une image
+        # isolée. Une zone est « au sol » si l'une de ses boîtes l'est.
+        par_zone: dict[str, dict] = {}
         for f in self.falls:
             x1, y1, x2, y2 = f["box"]
             cle = f"{int((x1 + x2) / 160)}:{int((y1 + y2) / 160)}"
+            if cle not in par_zone or (f["fallen"] and not par_zone[cle]["fallen"]):
+                par_zone[cle] = f
+        evs = []
+        for cle, f in par_zone.items():
             if self.confirmation.confirmer(cle, bool(f["fallen"])) and f["fallen"]:
                 evs.append(Evenement(ctx["t"], ctx["frame"], self.nom, "chute",
                                      "PERSONNE AU SOL", box=f["box"]))
+        vues = set(par_zone)
+        # Une zone où plus rien n'est vu compte une analyse négative : sans
+        # cela, deux détections isolées au même endroit, à n'importe quel
+        # intervalle, suffisaient à confirmer une chute.
+        self.confirmation.vieillir(vues)
         self.confirmation.purger()
         return evs
 
@@ -1283,6 +1367,7 @@ class AnalyseurLigne(Analyseur):
     """
     nom = "ligne"
     every = 1
+    inference = False
 
     def __init__(self, debut, fin):
         from module_line_crossing import LineCrossingCounter
@@ -1325,6 +1410,7 @@ class AnalyseurFoule(Analyseur):
     """
     nom = "foule"
     every = 1
+    inference = False
 
     def __init__(self, seuil_densite: float = 2.0, seuil_effectif: int = 0,
                  zone=None, calibration=None, fenetre: int = 5, minimum: int = 3):
@@ -1437,6 +1523,7 @@ class AnalyseurObjetAbandonne(Analyseur):
     """
     nom = "objet_abandonne"
     every = 1
+    inference = False
 
     # Bagagerie et objets encombrants susceptibles d'etre deposes puis oublies.
     # Volontairement restreint : elargir a « bottle » ou « cell phone » noierait
@@ -1553,14 +1640,24 @@ class AnalyseurFeu(Analyseur):
 
     def process(self, frame, ctx):
         self.res = self.det.detect(frame)
-        evs = []
+        # Meilleure détection par zone : deux boîtes de fumée qui se
+        # chevauchent sur une même image ne sont qu'une observation, pas deux
+        # -- sans quoi une image isolée suffisait à « confirmer ».
+        par_zone: dict[str, dict] = {}
         for d in self.res:
             x1, y1, x2, y2 = d["box"]
             cle = f"{d['label']}:{int((x1 + x2) / 160)}:{int((y1 + y2) / 160)}"
+            if cle not in par_zone or d["conf"] > par_zone[cle]["conf"]:
+                par_zone[cle] = d
+        evs = []
+        for cle, d in par_zone.items():
             if self.confirmation.confirmer(cle, True):
                 evs.append(Evenement(ctx["t"], ctx["frame"], self.nom, d["label"],
                                      f"{d['label'].upper()} détecté",
                                      conf=d["conf"], box=tuple(d["box"])))
+        # Les zones sans détection sur cette analyse comptent une observation
+        # négative : c'est ce qui donne son sens à « 2 sur les 3 dernières ».
+        self.confirmation.vieillir(par_zone)
         self.confirmation.purger()
         return evs
 
@@ -1663,6 +1760,181 @@ class AnalyseurPorte(Analyseur):
 
 # ── Boucle unifiée ───────────────────────────────────────────────────────────
 
+class AnalyseurVisage(Analyseur):
+    """Signature faciale de chaque personne suivie. N'identifie personne.
+
+    Ce module produit un évènement `visage` par piste, portant la **signature**
+    du visage (512 nombres) et le `track_id` de la personne. La plateforme fait
+    la recherche dans son trombinoscope et attribue un nom ; le moteur ne détient
+    aucun gabarit et ne sait donc rien dire de l'identité de qui que ce soit.
+
+    ## Pourquoi le `track_id` est le cœur de la fonction
+
+    C'est lui, et non le nom, qui relie « personne 7 sans casque » à « personne 7
+    a le visage X ». `AnalyseurEPI` place déjà `track_id` dans l'`extra` de ses
+    violations (§4 bis du contrat) ; en publiant le même identifiant ici, la
+    plateforme peut rattacher les deux sans jamais comparer de boîtes ni deviner.
+
+    La conséquence, à connaître : **le rattachement n'est valable que dans une
+    même piste**. Si le suivi perd la personne et lui donne un nouveau
+    `track_id`, il faudra une nouvelle signature pour la renommer. C'est le
+    comportement voulu — perpétuer une identité par-delà une rupture de suivi
+    reviendrait à attribuer une infraction à quelqu'un sur la foi d'une
+    supposition.
+
+    ## Cadence
+
+    `every=4` : quatre fois moins souvent que le suivi. Un visage exploitable
+    reste exploitable pendant plusieurs images, et l'émission n'a lieu qu'au gain
+    de qualité (`SuiviSignatures`). Analyser à chaque image aurait multiplié le
+    coût sans améliorer une seule signature.
+    """
+    nom = "visage"
+    every = 4
+
+    def __init__(self, paquet=None, seuil=0.5, gpu=True, qualite_minimale=0.35):
+        from surveillance_suite.modules.module_visage import (
+            DetecteurVisage, PAQUET_DEFAUT, SuiviSignatures)
+
+        self.detecteur = DetecteurVisage(paquet or PAQUET_DEFAUT, seuil=seuil, gpu=gpu)
+        if not self.detecteur.disponible:
+            # Remonter en `FileNotFoundError` fait traiter le cas par la même
+            # voie que les poids manquants dans `construire_analyseurs` : le
+            # module est déclaré indisponible, le moteur démarre quand même.
+            raise FileNotFoundError(
+                "insightface indisponible (paquet %s)" % (paquet or PAQUET_DEFAUT))
+        self.suivi = SuiviSignatures()
+        self.qualite_minimale = qualite_minimale
+        self._derniers = []   # pour `draw`
+
+    def process(self, frame, ctx):
+        from surveillance_suite.modules.module_visage import (
+            DIMENSION, PAQUET_DEFAUT, encoder, qualite, tete_de)
+
+        personnes = ctx.get("personnes") or []
+        self.suivi.oublier([tid for tid, _ in personnes])
+        self._derniers = []
+        evenements = []
+
+        for track_id, boite in personnes:
+            if track_id < 0:
+                # Sans identifiant de suivi, la signature ne pourrait être
+                # rattachée à aucune infraction : elle ne servirait à rien et
+                # coûterait une inférence. Le contrat publie déjà `suivi: false`
+                # dans le même cas pour les EPI.
+                continue
+
+            fenetre = tete_de(boite, frame.shape)
+            if fenetre is None:
+                continue
+            hx1, hy1, hx2, hy2 = fenetre
+            vignette = frame[hy1:hy2, hx1:hx2]
+            if vignette.size == 0:
+                continue
+
+            for visage in self._visage_de_la_personne(
+                    self.detecteur.detecter(vignette), boite, hx1):
+                vx1, vy1, vx2, vy2 = visage["box"]
+                decoupe = vignette[max(0, vy1):max(0, vy2), max(0, vx1):max(0, vx2)]
+                if decoupe.size == 0:
+                    continue
+
+                note = qualite(decoupe, visage["score"], visage.get("pose"))
+                boite_absolue = (hx1 + vx1, hy1 + vy1, hx1 + vx2, hy1 + vy2)
+                self._derniers.append((boite_absolue, track_id, note))
+
+                if note < self.qualite_minimale:
+                    continue
+                if not self.suivi.merite_emission(track_id, note):
+                    continue
+
+                evenements.append(Evenement(
+                    t=ctx["t"], frame=ctx["frame"], source="visage", type="visage",
+                    libelle=f"Visage capté — personne #{track_id}",
+                    conf=round(note, 3),
+                    box=boite_absolue,
+                    extra={
+                        "track_id": track_id,
+                        "suivi": True,
+                        # La signature, et de quoi refuser de la comparer à un
+                        # gabarit produit par un autre modèle. Sans ces deux
+                        # champs, un changement de paquet côté moteur ferait
+                        # silencieusement chuter tous les scores de la
+                        # plateforme, sans qu'aucune erreur ne soit levée.
+                        "signature": encoder(visage["signature"]),
+                        "modele": self.detecteur.paquet,
+                        "dim": DIMENSION,
+                        "qualite": round(note, 3),
+                        "score_detection": round(visage["score"], 3),
+                        "boite_personne": [int(v) for v in boite],
+                        # Vignette du visage, pour que la plateforme puisse
+                        # montrer QUI elle a vu — indispensable pour trancher
+                        # une identité proposée, et pour qu'un « Inconnu #12 »
+                        # soit autre chose qu'un numéro. ~3 Ko, émis deux ou
+                        # trois fois par piste seulement (voir SuiviSignatures),
+                        # pas à chaque image.
+                        "vignette": self._vignette(decoupe),
+                    },
+                ))
+        return evenements
+
+    @staticmethod
+    def _visage_de_la_personne(visages, boite_personne, decalage_x):
+        """Au plus UN visage par personne suivie : celui qui lui appartient.
+
+        La vignette de tête déborde de la boîte de la personne (marge de
+        `tete_de`), et deux personnes proches se chevauchent : la vignette de
+        l'une contient souvent le visage de l'autre. Tous les visages trouvés
+        étaient jusqu'ici émis sous le MÊME `track_id` -- la signature du
+        voisin pouvait donc nommer la mauvaise personne, et lui imputer ses
+        infractions EPI. On ne garde que le visage dont le centre tombe dans
+        la boîte de la personne, le plus proche de son axe vertical ; aucun
+        s'il n'y en a pas, plutôt qu'un visage douteux.
+        """
+        x1, _, x2, _ = (int(v) for v in boite_personne)
+        axe = (x1 + x2) / 2
+        candidats = []
+        for v in visages:
+            cx = decalage_x + (v["box"][0] + v["box"][2]) / 2
+            if x1 <= cx <= x2:
+                candidats.append((abs(cx - axe), v))
+        if not candidats:
+            return []
+        return [min(candidats, key=lambda c: c[0])[1]]
+
+    @staticmethod
+    def _vignette(decoupe, cote=128, qualite_jpeg=80):
+        """Vignette JPEG du visage, encodée en base64. Chaîne vide si échec.
+
+        128 px : assez pour qu'un opérateur reconnaisse quelqu'un à l'écran, pas
+        assez pour ré-identifier hors du système. Un échec d'encodage ne doit
+        jamais faire perdre la signature, qui est la donnée utile — d'où le
+        repli sur une chaîne vide plutôt qu'une exception.
+        """
+        try:
+            h, l = decoupe.shape[:2]
+            if h == 0 or l == 0:
+                return ""
+            facteur = cote / max(h, l)
+            if facteur < 1.0:
+                decoupe = cv2.resize(decoupe, (max(1, int(l * facteur)),
+                                               max(1, int(h * facteur))),
+                                     interpolation=cv2.INTER_AREA)
+            ok, tampon = cv2.imencode(".jpg", decoupe,
+                                      [int(cv2.IMWRITE_JPEG_QUALITY), qualite_jpeg])
+            return base64.b64encode(tampon).decode("ascii") if ok else ""
+        except Exception:      # noqa: BLE001
+            return ""
+
+    def draw(self, frame):
+        for (x1, y1, x2, y2), track_id, note in self._derniers:
+            couleur = (0, 220, 220) if note >= self.qualite_minimale else (120, 120, 120)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), couleur, 2)
+            cv2.putText(frame, f"#{track_id} q={note:.2f}", (x1, max(14, y1 - 4)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, couleur, 1)
+        return frame
+
+
 def construire_analyseurs(args, config) -> list[Analyseur]:
     """Instancie les analyseurs disponibles, en ignorant proprement les modèles absents."""
     desactives = {s.strip() for s in args.disable.split(",") if s.strip()}
@@ -1762,6 +2034,16 @@ def construire_analyseurs(args, config) -> list[Analyseur]:
             args.imgsz, args.every_epi, ancrage=not args.sans_ancrage_epi)
     ajouter("epi", _epi)
 
+    # La reconnaissance faciale vient EN DERNIER, et ce n'est pas indifférent :
+    # `construire_analyseurs` conserve l'ordre, et la boucle principale exécute
+    # les analyseurs dans cet ordre. `AnalyseurVisage` consomme
+    # `ctx["personnes"]`, que `AnalyseurGeneral` vient de remplir ; le placer
+    # avant lui l'aurait fait travailler sur le contexte de l'image précédente.
+    if args.visage:
+        ajouter("visage", lambda: AnalyseurVisage(
+            paquet=args.visage_paquet, seuil=args.visage_seuil,
+            gpu=not args.visage_cpu, qualite_minimale=args.visage_qualite))
+
     return analyseurs
 
 
@@ -1786,6 +2068,39 @@ def _points(texte: str | None):
     if len(pts) < 3:
         raise SystemExit("une zone demande au moins 3 points")
     return pts
+
+
+def configurer_threads(budget: int) -> int:
+    """Répartit le budget de cœurs du processus entre les modèles. Rend les
+    threads accordés à chaque appel de modèle.
+
+    Par défaut PyTorch donne TOUS les cœurs de la machine à chaque appel de
+    modèle, et chaque fil qui appelle un modèle ouvre sa propre équipe de
+    threads. Avec la cascade EPI (cinq modèles simultanés), les analyseurs du
+    pool et le suivi, cela faisait plusieurs dizaines de threads de calcul pour
+    douze cœurs : ils passaient leur temps à se céder la place (1,27 million de
+    changements de contexte pour 60 images, mesure du 2026-09-23). Sur un
+    serveur à plusieurs caméras, chaque processus moteur en faisait autant.
+
+    Un quart du budget par appel : c'est le réglage retenu par la mesure
+    (cinq modèles à 3 threads sur 12 cœurs, 2,6 fois plus rapide que douze
+    threads à la suite), et il garde environ quatre appels simultanés dans le
+    budget. Le calcul numérique ne change pas : seul l'ordonnancement change.
+    """
+    import torch
+    par_modele = max(1, budget // 4)
+    torch.set_num_threads(par_modele)
+    cv2.setNumThreads(par_modele)
+    return par_modele
+
+
+def _coeurs_disponibles() -> int:
+    """Cœurs réellement accordés au processus (affinité, `cpuset` du
+    conteneur), et non ceux de la machine."""
+    try:
+        return len(os.sched_getaffinity(0))
+    except (AttributeError, OSError):
+        return os.cpu_count() or 1
 
 
 def _env(nom: str, defaut, conv=str):
@@ -1903,6 +2218,26 @@ def main():
     ap.add_argument("--sans-ancrage-epi", action="store_true",
                     help="revient a l'association EPI par IoU, sans rejet "
                          "(comportement d'avant le 2026-08-13)")
+    # ── Reconnaissance faciale ───────────────────────────────────────────────
+    # Désactivée par défaut, délibérément. C'est le seul module qui produise une
+    # donnée biométrique : il ne doit jamais s'activer parce qu'on a oublié de
+    # le désactiver. Les autres modules suivent la règle inverse (actifs si
+    # leurs poids sont là) parce qu'un casque détecté n'engage personne.
+    ap.add_argument("--visage", action="store_true",
+                    default=_env("visage", False, lambda v: v == "1"),
+                    help="active la signature faciale (donnee biometrique : "
+                         "verifier la base legale avant d'activer)")
+    ap.add_argument("--visage-paquet", default=_env("visage_paquet", "buffalo_l", str),
+                    help="paquet InsightFace (buffalo_l par defaut : SCRFD + ArcFace R50)")
+    ap.add_argument("--visage-seuil", type=float, default=_env("visage_seuil", 0.5, float),
+                    help="seuil de detection d'un visage")
+    ap.add_argument("--visage-qualite", type=float,
+                    default=_env("visage_qualite", 0.35, float),
+                    help="qualite minimale d'un visage pour que sa signature soit emise. "
+                         "Sous ce niveau la signature est instable et polluerait la recherche")
+    ap.add_argument("--visage-cpu", action="store_true",
+                    help="force la reconnaissance faciale sur CPU (essais uniquement : "
+                         "ArcFace sur CPU ne tient pas le temps reel)")
     ap.add_argument("--sans-qualification", action="store_true",
                     help="desactive la machine a etats : un evenement par image, "
                          "comportement d'avant le 2026-08-13")
@@ -1915,7 +2250,19 @@ def main():
     ap.add_argument("--boucler", action="store_true",
                     help="relit un fichier video en boucle (tests d'endurance)")
     ap.add_argument("--max-frames", type=int, default=_env("max_frames", 0, int), help="0 = illimite")
-    ap.add_argument("--workers", type=int, default=_env("workers", 4, int))
+    ap.add_argument("--workers", type=int, default=_env("workers", 4, int),
+                    help="fils d'analyse minimum ; le pool en ouvre au moins un par "
+                         "analyseur a modele, pour qu'aucun n'attende derriere un autre")
+    ap.add_argument("--threads", type=int, default=_env("threads", 0, int),
+                    help="coeurs CPU accordes a ce processus (0 = tous ceux qu'il voit). "
+                         "Le superviseur le fixe a sa part quand plusieurs cameras "
+                         "partagent la machine")
+    ap.add_argument("--synchrone", action="store_true",
+                    default=_env("synchrone", False, lambda v: v == "1"),
+                    help="sur un flux direct, attend la fin de tous les analyseurs avant "
+                         "l'image suivante (comportement d'avant le 2026-09-23). Par "
+                         "defaut, les analyseurs lourds tournent en arriere-plan et le "
+                         "suivi continue a chaque image")
     ap.add_argument("--health-port", type=int, default=_env("health_port", 0, int),
                     help="expose GET /health et GET /metrics sur ce port (0 = desactive)")
     ap.add_argument("--health-adresse", default=_env("health_adresse", "127.0.0.1", str),
@@ -1929,6 +2276,11 @@ def main():
     args = ap.parse_args()
 
     configurer_logs(args.log_level, args.log_json, args.camera_id, args.site_id)
+
+    budget = args.threads if args.threads > 0 else _coeurs_disponibles()
+    par_modele = configurer_threads(budget)
+    log.info("budget CPU : %d coeur(s), %d thread(s) par appel de modele",
+             budget, par_modele)
 
     # Un moteur qui retombe sur le CPU ne produit aucune erreur : il tourne, il
     # detecte, il est simplement dix fois trop lent. Le retard se voit maintenant
@@ -2018,27 +2370,100 @@ def main():
     if not analyseurs:
         raise SystemExit("Aucun analyseur disponible.")
 
-    pool = ThreadPoolExecutor(max_workers=args.workers)
+    # `general` alimente le contexte des autres : il est exécuté avant eux, pas
+    # en parallèle, sinon `ligne` et `epi` travailleraient sur le suivi de la
+    # frame précédente.
+    general = next((a for a in analyseurs if a.nom == "general"), None)
+    autres = [a for a in analyseurs if a is not general]
+    # Sans modèle, un analyseur ne coûte que quelques comparaisons de boîtes :
+    # il tourne dans la boucle, à chaque image, sur le suivi qui vient d'être
+    # calculé. Les autres passent par le pool.
+    legers = [a for a in autres if not a.inference]
+    lourds = [a for a in autres if a.inference]
+
+    # Ordonnancement asynchrone sur flux direct.
+    #
+    # Jusqu'ici chaque image attendait la fin de TOUS les analyseurs dus avant
+    # de passer à la suivante : une image sur trois, la boucle restait bloquée
+    # près d'une seconde sur la cascade EPI, et le suivi des personnes avec
+    # elle. Or le suivi est ce qui porte l'identité (`track_id`) dont
+    # dépendent l'historique EPI par personne, le franchissement de ligne et le
+    # rattachement d'un visage : une piste qui saute des images perd plus
+    # souvent sa cible et change d'identifiant.
+    #
+    # Désormais, sur un flux direct, un analyseur lourd reçoit l'image ET le
+    # contexte de suivi de la même image, tourne en arrière-plan, et ses
+    # évènements sont publiés dès qu'il a fini, datés de SON image. Pendant ce
+    # temps, le suivi continue. S'il est encore occupé quand son tour revient,
+    # il saute ce tour au lieu de bloquer tout le monde.
+    #
+    # Un fichier reste traité de façon synchrone et reproductible : c'est ce
+    # que les mesures et les tests attendent, et rien n'y presse.
+    asynchrone = not cap.est_fichier and not args.synchrone
+    pool = ThreadPoolExecutor(max_workers=max(args.workers, len(lourds), 1),
+                              thread_name_prefix="analyse")
+    log.info("ordonnancement %s : %d analyseur(s) a modele, %d sans modele",
+             "asynchrone (flux direct)" if asynchrone else "synchrone",
+             len(lourds), len(legers))
 
     etat_sante = EtatSante([a.nom for a in analyseurs])
     if args.health_port:
         etat_sante.demarrer_serveur(args.health_port, args.health_adresse,
                                     args.health_jeton)
 
-    # `general` alimente le contexte des autres : il est exécuté avant eux, pas
-    # en parallèle, sinon `ligne` et `epi` travailleraient sur le suivi de la
-    # frame précédente.
-    general = next((a for a in analyseurs if a.nom == "general"), None)
-    autres = [a for a in analyseurs if a is not general]
-
     frame_idx = 0
     t_debut = time.time()
     couts: dict[str, float] = {a.nom: 0.0 for a in analyseurs}
+    executions: dict[str, int] = {a.nom: 0 for a in analyseurs}
     echecs: dict[str, int] = {a.nom: 0 for a in analyseurs}
     desactives_a_chaud: set[str] = set()
+    dernier_lancement: dict[str, int] = {a.nom: 0 for a in autres}
+    en_cours: dict[str, tuple] = {}      # nom -> (future, analyseur)
     MAX_ECHECS = args.max_echecs
     fps_liss = 0.0
     prev = time.time()
+
+    def chronometre(a, frame, ctx):
+        t0 = time.time()
+        evs = a.process(frame, ctx)
+        return evs, time.time() - t0
+
+    def traiter(a, obtenir):
+        """Publie les évènements d'un analyseur, ou comptabilise son échec.
+
+        Toujours appelé depuis la boucle principale : le bus, sa machine à
+        états et ses sorties ne voient jamais deux fils à la fois.
+        """
+        try:
+            evs, duree = obtenir()
+            couts[a.nom] += duree
+            executions[a.nom] += 1
+            for ev in evs:
+                bus.publier(ev)
+            echecs[a.nom] = 0
+        except Exception as e:
+            # Un module qui échoue ne doit pas emporter les autres : on
+            # journalise, on continue, et s'il échoue de façon répétée on
+            # le désactive en le signalant. Mieux vaut cinq modules qui
+            # fonctionnent qu'un pipeline entier arrêté par le sixième.
+            echecs[a.nom] += 1
+            log.error("module %s en echec (%d/%d): %s: %s",
+                      a.nom, echecs[a.nom], MAX_ECHECS, type(e).__name__, e)
+            if echecs[a.nom] >= MAX_ECHECS:
+                desactives_a_chaud.add(a.nom)
+                log.error("module %s desactive apres %d echecs consecutifs",
+                          a.nom, MAX_ECHECS)
+                bus.publier(Evenement(
+                    time.time(), frame_idx, "moteur", "module_desactive",
+                    f"Module {a.nom} désactivé après {MAX_ECHECS} échecs consécutifs"))
+
+    def recolter(attendre: bool):
+        # Dans l'ordre de lancement : à attente égale, la publication reste
+        # celle du comportement synchrone.
+        for nom, (fut, a) in list(en_cours.items()):
+            if attendre or fut.done():
+                del en_cours[nom]
+                traiter(a, fut.result)
 
     try:
         while not arret.is_set():
@@ -2050,34 +2475,29 @@ def main():
             # situe la scene dans le temps pour la plateforme aval.
             ctx = {"frame": frame_idx, "t": cap.t_capture or time.time()}
 
+            recolter(attendre=False)
+
             if general is not None:
                 t0 = time.time()
                 general.process(frame, ctx)
                 couts["general"] += time.time() - t0
+                executions["general"] += 1
 
-            dus = [a for a in autres if frame_idx % a.every == 0 and a.nom not in desactives_a_chaud]
-            futures = {pool.submit(a.process, frame, ctx): (a, time.time()) for a in dus}
-            for fut, (a, t0) in futures.items():
-                try:
-                    for ev in fut.result():
-                        bus.publier(ev)
-                    echecs[a.nom] = 0
-                except Exception as e:
-                    # Un module qui échoue ne doit pas emporter les autres : on
-                    # journalise, on continue, et s'il échoue de façon répétée on
-                    # le désactive en le signalant. Mieux vaut cinq modules qui
-                    # fonctionnent qu'un pipeline entier arrêté par le sixième.
-                    echecs[a.nom] += 1
-                    log.error("module %s en echec (%d/%d): %s: %s",
-                              a.nom, echecs[a.nom], MAX_ECHECS, type(e).__name__, e)
-                    if echecs[a.nom] >= MAX_ECHECS:
-                        desactives_a_chaud.add(a.nom)
-                        log.error("module %s desactive apres %d echecs consecutifs",
-                                  a.nom, MAX_ECHECS)
-                        bus.publier(Evenement(
-                            time.time(), frame_idx, "moteur", "module_desactive",
-                            f"Module {a.nom} désactivé après {MAX_ECHECS} échecs consécutifs"))
-                couts[a.nom] += time.time() - t0
+            for a in legers:
+                if a.nom in desactives_a_chaud or frame_idx - dernier_lancement[a.nom] < a.every:
+                    continue
+                dernier_lancement[a.nom] = frame_idx
+                traiter(a, lambda a=a: chronometre(a, frame, ctx))
+
+            for a in lourds:
+                if (a.nom in desactives_a_chaud or a.nom in en_cours
+                        or frame_idx - dernier_lancement[a.nom] < a.every):
+                    continue
+                dernier_lancement[a.nom] = frame_idx
+                en_cours[a.nom] = (pool.submit(chronometre, a, frame, ctx), a)
+
+            if not asynchrone:
+                recolter(attendre=True)
 
             now = time.time()
             fps = 1.0 / max(now - prev, 1e-6)
@@ -2087,6 +2507,11 @@ def main():
             etat_sante.update(frame_idx, fps_liss, bus, cap)
 
             if args.display:
+                # Dessiner sur une copie : en asynchrone, un analyseur lit
+                # peut-être encore cette image, et y tracer des rectangles
+                # fausserait sa détection.
+                if asynchrone:
+                    frame = frame.copy()
                 for a in analyseurs:
                     frame = a.draw(frame)
                 cv2.putText(frame, f"FPS:{fps_liss:.1f}  frame {frame_idx}", (10, 24),
@@ -2100,6 +2525,12 @@ def main():
             if args.max_frames and frame_idx >= args.max_frames:
                 break
     finally:
+        # Les analyses encore en vol portent peut-être un évènement : on les
+        # laisse finir et on le publie avant de fermer le bus.
+        try:
+            recolter(attendre=True)
+        except Exception as e:  # noqa: BLE001 -- l'arret doit aller au bout
+            log.error("recolte finale impossible : %s: %s", type(e).__name__, e)
         cap.liberer()
         if args.display:
             cv2.destroyAllWindows()
@@ -2111,7 +2542,10 @@ def main():
     log.info("%d frames en %.1fs -> %.2f FPS moyen", frame_idx, duree, frame_idx / max(duree, 1e-6))
     log.info("%d evenements%s", bus.total, f" -> {args.events}" if args.events else "")
     for nom, c in sorted(couts.items(), key=lambda kv: -kv[1]):
-        log.info("cout %-10s %6.1fs  %5.1f%%", nom, c, 100 * c / max(duree, 1e-6))
+        # Le nombre d'executions dit ce que le cout seul cache : en asynchrone,
+        # un analyseur trop lent pour sa cadence saute des tours.
+        log.info("cout %-10s %6.1fs  %5.1f%%  %d execution(s)", nom, c,
+                 100 * c / max(duree, 1e-6), executions[nom])
 
 
 if __name__ == "__main__":

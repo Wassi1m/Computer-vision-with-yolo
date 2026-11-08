@@ -177,10 +177,19 @@ leurs positives — c'est le défaut structurel de ce jeu.
 - Les deux modèles ont des taxonomies différentes (`helmet` vs `Hardhat`,
   `Vest` vs `Safety Vest`) ; la correspondance est faite par
   `improvements/ppe_taxonomy.py`, avec un seuil propre à chaque classe.
-- L'ancrage EPI ↔ personne par confinement existe
-  (`improvements/qualification.py`) mais **n'est pas encore branché** dans le
-  pipeline, qui associe toujours par IoU — une méthode inadaptée à un rapport
-  « partie de » (un casque occupe ~3 % d'une personne).
+- L'ancrage EPI ↔ personne par confinement (`improvements/qualification.py`)
+  **est branché** dans le moteur de flux, actif par défaut, débrayable par
+  `--sans-ancrage-epi` (`AnalyseurEPI.process`). Il remplace l'association par
+  IoU, inadaptée à un rapport « partie de » — un casque occupe ~3 % d'une
+  personne, son IoU vaut donc ~0,03 qu'il soit porté ou non. Mesuré sur le
+  sous-modèle chaussures : **59,3 % d'images touchées sans ancrage, 1,0 % avec**
+  (`reports/v3_results/chaussures_ancrage.json`).
+- Depuis le 2026-08-25, les services d'analyse **à la demande** (essai sur
+  image, webcam du navigateur) appliquent la même cascade, par
+  `improvements/epi_image.py`. Ils faisaient auparavant tourner chaque modèle
+  au seuil unique de l'appelant, sans ancrage : `epi_chaussures.pt` y annonçait
+  des chaussures de sécurité sur des visages, et `Gloves`, calibré à 0,08,
+  n'apparaissait jamais sous un seuil d'interface à 0,35.
 
 ---
 
